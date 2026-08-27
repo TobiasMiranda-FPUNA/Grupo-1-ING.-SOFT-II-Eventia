@@ -1,2 +1,2 @@
-# Grupo-1-ING.-SOFT-II-Eventia
-Repositorio Git del proyecto de Ing. de Software II
+# SCRIPTS SQL DE LA BASE DE DATOS DEL SISTEMA
+La base de datos es en PostgresSQL
