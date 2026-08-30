@@ -16,3 +16,5 @@ uvicorn app.main:app --reload
 ```
 
 La documentación interactiva queda disponible en `/docs`. El endpoint de autenticación es `POST /api/v1/auth/login`.
+# SCRIPTS SQL DE LA BASE DE DATOS DEL SISTEMA
+La base de datos es en PostgresSQL
