@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Eventia - Resumen del proyecto</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body { font-family: Arial, sans-serif; color: #202124; line-height: 1.45; font-size: 11pt; }
+    h1 { color: #173f5f; font-size: 25pt; margin-bottom: 4px; }
+    h2 { color: #20639b; border-bottom: 1px solid #c8d7e5; padding-bottom: 4px; margin-top: 24px; }
+    h3 { color: #3b6e8f; margin-bottom: 4px; }
+    .subtitle { color: #5f6368; font-size: 13pt; }
+    .cover { margin-top: 5cm; page-break-after: always; }
+    .meta { margin-top: 30px; color: #5f6368; }
+    .box { background: #f2f7fa; border-left: 4px solid #20639b; padding: 10px 14px; margin: 12px 0; }
+    code { font-family: monospace; background: #f1f3f4; padding: 1px 3px; }
+    pre { background: #f5f5f5; padding: 12px; font-size: 9pt; white-space: pre-wrap; }
+    li { margin: 4px 0; }
+    img { max-width: 100%; }
+    .diagram { text-align: center; margin: 14px 0; }
+    .small { font-size: 9pt; color: #5f6368; }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <h1>Eventia</h1>
+    <div class="subtitle">Resumen del proyecto y del módulo de autenticación</div>
+    <p class="meta">Grupo 1 - Ingeniería de Software II<br>Fecha: 26 de agosto de 2026</p>
+  </section>
+
+  <h2>1. Enunciado del proyecto</h2>
+  <p>La organización de eventos académicos, profesionales o institucionales requiere gestionar participantes, conferencistas, actividades y agenda del evento. El sistema busca centralizar estas tareas para mejorar el control de inscripciones, la planificación y el registro de asistencia.</p>
+  <p>El sistema deberá permitir:</p>
+  <ul>
+    <li>Crear y administrar eventos.</li>
+    <li>Gestionar participantes y conferencistas.</li>
+    <li>Organizar la agenda de actividades.</li>
+    <li>Registrar la asistencia a sesiones o actividades.</li>
+    <li>Administrar tipos de eventos como congresos, seminarios, talleres y jornadas.</li>
+    <li>Gestionar inscripciones, cupos y listas de participantes.</li>
+    <li>Generar certificados o registros de participación.</li>
+    <li>Configurar tipos de eventos, categorías, roles, políticas de inscripción, límites de cupo y formatos de agenda.</li>
+  </ul>
+
+  <h2>2. Modelo entidad-relación</h2>
+  <p>El modelo presentado contiene las entidades principales del dominio:</p>
+  <ul>
+    <li><code>USUARIO</code>, <code>ROL_SISTEMA</code> y <code>USUARIO_ROL</code> para usuarios y roles.</li>
+    <li><code>TIPO_EVENTO</code> y <code>EVENTO</code> para la administración de eventos.</li>
+    <li><code>PARTICIPANTE</code> y <code>ROL_PARTICIPANTE</code> para las personas inscriptas.</li>
+    <li><code>ACTIVIDAD</code>, <code>CATEGORIA_ACTIVIDAD</code>, <code>CONFERENCISTA</code> y <code>ACTIVIDAD_CONFERENCISTA</code> para la agenda.</li>
+    <li><code>POLITICA_INSCRIPCION</code> e <code>INSCRIPCION</code> para las reglas de registro.</li>
+    <li><code>ASISTENCIA</code> y <code>CERTIFICADO</code> para participación y acreditación.</li>
+  </ul>
+  <div class="diagram"><img src="../../diagrama_entidad_relacion.png" alt="Modelo entidad-relación de Eventia"></div>
+  <p class="small">Diagrama entidad-relación utilizado como referencia del proyecto.</p>
+
+  <h2>3. Módulo: Gestión de Usuarios, Roles y Seguridad</h2>
+  <p>El módulo contempla la administración de usuarios, la asignación de roles del sistema y el control de acceso a las funcionalidades. Las entidades centrales son:</p>
+  <ul>
+    <li><code>USUARIO</code>: identidad, correo, estado y hash de contraseña.</li>
+    <li><code>ROL_SISTEMA</code>: roles disponibles y su estado.</li>
+    <li><code>USUARIO_ROL</code>: relación muchos a muchos entre usuarios y roles.</li>
+  </ul>
+  <p>Como funcionalidades complementarias se identificaron el alta, edición y desactivación de usuarios, el inicio y cierre de sesión, la recuperación de contraseña y la autorización por roles.</p>
+
+  <h2>4. Historias de usuario</h2>
+  <h3>4.1 Autenticación de usuarios</h3>
+  <p><strong>Descripción:</strong> Como usuario del sistema, quiero iniciar sesión con mi correo y contraseña para acceder a las funcionalidades correspondientes a mi perfil.</p>
+  <p>La implementación utiliza el endpoint <code>POST /api/v1/auth/login</code>, valida las credenciales contra el hash seguro de contraseña y genera un token JWT.</p>
+  <p><strong>Criterios de aceptación:</strong></p>
+  <ul>
+    <li>Dadas credenciales válidas, el sistema compara la contraseña ingresada con <code>password_hash</code> mediante Argon2, verifica que el usuario esté activo y otorga acceso con un token de sesión JWT.</li>
+    <li>Dadas credenciales incorrectas, el sistema responde con <code>401 Credenciales inválidas</code> sin especificar si falló el correo o la contraseña.</li>
+  </ul>
+
+  <h3>4.2 Middleware y tokens de sesión</h3>
+  <p>Configurar la validación de tokens JWT para proteger los endpoints de la API.</p>
+  <ul>
+    <li>Generar un JWT con el identificador del usuario y sus roles.</li>
+    <li>Definir una fecha de expiración.</li>
+    <li>Leer el encabezado <code>Authorization: Bearer TOKEN</code>.</li>
+    <li>Rechazar tokens ausentes, inválidos o vencidos.</li>
+    <li>Permitir autorización basada en roles.</li>
+  </ul>
+
+  <h3>4.3 Parametrización de roles de sistema y participantes</h3>
+  <p>Como administrador, se pueden crear y administrar roles de usuario y tipos de participantes para controlar la seguridad y clasificar a los asistentes a un evento.</p>
+  <ul>
+    <li>Los roles de sistema y de participantes se administran como catálogos parametrizables.</li>
+    <li>Los nombres son únicos, sin distinguir mayúsculas de minúsculas.</li>
+    <li>Las operaciones administrativas requieren un JWT con rol <code>administrador</code>.</li>
+    <li>La eliminación de un rol de participante se bloquea con conflicto <code>409</code> si existen inscripciones activas asociadas.</li>
+    <li>La eliminación de un rol de sistema se bloquea si está asignado a usuarios.</li>
+  </ul>
+  <pre>GET    /api/v1/roles/sistema
+POST   /api/v1/roles/sistema
+PUT    /api/v1/roles/sistema/{role_id}
+DELETE /api/v1/roles/sistema/{role_id}
+
+GET    /api/v1/roles/participantes
+POST   /api/v1/roles/participantes
+PUT    /api/v1/roles/participantes/{role_id}
+DELETE /api/v1/roles/participantes/{role_id}</pre>
+  <p class="small">La API conserva PATCH como alias de actualización por compatibilidad.</p>
+
+  <h2>5. Implementación realizada</h2>
+  <p>Se preparó un backend REST con Python, FastAPI, SQLAlchemy y PostgreSQL:</p>
+  <pre>backend/
+├── app/
+│   ├── api/
+│   │   ├── auth.py       # POST /api/v1/auth/login
+│   │   ├── roles.py      # Parametrización de roles
+│   │   └── users.py      # GET /api/v1/users/me
+│   ├── core/
+│   │   ├── config.py     # Variables de entorno
+│   │   └── security.py   # Argon2 y JWT
+│   ├── db.py             # Conexión SQLAlchemy
+│   ├── models.py         # Usuario y roles
+│   ├── schemas.py        # Solicitudes y respuestas
+│   └── main.py           # Aplicación FastAPI
+├── .env.example
+└── requirements.txt</pre>
+  <p>El login devuelve el token, su tipo, el tiempo de expiración y los datos públicos del usuario. Nunca devuelve <code>password_hash</code>. La parametrización usa <code>ROL_SISTEMA</code>, <code>ROL_PARTICIPANTE</code>, <code>USUARIO_ROL</code> e <code>INSCRIPCION</code>.</p>
+
+  <h2>6. Ejecución local</h2>
+  <pre>cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload</pre>
+  <p>Configurar en <code>.env</code> la conexión a PostgreSQL:</p>
+  <pre>DATABASE_URL=postgresql+psycopg://usuario:password@localhost:5432/eventia
+JWT_SECRET_KEY=una-clave-secreta-de-al-menos-32-caracteres
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=60</pre>
+  <p>La documentación interactiva está disponible en <code>http://127.0.0.1:8000/docs</code>. También existe el endpoint <code>GET /health</code> para comprobar que el servidor está activo.</p>
+
+  <h2>7. Validaciones realizadas</h2>
+  <ul>
+    <li>Compilación de todos los módulos Python mediante <code>compileall</code>.</li>
+    <li>Registro correcto de las rutas de login y perfil protegido en OpenAPI.</li>
+    <li>Hash y verificación de contraseñas mediante Argon2.</li>
+    <li>Generación de JWT con roles y expiración.</li>
+    <li>Pruebas de autenticación válida, contraseña incorrecta y correo inexistente mediante <code>tests/test_auth.py</code>.</li>
+    <li>Pruebas de integridad de roles mediante <code>tests/test_role_integrity.py</code>.</li>
+  </ul>
+  <p class="small">La prueba contra una base PostgreSQL real requiere configurar el servidor y crear las tablas del modelo.</p>
+</body>
+</html>
