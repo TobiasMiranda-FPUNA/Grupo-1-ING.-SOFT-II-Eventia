@@ -1,0 +1,98 @@
+<div class="roles-container">
+    <header class="page-header">
+        <h1>Administración de Catálogos</h1>
+        <p>Gestión de Roles de Participantes y Sistema</p>
+    </header>
+
+    <!-- Mensajes de Notificación -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+        <strong>¡Acción Bloqueada!</strong> {{ errorMessage }}
+    </div>
+
+    <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+    </div>
+
+    <div class="content-grid">
+        <!-- Formulario para Crear Nuevo Rol -->
+        <section class="card form-card">
+        <h3>Crear Nuevo Rol</h3>
+        <form [formGroup]="roleForm" (ngSubmit)="onSubmitRole()" novalidate>
+            <div class="form-group">
+            <label for="nombre">Nombre del Rol</label>
+            <input
+                type="text"
+                id="nombre"
+                formControlName="nombre"
+                placeholder="Ej: Estudiante, Expositor, Invitado"
+                [class.is-invalid]="roleForm.get('nombre')?.touched && roleForm.get('nombre')?.invalid"
+            />
+            <div class="error-feedback" *ngIf="roleForm.get('nombre')?.touched && roleForm.get('nombre')?.invalid">
+                <small *ngIf="roleForm.get('nombre')?.errors?.['required']">El nombre es obligatorio.</small>
+                <small *ngIf="roleForm.get('nombre')?.errors?.['minlength']">Mínimo 3 caracteres.</small>
+            </div>
+            </div>
+
+            <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea
+                id="descripcion"
+                formControlName="descripcion"
+                rows="3"
+                placeholder="Describa los permisos o categoría de este rol..."
+                [class.is-invalid]="roleForm.get('descripcion')?.touched && roleForm.get('descripcion')?.invalid"
+            ></textarea>
+            <div class="error-feedback" *ngIf="roleForm.get('descripcion')?.touched && roleForm.get('descripcion')?.invalid">
+                <small *ngIf="roleForm.get('descripcion')?.errors?.['required']">La descripción es obligatoria.</small>
+            </div>
+            </div>
+
+            <button type="submit" [disabled]="roleForm.invalid || isLoading" class="btn-primary">
+            {{ isLoading ? 'Guardando...' : 'Guardar Rol' }}
+            </button>
+        </form>
+        </section>
+
+        <!-- Tabla con Listado de Roles -->
+        <section class="card table-card">
+        <h3>Roles Registrados</h3>
+        <div class="table-responsive">
+            <table>
+            <thead>
+                <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let role of rolesList">
+                <td>#{{ role.id }}</td>
+                <td><strong>{{ role.nombre }}</strong></td>
+                <td>{{ role.descripcion }}</td>
+                <td>
+                    <span class="badge" [class.badge-inuse]="role.enUso" [class.badge-free]="!role.enUso">
+                    {{ role.enUso ? 'En Uso (Inscripciones)' : 'Disponible' }}
+                    </span>
+                </td>
+                <td>
+                    <button 
+                    class="btn-danger" 
+                    (click)="onDeleteRole(role)" 
+                    title="Eliminar rol"
+                    >
+                    Eliminar
+                    </button>
+                </td>
+                </tr>
+                <tr *ngIf="rolesList.length === 0">
+                <td colspan="5" class="empty-state">No hay roles registrados actualmente.</td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+        </section>
+    </div>
+</div>
