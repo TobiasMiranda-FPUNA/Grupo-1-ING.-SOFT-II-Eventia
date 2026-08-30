@@ -1,0 +1,101 @@
+<mxfile host="Electron" agent="ChatGPT">
+  <diagram id="eventia-c4" name="C4 - Contenedores">
+    <mxGraphModel dx="1883" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=26;fontStyle=1;" value="Eventia - Diagrama C4 - Nivel Contenedores" vertex="1">
+          <mxGeometry height="80" width="800" x="390" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="actorsTitle" parent="1" style="swimlane;html=1;rounded=0;startSize=32;fillColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=16;align=center;" value="Actores" vertex="1">
+          <mxGeometry height="700" width="270" x="30" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" parent="actorsTitle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=14;spacing=8;" value="&lt;b&gt;Administrador&lt;/b&gt;&lt;br&gt;&lt;br&gt;Gestiona usuarios, roles,&#xa;parámetros y configuración." vertex="1">
+          <mxGeometry height="105" width="230" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="organizer" parent="actorsTitle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=14;spacing=8;" value="&lt;b&gt;Organizador&lt;/b&gt;&lt;br&gt;&lt;br&gt;Gestiona eventos, inscripciones,&#xa;agenda, actividades, conferencistas,&#xa;asistencia, certificados y dashboard." vertex="1">
+          <mxGeometry height="135" width="230" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="participant" parent="actorsTitle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=14;spacing=8;" value="&lt;b&gt;Participante&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se inscribe a eventos, consulta&#xa;la agenda y descarga o valida&#xa;certificados." vertex="1">
+          <mxGeometry height="120" width="230" x="20" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="accreditation" parent="actorsTitle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=14;spacing=8;" value="&lt;b&gt;Personal de Acreditación&lt;/b&gt;&lt;br&gt;&lt;br&gt;Registra la asistencia de los&#xa;participantes a las actividades." vertex="1">
+          <mxGeometry height="120" width="230" x="20" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="speaker" parent="actorsTitle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=14;spacing=8;" value="&lt;b&gt;Conferencista&lt;/b&gt;&lt;br&gt;&lt;br&gt;Consulta sus actividades&#xa;asignadas en la agenda." vertex="1">
+          <mxGeometry height="95" width="230" x="20" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="system" parent="1" style="swimlane;html=1;rounded=0;startSize=32;fillColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=16;align=center;" value="Eventia" vertex="1">
+          <mxGeometry height="700" width="1280" x="590" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="web" parent="system" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=15;spacing=8;align=center;verticalAlign=top;" value="&lt;b&gt;Aplicación Web&lt;/b&gt;&lt;br&gt;(Frontend)&lt;br&gt;&lt;br&gt;Angular&lt;br&gt;&lt;hr&gt;&lt;br&gt;Interfaz utilizada por los usuarios&lt;br&gt;para acceder y gestionar las&lt;br&gt;funcionalidades del sistema." vertex="1">
+          <mxGeometry height="250" width="260" x="70" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="system" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=15;spacing=10;align=left;verticalAlign=top;" value="&lt;b&gt;Backend / API&lt;/b&gt;&lt;br&gt;(Python + FastAPI)&lt;br&gt;&lt;br&gt;Expone endpoints REST y contiene&#xa;la lógica de negocio del sistema.&lt;br&gt;&lt;br&gt;• Autenticación y autorización&#xa;• Gestión de usuarios y roles&#xa;• Eventos e inscripciones&#xa;• Agenda y actividades&#xa;• Conferencistas&#xa;• Asistencia&#xa;• Certificados&#xa;• Dashboard y reportes" vertex="1">
+          <mxGeometry height="440" width="310" x="520" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="db" parent="system" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#ffffff;strokeColor=#000000;fontSize=15;spacing=10;align=center;verticalAlign=top;" value="&lt;b&gt;Base de Datos&lt;/b&gt;&lt;br&gt;(PostgreSQL)&lt;br&gt;&lt;br&gt;Almacena la información del sistema:&lt;br&gt;&lt;br&gt;• Usuarios y roles&#xa;• Eventos&#xa;• Inscripciones&#xa;• Actividades&#xa;• Conferencistas&#xa;• Asistencias&#xa;• Certificados&#xa;• Parámetros y catálogos" vertex="1">
+          <mxGeometry height="330" width="210" x="1000" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-3" edge="1" parent="system" source="api" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;exitX=-0.007;exitY=0.634;exitDx=0;exitDy=0;exitPerimeter=0;" target="web" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="400" y="440" as="sourcePoint" />
+            <mxPoint x="450" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-4" connectable="0" parent="VIqqtX9AVuU-nvagW518-3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Respuestas JSON" vertex="1">
+          <mxGeometry relative="1" x="-0.0177" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-11" connectable="0" parent="VIqqtX9AVuU-nvagW518-3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="r" vertex="1">
+          <mxGeometry relative="1" x="-0.0144" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-6" edge="1" parent="system" source="db" style="endArrow=classic;html=1;rounded=0;entryX=0.998;entryY=0.64;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.7;exitDx=0;exitDy=0;" target="api" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="890" y="430" as="sourcePoint" />
+            <mxPoint x="940" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-7" connectable="0" parent="VIqqtX9AVuU-nvagW518-6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Resultado" vertex="1">
+          <mxGeometry relative="1" x="0.255" y="4" as="geometry">
+            <mxPoint x="27" y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-9" edge="1" parent="system" source="api" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.545;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1.003;exitY=0.524;exitDx=0;exitDy=0;exitPerimeter=0;" target="db" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="890" y="365" as="sourcePoint" />
+            <mxPoint x="940" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIqqtX9AVuU-nvagW518-10" connectable="0" parent="VIqqtX9AVuU-nvagW518-9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SQL" vertex="1">
+          <mxGeometry relative="1" x="-0.1078" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" target="web" value="HTTPS (Web)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="organizer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" target="web" value="HTTPS (Web)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="participant" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" target="web" value="HTTPS (Web)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="accreditation" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" target="web" value="HTTPS (Web)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="speaker" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" target="web" value="HTTPS (Web)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="web" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;fontSize=13;labelBackgroundColor=#ffffff;" target="api" value="HTTPS / API REST (JSON)">
+          <mxGeometry relative="1" x="-0.0252" y="26" as="geometry">
+            <mxPoint x="-21" y="-25" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
