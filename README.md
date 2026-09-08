@@ -73,4 +73,9 @@ La base inicial está compuesta por cuatro tablas principales:
 - rol_sistema	Catálogo de roles utilizados para controlar permisos y acceso al sistema.
 - usuario_rol	Tabla intermedia que relaciona usuarios con roles del sistema.
 - rol_participante	Catálogo de funciones que una persona puede cumplir dentro de un evento.
+- tipo_evento: almacena los diferentes tipos de eventos, como congresos, seminarios, talleres o jornadas.
+- evento: almacena la información principal de cada evento, como nombre, fechas, lugar, cupo y estado.
+- politica_inscripcion: almacena las reglas de inscripción de cada evento, como fecha límite, aprobación, lista de espera y asistencia mínima para certificado.
+- participante: almacena los datos de las personas que pueden participar o inscribirse en los eventos.
+- inscripcion: almacena la relación entre un participante y un evento, incluyendo su rol, fecha de inscripción y estado.
 
