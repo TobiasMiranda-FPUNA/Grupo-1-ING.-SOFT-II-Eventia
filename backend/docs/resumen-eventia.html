@@ -18,14 +18,17 @@
     li { margin: 4px 0; }
     img { max-width: 100%; }
     .diagram { text-align: center; margin: 14px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; }
+    th, td { border: 1px solid #c8d7e5; padding: 6px 10px; text-align: left; }
+    th { background: #eaf1f7; color: #173f5f; }
     .small { font-size: 9pt; color: #5f6368; }
   </style>
 </head>
 <body>
   <section class="cover">
     <h1>Eventia</h1>
-    <div class="subtitle">Resumen del proyecto y del módulo de autenticación</div>
-    <p class="meta">Grupo 1 - Ingeniería de Software II<br>Fecha: 26 de agosto de 2026</p>
+    <div class="subtitle">Resumen del proyecto — Épica 1 (Usuarios, Roles y Seguridad) y Épica 2 (Eventos e Inscripciones)</div>
+    <p class="meta">Grupo 1 - Ingeniería de Software II<br>Última actualización: 5 de septiembre de 2026</p>
   </section>
 
   <h2>1. Enunciado del proyecto</h2>
@@ -54,8 +57,9 @@
   </ul>
   <div class="diagram"><img src="../../diagrama_entidad_relacion.png" alt="Modelo entidad-relación de Eventia"></div>
   <p class="small">Diagrama entidad-relación utilizado como referencia del proyecto.</p>
+  <div class="box">Con la Épica 2 (sección 4), <code>TIPO_EVENTO</code>, <code>EVENTO</code>, <code>POLITICA_INSCRIPCION</code>, <code>PARTICIPANTE</code> e <code>INSCRIPCION</code> dejaron de ser solo diseño: ya están modeladas en el ORM del backend (<code>app/models.py</code>) y respaldan los endpoints en producción.</div>
 
-  <h2>3. Módulo: Gestión de Usuarios, Roles y Seguridad</h2>
+  <h2>3. Épica 1 — Gestión de Usuarios, Roles y Seguridad</h2>
   <p>El módulo contempla la administración de usuarios, la asignación de roles del sistema y el control de acceso a las funcionalidades. Las entidades centrales son:</p>
   <ul>
     <li><code>USUARIO</code>: identidad, correo, estado y hash de contraseña.</li>
@@ -64,8 +68,7 @@
   </ul>
   <p>Como funcionalidades complementarias se identificaron el alta, edición y desactivación de usuarios, el inicio y cierre de sesión, la recuperación de contraseña y la autorización por roles.</p>
 
-  <h2>4. Historias de usuario</h2>
-  <h3>4.1 Autenticación de usuarios</h3>
+  <h3>3.1 HU01 — Autenticación de usuarios</h3>
   <p><strong>Descripción:</strong> Como usuario del sistema, quiero iniciar sesión con mi correo y contraseña para acceder a las funcionalidades correspondientes a mi perfil.</p>
   <p>La implementación utiliza el endpoint <code>POST /api/v1/auth/login</code>, valida las credenciales contra el hash seguro de contraseña y genera un token JWT.</p>
   <p><strong>Criterios de aceptación:</strong></p>
@@ -74,7 +77,7 @@
     <li>Dadas credenciales incorrectas, el sistema responde con <code>401 Credenciales inválidas</code> sin especificar si falló el correo o la contraseña.</li>
   </ul>
 
-  <h3>4.2 Middleware y tokens de sesión</h3>
+  <h3>3.2 Middleware y tokens de sesión</h3>
   <p>Configurar la validación de tokens JWT para proteger los endpoints de la API.</p>
   <ul>
     <li>Generar un JWT con el identificador del usuario y sus roles.</li>
@@ -84,13 +87,13 @@
     <li>Permitir autorización basada en roles.</li>
   </ul>
 
-  <h3>4.3 Parametrización de roles de sistema y participantes</h3>
+  <h3>3.3 HU02 — Parametrización de roles de sistema y participantes</h3>
   <p>Como administrador, se pueden crear y administrar roles de usuario y tipos de participantes para controlar la seguridad y clasificar a los asistentes a un evento.</p>
   <ul>
     <li>Los roles de sistema y de participantes se administran como catálogos parametrizables.</li>
     <li>Los nombres son únicos, sin distinguir mayúsculas de minúsculas.</li>
     <li>Las operaciones administrativas requieren un JWT con rol <code>administrador</code>.</li>
-    <li>La eliminación de un rol de participante se bloquea con conflicto <code>409</code> si existen inscripciones activas asociadas.</li>
+    <li>La eliminación de un rol de participante se bloquea con conflicto <code>409</code> si existen inscripciones activas asociadas (incluyendo, desde la Épica 2, inscripciones en estado <code>lista_de_espera</code>).</li>
     <li>La eliminación de un rol de sistema se bloquea si está asignado a usuarios.</li>
   </ul>
   <pre>GET    /api/v1/roles/sistema
@@ -104,24 +107,92 @@ PUT    /api/v1/roles/participantes/{role_id}
 DELETE /api/v1/roles/participantes/{role_id}</pre>
   <p class="small">La API conserva PATCH como alias de actualización por compatibilidad.</p>
 
+  <h2>4. Épica 2 — Gestión de Eventos e Inscripciones</h2>
+  <p>Cubre las historias <strong>HU03 (Creación y Parametrización de Eventos)</strong> y <strong>HU04 (Inscripción de Participante a un Evento)</strong>.</p>
+  <table>
+    <tr><th>Tarea</th><th>Descripción</th><th>Estado</th></tr>
+    <tr><td>3.2</td><td><code>POST /api/v1/eventos</code> con validación de fechas (fin ≥ inicio) y cupo positivo</td><td>Hecho</td></tr>
+    <tr><td>3.3</td><td><code>GET /api/v1/eventos</code> (con filtros) y <code>PUT /api/v1/eventos/{id}</code></td><td>Hecho</td></tr>
+    <tr><td>4.2</td><td><code>POST /api/v1/inscripciones</code> con lógica transaccional (duplicado, cupo, estado)</td><td>Hecho</td></tr>
+    <tr><td>4.3</td><td>Derivación automática a "Lista de Espera" según la política del evento</td><td>Hecho</td></tr>
+  </table>
+  <p>Las tareas de base de datos <strong>3.1</strong> y <strong>4.1</strong> (diseño formal de tablas <code>TIPO_EVENTO</code>, <code>EVENTO</code>, <code>POLITICA_INSCRIPCION</code>, <code>PARTICIPANTE</code>) no estaban asignadas a esta entrega, pero fue necesario modelarlas a nivel de ORM porque los endpoints de negocio dependen de ellas (ver sección 8, Notas y pendientes).</p>
+
+  <h3>4.1 HU03 — Creación y Parametrización de Eventos</h3>
+  <p><strong>Descripción:</strong> Como Organizador, quiero crear un nuevo evento indicando su tipo, rango de fechas, lugar y cupo máximo para publicarlo y habilitar inscripciones.</p>
+  <p><strong>Criterios de aceptación:</strong></p>
+  <ul>
+    <li>Dado un formulario de alta de evento, cuando el organizador completa los campos obligatorios (tipo de evento, fechas válidas, cupo &gt; 0), entonces el evento se guarda en estado "Borrador" o "Publicado".</li>
+    <li>Dado un evento con fecha de fin anterior a la fecha de inicio, cuando se intenta guardar, entonces el sistema muestra un mensaje de error de validación.</li>
+  </ul>
+
+  <h3>4.2 HU04 — Inscripción de Participante a un Evento</h3>
+  <p><strong>Descripción:</strong> Como Participante, quiero inscribirme a un evento disponible para asegurar mi cupo y recibir mi comprobante.</p>
+  <p><strong>Criterios de aceptación:</strong></p>
+  <ul>
+    <li>Dado un evento con cupo disponible, cuando un participante envía su formulario de inscripción, entonces el sistema crea el registro con estado "Confirmada" y reduce el cupo disponible.</li>
+    <li>Dado que un participante ya posee una inscripción activa en el mismo evento, cuando intenta inscribirse nuevamente, entonces el sistema bloquea la operación indicando que ya está registrado.</li>
+    <li>Dado un evento sin cupos pero con la política "permite lista de espera" activa, cuando ingresa una nueva inscripción, entonces se registra en estado "Lista de Espera".</li>
+  </ul>
+
+  <h3>4.3 Modelo de datos agregado</h3>
+  <ul>
+    <li><strong><code>TipoEvento</code></strong>: catálogo parametrizable de tipos de evento (congreso, seminario, taller, jornada).</li>
+    <li><strong><code>Evento</code></strong>: tipo, nombre, descripción, fecha de inicio/fin, lugar, cupo máximo y estado (<code>borrador</code> / <code>publicado</code>).</li>
+    <li><strong><code>PoliticaInscripcion</code></strong>: relación 1 a 1 con <code>Evento</code>; define <code>permite_lista_espera</code>, <code>requiere_aprobacion</code>, <code>fecha_limite</code> y <code>min_asistencia_certificado</code> (con valores por defecto si no se especifican).</li>
+    <li><strong><code>Participante</code></strong>: datos de contacto de la persona que se inscribe (documento, nombres, apellidos, email único, institución). No requiere una cuenta de usuario del sistema.</li>
+    <li><strong><code>Inscripcion</code></strong> (extendida): ahora incluye <code>id_evento</code> e <code>id_participante</code>, con una restricción <code>UNIQUE (id_evento, id_participante)</code> que impide que un mismo participante quede inscripto dos veces al mismo evento.</li>
+  </ul>
+
+  <h3>4.4 Endpoints</h3>
+  <p><strong><code>app/api/eventos.py</code></strong></p>
+  <pre>POST /api/v1/eventos                 Crea un evento (requiere rol "organizador")
+GET  /api/v1/eventos                 Lista eventos con filtros (público)
+PUT  /api/v1/eventos/{evento_id}     Actualiza un evento (requiere rol "organizador")</pre>
+  <ul>
+    <li><strong>Validaciones al crear/actualizar:</strong> el <code>id_tipo_evento</code> debe existir (404 si no), <code>fecha_fin</code> no puede ser anterior a <code>fecha_inicio</code> (422), <code>cupo_maximo</code> debe ser mayor a 0 (validado por el schema).</li>
+    <li><strong>Filtros del listado:</strong> <code>id_tipo_evento</code>, <code>estado</code>, <code>q</code> (búsqueda por nombre), <code>fecha_desde</code> y <code>fecha_hasta</code> (eventos cuyo rango de fechas se solapa con el filtro).</li>
+    <li>La política de inscripción se puede enviar anidada en el body (<code>politica</code>); si no se envía, se crea con valores por defecto (<code>permite_lista_espera=false</code>, <code>min_asistencia_certificado=75</code>).</li>
+  </ul>
+
+  <p><strong><code>app/api/inscripciones.py</code></strong></p>
+  <pre>POST /api/v1/inscripciones           Inscribe a un participante a un evento (público)</pre>
+  <p>Lógica transaccional del endpoint:</p>
+  <ol>
+    <li>Busca el evento (con bloqueo de fila <code>SELECT ... FOR UPDATE</code> para evitar condiciones de carrera al validar el cupo) y el rol de participante; responde <code>404</code> si no existen.</li>
+    <li>Busca un <code>Participante</code> existente por email (sin distinguir mayúsculas) o crea uno nuevo con los datos recibidos.</li>
+    <li>Si ya existe una inscripción de ese participante a ese evento, responde <code>409 Conflict</code>.</li>
+    <li>Cuenta las inscripciones con estado <code>confirmada</code> para el evento:
+      <ul>
+        <li>Si hay cupo disponible → estado <code>confirmada</code>.</li>
+        <li>Si no hay cupo pero <code>politica.permite_lista_espera</code> es verdadero → estado <code>lista_de_espera</code>.</li>
+        <li>Si no hay cupo y no se permite lista de espera → <code>409 Conflict</code>.</li>
+      </ul>
+    </li>
+    <li>Persiste la inscripción con <code>fecha_inscripcion</code> (UTC) y la devuelve.</li>
+  </ol>
+
   <h2>5. Implementación realizada</h2>
   <p>Se preparó un backend REST con Python, FastAPI, SQLAlchemy y PostgreSQL:</p>
   <pre>backend/
 ├── app/
 │   ├── api/
-│   │   ├── auth.py       # POST /api/v1/auth/login
-│   │   ├── roles.py      # Parametrización de roles
-│   │   └── users.py      # GET /api/v1/users/me
+│   │   ├── auth.py             # POST /api/v1/auth/login
+│   │   ├── roles.py            # Parametrización de roles
+│   │   ├── users.py            # GET /api/v1/users/me
+│   │   ├── eventos.py          # Épica 2 (HU03): eventos
+│   │   └── inscripciones.py    # Épica 2 (HU04): inscripciones
 │   ├── core/
-│   │   ├── config.py     # Variables de entorno
-│   │   └── security.py   # Argon2 y JWT
-│   ├── db.py             # Conexión SQLAlchemy
-│   ├── models.py         # Usuario y roles
-│   ├── schemas.py        # Solicitudes y respuestas
-│   └── main.py           # Aplicación FastAPI
+│   │   ├── config.py           # Variables de entorno
+│   │   └── security.py         # Argon2 y JWT
+│   ├── db.py                   # Conexión SQLAlchemy
+│   ├── models.py                # Usuario, roles, evento, inscripción, etc.
+│   ├── schemas.py                # Solicitudes y respuestas
+│   └── main.py                   # Aplicación FastAPI
 ├── .env.example
 └── requirements.txt</pre>
   <p>El login devuelve el token, su tipo, el tiempo de expiración y los datos públicos del usuario. Nunca devuelve <code>password_hash</code>. La parametrización usa <code>ROL_SISTEMA</code>, <code>ROL_PARTICIPANTE</code>, <code>USUARIO_ROL</code> e <code>INSCRIPCION</code>.</p>
+  <p>Con la Épica 2, el backend además crea y publica eventos, y gestiona su ciclo de inscripción completo (confirmación directa o lista de espera según cupo y política).</p>
 
   <h2>6. Ejecución local</h2>
   <pre>cd backend
@@ -140,12 +211,26 @@ JWT_EXPIRE_MINUTES=60</pre>
   <h2>7. Validaciones realizadas</h2>
   <ul>
     <li>Compilación de todos los módulos Python mediante <code>compileall</code>.</li>
-    <li>Registro correcto de las rutas de login y perfil protegido en OpenAPI.</li>
+    <li>Registro correcto de las rutas de login, roles, eventos e inscripciones en OpenAPI.</li>
     <li>Hash y verificación de contraseñas mediante Argon2.</li>
     <li>Generación de JWT con roles y expiración.</li>
-    <li>Pruebas de autenticación válida, contraseña incorrecta y correo inexistente mediante <code>tests/test_auth.py</code>.</li>
-    <li>Pruebas de integridad de roles mediante <code>tests/test_role_integrity.py</code>.</li>
+    <li>Suite completa de <code>pytest</code>: <strong>19 tests pasan</strong>.
+      <ul>
+        <li><code>tests/test_auth.py</code>: autenticación válida, contraseña incorrecta y correo inexistente.</li>
+        <li><code>tests/test_role_integrity.py</code>: bloqueo de borrado de roles en uso (incluye estado <code>lista_de_espera</code>).</li>
+        <li><code>tests/test_eventos.py</code> (nuevo): creación con valores por defecto, rechazo de fechas inválidas, rechazo de tipo de evento inexistente, filtros de listado, actualización parcial y de política.</li>
+        <li><code>tests/test_inscripciones.py</code> (nuevo): inscripción confirmada con cupo disponible, rechazo de duplicados, paso a lista de espera al agotar cupo, rechazo sin cupo ni lista de espera, reutilización de participante existente por email.</li>
+      </ul>
+    </li>
   </ul>
   <p class="small">La prueba contra una base PostgreSQL real requiere configurar el servidor y crear las tablas del modelo.</p>
+
+  <h2>8. Notas y pendientes</h2>
+  <div class="box">
+    <p><strong>sql/ desactualizado respecto al ORM:</strong> los scripts de migración en <code>sql/</code> usan nombres de columna distintos a los del modelo real (<code>correo</code>/<code>contrasena_hash</code> vs. <code>email</code>/<code>password_hash</code> en <code>usuario</code>, por ejemplo) y todavía no incluyen las tablas de la Épica 2 (<code>evento</code>, <code>tipo_evento</code>, <code>politica_inscripcion</code>, <code>participante</code>, ni la <code>inscripcion</code> extendida). Los tests corren contra un esquema generado directamente desde <code>app/models.py</code> (SQLite en memoria), que es la fuente de verdad actual del backend. Falta sincronizar o generar los scripts SQL correspondientes (tareas 3.1 y 4.1) para que el despliegue en PostgreSQL coincida con el ORM.</p>
+  </div>
+  <ul>
+    <li><strong>Rol "organizador":</strong> no viene seedeado en ningún script; un administrador debe crearlo mediante <code>POST /api/v1/roles/sistema</code>, igual que cualquier otro rol parametrizable del sistema.</li>
+  </ul>
 </body>
 </html>

@@ -24,7 +24,16 @@ router = APIRouter(prefix="/api/v1/roles", tags=["Parametrización"])
 admin_required = Depends(require_system_role("administrador"))
 # Estados de una inscripción que se consideran "activos" (no cancelados),
 # usados para impedir borrar un rol de participante que esté en uso.
-ACTIVE_INSCRIPTION_STATES = {"pendiente", "confirmada", "inscripta", "inscrito", "activa"}
+# Incluye "lista_de_espera" (ver app/api/inscripciones.py): una inscripción
+# en espera de cupo sigue en uso, no debe permitir borrar su rol asociado.
+ACTIVE_INSCRIPTION_STATES = {
+    "pendiente",
+    "confirmada",
+    "inscripta",
+    "inscrito",
+    "activa",
+    "lista_de_espera",
+}
 
 
 # Construye el error 409 Conflict que se devuelve cuando ya existe un rol
