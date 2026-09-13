@@ -57,8 +57,11 @@ def get_current_user(
 # activo (usada en app/api/roles.py como "admin_required"). Si no lo tiene,
 # responde 403 Forbidden.
 def require_system_role(role_name: str):
+    role_name_lower = role_name.lower()
+
     def role_dependency(user: Usuario = Depends(get_current_user)) -> Usuario:
-        if role_name not in {role.nombre for role in user.roles if role.activo}:
+        active_roles = {role.nombre.lower() for role in user.roles if role.activo}
+        if role_name_lower not in active_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="El usuario no tiene permisos para esta operación",
