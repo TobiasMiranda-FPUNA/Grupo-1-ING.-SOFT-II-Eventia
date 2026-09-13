@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth';
 import { Router } from '@angular/router';
@@ -15,8 +15,8 @@ export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  errorMessage: string | null = null;
-  isLoading = false;
+  isLoading = signal(false);
+  showInvalidCredentialsAlert = signal(false);
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -29,8 +29,7 @@ export class Login {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = null;
+    this.isLoading.set(true);
 
     const credentials = {
       email: this.loginForm.value.email,
@@ -39,14 +38,21 @@ export class Login {
 
     this.authService.login(credentials).subscribe({
       next: () => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.router.navigate(['/roles']);
       },
       error: () => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         // Cumple el Criterio de Aceptación: error claro sin revelar si falló correo o clave
-        this.errorMessage = 'Credenciales inválidas. Por favor verifique su correo y contraseña.';
+        this.showInvalidCredentialsAlert.set(true);
       }
     });
+  }
+
+  closeInvalidCredentialsAlert(): void {
+    this.showInvalidCredentialsAlert.set(false);
+    this.loginForm.reset();
+    this.loginForm.markAsPristine();
+    this.loginForm.markAsUntouched();
   }
 }
