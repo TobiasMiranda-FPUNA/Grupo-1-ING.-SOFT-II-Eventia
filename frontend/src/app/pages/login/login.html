@@ -5,11 +5,6 @@
         <p>Sistema de Gestión de Eventos</p>
         </div>
 
-        <!-- Mensaje de error general de la API (Criterio de Aceptación) -->
-        <div class="alert alert-danger" *ngIf="errorMessage">
-        {{ errorMessage }}
-        </div>
-
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
         <!-- Campo Correo -->
         <div class="form-group">
@@ -44,10 +39,19 @@
         </div>
 
         <!-- Botón de Envío -->
-        <button type="submit" [disabled]="loginForm.invalid || isLoading" class="btn-primary">
-            <span *ngIf="!isLoading">Ingresar</span>
-            <span *ngIf="isLoading">Cargando...</span>
+        <button type="submit" [disabled]="loginForm.invalid || isLoading()" class="btn-primary">
+            <span *ngIf="!isLoading()">Ingresar</span>
+            <span *ngIf="isLoading()">Cargando...</span>
         </button>
         </form>
+    </div>
+
+    <!-- Alerta de credenciales inválidas -->
+    <div class="modal-overlay" *ngIf="showInvalidCredentialsAlert()">
+        <div class="modal-box" role="alertdialog" aria-labelledby="invalid-credentials-title">
+        <h3 id="invalid-credentials-title" class="modal-title">Credencial invalida</h3>
+        <p class="modal-message">Ingrese correo y/o contraseña válido</p>
+        <button type="button" class="btn-primary" (click)="closeInvalidCredentialsAlert()">Entendido</button>
+        </div>
     </div>
 </div>

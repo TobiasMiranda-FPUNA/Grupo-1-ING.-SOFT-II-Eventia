@@ -36,7 +36,7 @@ usuario_rol = Table(
     "usuario_rol",
     Base.metadata,
     Column("id_usuario", ForeignKey("usuario.id_usuario"), primary_key=True),
-    Column("id_rol", ForeignKey("rol_sistema.id_rol"), primary_key=True),
+    Column("id_rol_sistema", ForeignKey("rol_sistema.id_rol_sistema"), primary_key=True),
 )
 
 
@@ -45,7 +45,7 @@ usuario_rol = Table(
 class RolSistema(Base):
     __tablename__ = "rol_sistema"
 
-    id_rol: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id_rol: Mapped[int] = mapped_column("id_rol_sistema", Integer, primary_key=True)
     nombre: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     descripcion: Mapped[str | None] = mapped_column(String(255))
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -171,7 +171,11 @@ class Usuario(Base):
     id_usuario: Mapped[int] = mapped_column(Integer, primary_key=True)
     nombres: Mapped[str] = mapped_column(String(100), nullable=False)
     apellidos: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(
+        "correo", String(255), unique=True, index=True, nullable=False
+    )
+    password_hash: Mapped[str] = mapped_column(
+        "contrasena_hash", String(255), nullable=False
+    )
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     roles: Mapped[list[RolSistema]] = relationship(secondary=usuario_rol, lazy="selectin")

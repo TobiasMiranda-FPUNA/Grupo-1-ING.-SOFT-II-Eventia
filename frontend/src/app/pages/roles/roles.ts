@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ParticipantRole, RolesService } from '../../services/roles';
 
@@ -13,12 +13,12 @@ export class Roles implements OnInit {
   private fb = inject(FormBuilder);
   private rolesService = inject(RolesService);
 
-  rolesList: ParticipantRole[] = [];
+  rolesList = signal<ParticipantRole[]>([]);
   roleForm: FormGroup;
-  
-  errorMessage: string | null = null;
-  successMessage: string | null = null;
-  isLoading = false;
+
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
+  isLoading = signal(false);
 
   constructor() {
     this.roleForm = this.fb.group({
@@ -34,15 +34,15 @@ export class Roles implements OnInit {
   loadRoles(): void {
     this.rolesService.getRoles().subscribe({
       next: (data) => {
-        this.rolesList = data;
+        this.rolesList.set(data);
       },
       error: () => {
         // Carga de datos de respaldo visual mientras el backend no esté conectado
-        this.rolesList = [
+        this.rolesList.set([
           { id: 1, nombre: 'Estudiante', descripcion: 'Participante matriculado en institución', activo: true, enUso: true },
           { id: 2, nombre: 'Expositor', descripcion: 'Conferencista o ponente de actividad', activo: true, enUso: false },
           { id: 3, nombre: 'General', descripcion: 'Público general asistente', activo: true, enUso: false }
-        ];
+        ]);
       }
     });
   }
@@ -53,9 +53,9 @@ export class Roles implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     const newRole: ParticipantRole = {
       nombre: this.roleForm.value.nombre,
@@ -65,43 +65,43 @@ export class Roles implements OnInit {
 
     this.rolesService.createRole(newRole).subscribe({
       next: (created) => {
-        this.isLoading = false;
-        this.successMessage = 'Rol creado exitosamente.';
-        this.rolesList.push(created);
+        this.isLoading.set(false);
+        this.successMessage.set('Rol creado exitosamente.');
+        this.rolesList.update(roles => [...roles, created]);
         this.roleForm.reset();
       },
       error: () => {
         // Simulación visual en frontend si no hay conexión backend
-        this.isLoading = false;
+        this.isLoading.set(false);
         newRole.id = Date.now();
         newRole.enUso = false;
-        this.rolesList.push(newRole);
-        this.successMessage = 'Rol registrado en la vista local.';
+        this.rolesList.update(roles => [...roles, newRole]);
+        this.successMessage.set('Rol registrado en la vista local.');
         this.roleForm.reset();
       }
     });
   }
 
   onDeleteRole(role: ParticipantRole): void {
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     // Cumplimiento del Criterio de Aceptación:
     // Bloquear eliminación y notificar si el rol está asignado a inscripciones activas
     if (role.enUso) {
-      this.errorMessage = `No se puede eliminar el rol "${role.nombre}" porque actualmente se encuentra asignado a inscripciones activas.`;
+      this.errorMessage.set(`No se puede eliminar el rol "${role.nombre}" porque actualmente se encuentra asignado a inscripciones activas.`);
       return;
     }
 
     if (role.id) {
       this.rolesService.deleteRole(role.id).subscribe({
         next: () => {
-          this.rolesList = this.rolesList.filter(r => r.id !== role.id);
-          this.successMessage = 'Rol eliminado correctamente.';
+          this.rolesList.update(roles => roles.filter(r => r.id !== role.id));
+          this.successMessage.set('Rol eliminado correctamente.');
         },
         error: () => {
-          this.rolesList = this.rolesList.filter(r => r.id !== role.id);
-          this.successMessage = 'Rol eliminado de la vista local.';
+          this.rolesList.update(roles => roles.filter(r => r.id !== role.id));
+          this.successMessage.set('Rol eliminado de la vista local.');
         }
       });
     }

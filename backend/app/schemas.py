@@ -3,23 +3,45 @@
 from datetime import date, datetime
 # Literal: restringe un campo a un conjunto fijo de valores permitidos
 # (ej: el estado de un evento solo puede ser "borrador" o "publicado").
-from typing import Literal
+# Annotated: permite adjuntarle un validador propio a un tipo (usado en
+# Email más abajo).
+from typing import Annotated, Literal
 
+# validate_email/EmailNotValidError: misma librería que usa EmailStr de
+# Pydantic por debajo, pero llamada directamente para poder pasarle
+# test_environment=True (ver comentario en Email más abajo).
+from email_validator import EmailNotValidError, validate_email
 # BaseModel: clase base de Pydantic de la que heredan todos los schemas,
 # permite validar y serializar datos automáticamente.
 # ConfigDict: permite configurar el comportamiento del modelo (por ejemplo,
 # habilitar la lectura de datos desde atributos de un objeto ORM).
-# EmailStr: tipo de dato que valida que el string tenga formato de email.
+# BeforeValidator: permite adjuntar una función de validación/normalización
+# propia a un tipo (usada por Email más abajo).
 # Field: permite agregar validaciones y metadatos extra a un campo
 # (longitud mínima/máxima, valor por defecto, etc.). model_validator: valida
 # el modelo completo una vez parseados los campos individuales (útil para
 # reglas que involucran más de un campo, como fecha_fin >= fecha_inicio).
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
+
+
+def _validate_email(value: str) -> str:
+    # test_environment=True evita que se rechacen dominios reservados para
+    # pruebas (test, example, invalid, localhost - ver RFC 2606), que es
+    # justamente lo que usan las cuentas de ejemplo cargadas en
+    # sql/cargar_datos_ejemplo.sql (ej: admin@eventia.test). Sin este flag,
+    # EmailStr de Pydantic las rechaza con "special-use or reserved name".
+    try:
+        return validate_email(value, check_deliverability=False, test_environment=True).normalized
+    except EmailNotValidError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+Email = Annotated[str, BeforeValidator(_validate_email)]
 
 
 # Datos que se esperan recibir al hacer login: email y contraseña.
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: Email
     password: str = Field(min_length=1)
 
 
@@ -32,7 +54,7 @@ class UserResponse(BaseModel):
     id_usuario: int
     nombres: str
     apellidos: str
-    email: EmailStr
+    email: Email
     roles: list[str]
 
 
@@ -149,7 +171,7 @@ class InscripcionCreate(BaseModel):
     documento: str | None = Field(default=None, max_length=50)
     nombres: str = Field(min_length=1, max_length=100)
     apellidos: str = Field(min_length=1, max_length=100)
-    email: EmailStr
+    email: Email
     institucion: str | None = Field(default=None, max_length=150)
 
 

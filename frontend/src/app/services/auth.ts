@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LoginCredentials {
     email: string;
-    password_hash: string;
+    password: string;
 }
 
 export interface AuthResponse {
@@ -17,8 +18,7 @@ export interface AuthResponse {
 })
 export class AuthService {
     private http = inject(HttpClient);
-    // URL local de la API FastAPI desarrollada por tu compañero
-    private apiUrl = 'http://localhost:8000/api/v1/auth';
+    private apiUrl = `${environment.apiUrl}/auth`;
 
     login(credentials: LoginCredentials): Observable<AuthResponse> {
         return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(

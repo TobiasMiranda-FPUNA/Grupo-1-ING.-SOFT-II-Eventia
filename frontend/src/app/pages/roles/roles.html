@@ -5,12 +5,12 @@
     </header>
 
     <!-- Mensajes de Notificación -->
-    <div class="alert alert-danger" *ngIf="errorMessage">
-        <strong>¡Acción Bloqueada!</strong> {{ errorMessage }}
+    <div class="alert alert-danger" *ngIf="errorMessage()">
+        <strong>¡Acción Bloqueada!</strong> {{ errorMessage() }}
     </div>
 
-    <div class="alert alert-success" *ngIf="successMessage">
-        {{ successMessage }}
+    <div class="alert alert-success" *ngIf="successMessage()">
+        {{ successMessage() }}
     </div>
 
     <div class="content-grid">
@@ -47,8 +47,8 @@
             </div>
             </div>
 
-            <button type="submit" [disabled]="roleForm.invalid || isLoading" class="btn-primary">
-            {{ isLoading ? 'Guardando...' : 'Guardar Rol' }}
+            <button type="submit" [disabled]="roleForm.invalid || isLoading()" class="btn-primary">
+            {{ isLoading() ? 'Guardando...' : 'Guardar Rol' }}
             </button>
         </form>
         </section>
@@ -68,7 +68,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let role of rolesList">
+                <tr *ngFor="let role of rolesList()">
                 <td>#{{ role.id }}</td>
                 <td><strong>{{ role.nombre }}</strong></td>
                 <td>{{ role.descripcion }}</td>
@@ -78,16 +78,16 @@
                     </span>
                 </td>
                 <td>
-                    <button 
-                    class="btn-danger" 
-                    (click)="onDeleteRole(role)" 
+                    <button
+                    class="btn-danger"
+                    (click)="onDeleteRole(role)"
                     title="Eliminar rol"
                     >
                     Eliminar
                     </button>
                 </td>
                 </tr>
-                <tr *ngIf="rolesList.length === 0">
+                <tr *ngIf="rolesList().length === 0">
                 <td colspan="5" class="empty-state">No hay roles registrados actualmente.</td>
                 </tr>
             </tbody>

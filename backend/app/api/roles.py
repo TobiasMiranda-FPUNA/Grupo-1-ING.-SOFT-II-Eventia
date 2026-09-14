@@ -132,7 +132,7 @@ def delete_system_role(
     role = db.get(RolSistema, role_id)
     if role is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rol no encontrado")
-    in_use = db.scalar(select(usuario_rol.c.id_usuario).where(usuario_rol.c.id_rol == role_id).limit(1))
+    in_use = db.scalar(select(usuario_rol.c.id_usuario).where(usuario_rol.c.id_rol_sistema == role_id).limit(1))
     if in_use is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El rol está asignado a usuarios")
     db.delete(role)
