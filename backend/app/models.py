@@ -1,12 +1,12 @@
-# date/datetime: tipos usados para las columnas de fechas de eventos y para
-# marcar el momento en que se registra una inscripción.
-from datetime import date, datetime, UTC
+# date/datetime/time: tipos usados para las columnas de fechas de eventos y
+# actividades, y para marcar el momento en que se registra una inscripción.
+from datetime import date, datetime, time, UTC
 
 # Tipos de columna de SQLAlchemy (Boolean, Integer, String), ForeignKey para
 # definir claves foráneas, Table/Column para crear tablas "a mano" (como la
-# tabla intermedia de la relación muchos-a-muchos usuario-rol). Date/DateTime
-# para columnas de fecha/fecha-hora, y UniqueConstraint para restricciones de
-# unicidad que involucran más de una columna.
+# tabla intermedia de la relación muchos-a-muchos usuario-rol). Date/DateTime/
+# Time para columnas de fecha/fecha-hora/hora, y UniqueConstraint para
+# restricciones de unicidad que involucran más de una columna.
 from sqlalchemy import (
     Boolean,
     Column,
@@ -16,6 +16,7 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    Time,
     UniqueConstraint,
 )
 
@@ -178,6 +179,46 @@ class Conferencista(Base):
     especialidad: Mapped[str | None] = mapped_column(String(150))
     biografia: Mapped[str | None] = mapped_column(String(1000))
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
+# Tabla intermedia (muchos a muchos) que vincula actividades con los
+# conferencistas que exponen en ellas. Al igual que usuario_rol, no necesita
+# atributos propios más allá de las dos claves foráneas. ondelete="CASCADE"
+# en ambos lados: si se borra la actividad o el conferencista, se limpia
+# automáticamente el vínculo sin dejar filas huérfanas.
+actividad_conferencista = Table(
+    "actividad_conferencista",
+    Base.metadata,
+    Column("id_actividad", ForeignKey("actividad.id_actividad", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "id_conferencista", ForeignKey("conferencista.id_conferencista", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
+
+# Representa una actividad puntual de la agenda de un evento (charla, taller,
+# panel), con su horario dentro del rango de fechas del evento. Modelo
+# mínimo: cubre lo necesario para poder asociarle conferencistas (HU06);
+# categorías de actividad y su CRUD completo quedan fuera de este alcance.
+class Actividad(Base):
+    __tablename__ = "actividad"
+
+    id_actividad: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id_evento: Mapped[int] = mapped_column(
+        ForeignKey("evento.id_evento", ondelete="CASCADE"), nullable=False
+    )
+    nombre: Mapped[str] = mapped_column(String(150), nullable=False)
+    descripcion: Mapped[str | None] = mapped_column(String(500))
+    fecha: Mapped[date] = mapped_column(Date, nullable=False)
+    hora_inicio: Mapped[time] = mapped_column(Time, nullable=False)
+    hora_fin: Mapped[time] = mapped_column(Time, nullable=False)
+    lugar: Mapped[str | None] = mapped_column(String(200))
+
+    # lazy="selectin" trae los conferencistas asociados en una segunda
+    # consulta batched, igual que Usuario.roles.
+    conferencistas: Mapped[list[Conferencista]] = relationship(
+        secondary=actividad_conferencista, lazy="selectin"
+    )
 
 
 # Representa a un usuario registrado en el sistema (credenciales y datos

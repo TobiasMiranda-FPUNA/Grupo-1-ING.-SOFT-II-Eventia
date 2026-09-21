@@ -5,6 +5,7 @@ from fastapi import FastAPI
 # en http://localhost:4200), algo que el navegador bloquea por defecto.
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.actividades import router as actividades_router
 from app.api.auth import router as auth_router
 from app.api.conferencistas import router as conferencistas_router
 from app.api.eventos import router as eventos_router
@@ -29,14 +30,15 @@ app.add_middleware(
 )
 
 # Se registran los routers de cada módulo (auth, roles, users, eventos,
-# inscripciones, conferencistas) en la app, incorporando así sus endpoints a
-# la API principal.
+# inscripciones, conferencistas, actividades) en la app, incorporando así sus
+# endpoints a la API principal.
 app.include_router(auth_router)
 app.include_router(roles_router)
 app.include_router(users_router)
 app.include_router(eventos_router)
 app.include_router(inscripciones_router)
 app.include_router(conferencistas_router)
+app.include_router(actividades_router)
 
 
 # Endpoint de health check: permite verificar que la API está corriendo

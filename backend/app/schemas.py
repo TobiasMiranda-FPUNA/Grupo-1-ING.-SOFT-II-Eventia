@@ -1,6 +1,6 @@
-# date/datetime: tipos usados en los campos de fecha de eventos y en la
-# fecha de registro de una inscripción.
-from datetime import date, datetime
+# date/datetime/time: tipos usados en los campos de fecha de eventos y
+# actividades, y en la fecha de registro de una inscripción.
+from datetime import date, datetime, time
 # Literal: restringe un campo a un conjunto fijo de valores permitidos
 # (ej: el estado de un evento solo puede ser "borrador" o "publicado").
 # Annotated: permite adjuntarle un validador propio a un tipo (usado en
@@ -195,6 +195,41 @@ class ConferencistaResponse(ConferencistaBase):
 
     id_conferencista: int
     activo: bool
+
+
+# Campos necesarios para crear una actividad de la agenda de un evento
+# (charla, taller, panel). Modelo mínimo: solo lo necesario para poder
+# asociarle conferencistas (HU06); no incluye categoría ni cupo propio.
+class ActividadCreate(BaseModel):
+    id_evento: int
+    nombre: str = Field(min_length=1, max_length=150)
+    descripcion: str | None = Field(default=None, max_length=500)
+    fecha: date
+    hora_inicio: time
+    hora_fin: time
+    lugar: str | None = Field(default=None, max_length=200)
+
+    @model_validator(mode="after")
+    def check_horario(self) -> "ActividadCreate":
+        if self.hora_fin <= self.hora_inicio:
+            raise ValueError("La hora de fin debe ser posterior a la hora de inicio")
+        return self
+
+
+# Datos de una actividad que se devuelven como respuesta de la API,
+# incluyendo los conferencistas actualmente asociados a ella.
+class ActividadResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_actividad: int
+    id_evento: int
+    nombre: str
+    descripcion: str | None
+    fecha: date
+    hora_inicio: time
+    hora_fin: time
+    lugar: str | None
+    conferencistas: list[ConferencistaResponse] = []
 
 
 # Datos que se esperan recibir al inscribir un participante a un evento.
