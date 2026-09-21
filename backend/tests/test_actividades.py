@@ -11,6 +11,7 @@ from app.api.actividades import (
     create_actividad,
     disassociate_conferencista,
     get_actividad,
+    get_agenda_evento,
 )
 from app.api.conferencistas import create_conferencista
 from app.db import Base
@@ -173,5 +174,36 @@ def test_disassociate_conferencista_404_si_no_estaba_asociado(db, evento, confer
 def test_disassociate_conferencista_404_si_actividad_no_existe(db, conferencista):
     with pytest.raises(HTTPException) as error:
         disassociate_conferencista(999, conferencista.id_conferencista, db)
+
+    assert error.value.status_code == 404
+
+
+def test_get_agenda_evento_ordena_por_fecha_y_hora_inicio(db, evento):
+    tarde_dia1 = create_actividad(
+        evento.id_evento, _data(nombre="Tarde día 1", fecha=date(2026, 3, 1), hora_inicio=time(15, 0), hora_fin=time(16, 0)), db
+    )
+    manana_dia1 = create_actividad(
+        evento.id_evento, _data(nombre="Mañana día 1", fecha=date(2026, 3, 1), hora_inicio=time(9, 0), hora_fin=time(10, 0)), db
+    )
+    dia2 = create_actividad(
+        evento.id_evento, _data(nombre="Día 2", fecha=date(2026, 3, 2), hora_inicio=time(8, 0), hora_fin=time(9, 0)), db
+    )
+
+    agenda = get_agenda_evento(evento.id_evento, db)
+
+    assert [a.id_actividad for a in agenda] == [
+        manana_dia1.id_actividad,
+        tarde_dia1.id_actividad,
+        dia2.id_actividad,
+    ]
+
+
+def test_get_agenda_evento_vacia_si_no_tiene_actividades(db, evento):
+    assert get_agenda_evento(evento.id_evento, db) == []
+
+
+def test_get_agenda_evento_404_si_evento_no_existe(db):
+    with pytest.raises(HTTPException) as error:
+        get_agenda_evento(999, db)
 
     assert error.value.status_code == 404

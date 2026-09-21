@@ -4,6 +4,8 @@ from datetime import date
 
 # APIRouter/Depends/HTTPException/status: ver detalle en app/api/auth.py.
 from fastapi import APIRouter, Depends, HTTPException, status
+# select: construcción declarativa de consultas SQL.
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # Dependencia que exige que el usuario autenticado tenga un rol específico.
@@ -103,6 +105,22 @@ def create_actividad(
 def get_actividad(actividad_id: int, db: Session = Depends(get_db)) -> ActividadResponse:
     actividad = _get_actividad_or_404(db, actividad_id)
     return ActividadResponse.model_validate(actividad)
+
+
+# Lista la agenda de un evento (todas sus actividades), ordenada por fecha
+# y hora de inicio. Pública, igual que el resto de los "get" de recursos de
+# agenda.
+@evento_actividades_router.get("/{evento_id}/agenda", response_model=list[ActividadResponse])
+def get_agenda_evento(evento_id: int, db: Session = Depends(get_db)) -> list[ActividadResponse]:
+    _get_evento_or_404(db, evento_id)
+
+    query = (
+        select(Actividad)
+        .where(Actividad.id_evento == evento_id)
+        .order_by(Actividad.fecha, Actividad.hora_inicio)
+    )
+    actividades = db.scalars(query).all()
+    return [ActividadResponse.model_validate(actividad) for actividad in actividades]
 
 
 # Asocia un conferencista a una actividad. Valida que ambos existan y que el
