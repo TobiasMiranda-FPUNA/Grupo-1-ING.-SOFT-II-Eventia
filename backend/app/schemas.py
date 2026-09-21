@@ -198,10 +198,11 @@ class ConferencistaResponse(ConferencistaBase):
 
 
 # Campos necesarios para crear una actividad de la agenda de un evento
-# (charla, taller, panel). Modelo mínimo: solo lo necesario para poder
-# asociarle conferencistas (HU06); no incluye categoría ni cupo propio.
+# (charla, taller, panel). El evento al que pertenece se toma del path
+# (POST /api/v1/eventos/{evento_id}/actividades), no del body. Modelo
+# mínimo: solo lo necesario para poder asociarle conferencistas (HU06); no
+# incluye categoría ni cupo propio.
 class ActividadCreate(BaseModel):
-    id_evento: int
     nombre: str = Field(min_length=1, max_length=150)
     descripcion: str | None = Field(default=None, max_length=500)
     fecha: date

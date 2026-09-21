@@ -52,9 +52,8 @@ def conferencista(db):
     )
 
 
-def _data(evento, **overrides):
+def _data(**overrides):
     base = dict(
-        id_evento=evento.id_evento,
         nombre="Charla de apertura",
         descripcion="Introducción al evento",
         fecha=date(2026, 3, 1),
@@ -67,17 +66,16 @@ def _data(evento, **overrides):
 
 
 def test_create_actividad_persiste_sin_conferencistas(db, evento):
-    response = create_actividad(_data(evento), db)
+    response = create_actividad(evento.id_evento, _data(), db)
 
     assert response.id_actividad is not None
     assert response.id_evento == evento.id_evento
     assert response.conferencistas == []
 
 
-def test_actividad_create_rechaza_hora_fin_anterior_o_igual_a_inicio(evento):
+def test_actividad_create_rechaza_hora_fin_anterior_o_igual_a_inicio():
     with pytest.raises(ValidationError):
         ActividadCreate(
-            id_evento=evento.id_evento,
             nombre="Actividad inválida",
             fecha=date(2026, 3, 1),
             hora_inicio=time(10, 0),
@@ -86,18 +84,28 @@ def test_actividad_create_rechaza_hora_fin_anterior_o_igual_a_inicio(evento):
 
 
 def test_create_actividad_rechaza_evento_inexistente(db):
-    data = ActividadCreate(
-        id_evento=999,
-        nombre="Actividad huérfana",
-        fecha=date(2026, 3, 1),
-        hora_inicio=time(9, 0),
-        hora_fin=time(10, 0),
-    )
-
     with pytest.raises(HTTPException) as error:
-        create_actividad(data, db)
+        create_actividad(999, _data(), db)
 
     assert error.value.status_code == 404
+
+
+def test_create_actividad_rechaza_fecha_fuera_del_rango_del_evento(db, evento):
+    # El evento va del 2026-03-01 al 2026-03-02 (ver fixture `evento`).
+    data = _data(fecha=date(2026, 3, 3))
+
+    with pytest.raises(HTTPException) as error:
+        create_actividad(evento.id_evento, data, db)
+
+    assert error.value.status_code == 422
+
+
+def test_create_actividad_acepta_fecha_en_el_borde_del_rango_del_evento(db, evento):
+    data = _data(fecha=evento.fecha_fin)
+
+    response = create_actividad(evento.id_evento, data, db)
+
+    assert response.fecha == evento.fecha_fin
 
 
 def test_get_actividad_404_si_no_existe(db):
@@ -108,7 +116,7 @@ def test_get_actividad_404_si_no_existe(db):
 
 
 def test_associate_conferencista_lo_asocia_a_la_actividad(db, evento, conferencista):
-    actividad = create_actividad(_data(evento), db)
+    actividad = create_actividad(evento.id_evento, _data(), db)
 
     response = associate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
 
@@ -119,7 +127,7 @@ def test_associate_conferencista_lo_asocia_a_la_actividad(db, evento, conferenci
 
 
 def test_associate_conferencista_rechaza_asociacion_duplicada(db, evento, conferencista):
-    actividad = create_actividad(_data(evento), db)
+    actividad = create_actividad(evento.id_evento, _data(), db)
     associate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
 
     with pytest.raises(HTTPException) as error:
@@ -136,7 +144,7 @@ def test_associate_conferencista_404_si_actividad_no_existe(db, conferencista):
 
 
 def test_associate_conferencista_404_si_conferencista_no_existe(db, evento):
-    actividad = create_actividad(_data(evento), db)
+    actividad = create_actividad(evento.id_evento, _data(), db)
 
     with pytest.raises(HTTPException) as error:
         associate_conferencista(actividad.id_actividad, 999, db)
@@ -145,7 +153,7 @@ def test_associate_conferencista_404_si_conferencista_no_existe(db, evento):
 
 
 def test_disassociate_conferencista_lo_quita_de_la_actividad(db, evento, conferencista):
-    actividad = create_actividad(_data(evento), db)
+    actividad = create_actividad(evento.id_evento, _data(), db)
     associate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
 
     disassociate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
@@ -154,7 +162,7 @@ def test_disassociate_conferencista_lo_quita_de_la_actividad(db, evento, confere
 
 
 def test_disassociate_conferencista_404_si_no_estaba_asociado(db, evento, conferencista):
-    actividad = create_actividad(_data(evento), db)
+    actividad = create_actividad(evento.id_evento, _data(), db)
 
     with pytest.raises(HTTPException) as error:
         disassociate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)

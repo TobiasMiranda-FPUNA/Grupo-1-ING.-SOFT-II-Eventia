@@ -5,6 +5,7 @@ from fastapi import FastAPI
 # en http://localhost:4200), algo que el navegador bloquea por defecto.
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.actividades import evento_actividades_router
 from app.api.actividades import router as actividades_router
 from app.api.auth import router as auth_router
 from app.api.conferencistas import router as conferencistas_router
@@ -39,6 +40,7 @@ app.include_router(eventos_router)
 app.include_router(inscripciones_router)
 app.include_router(conferencistas_router)
 app.include_router(actividades_router)
+app.include_router(evento_actividades_router)
 
 
 # Endpoint de health check: permite verificar que la API está corriendo

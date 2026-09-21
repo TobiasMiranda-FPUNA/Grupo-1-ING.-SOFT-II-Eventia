@@ -1,3 +1,7 @@
+# date: usado para validar que la fecha de la actividad quede dentro del
+# rango de fechas del evento al que pertenece.
+from datetime import date
+
 # APIRouter/Depends/HTTPException/status: ver detalle en app/api/auth.py.
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -14,6 +18,11 @@ from app.schemas import ActividadCreate, ActividadResponse
 # una actividad (HU06); el CRUD completo de actividades queda fuera de este
 # alcance.
 router = APIRouter(prefix="/api/v1/actividades", tags=["Actividades"])
+# Router separado con el prefijo "/api/v1/eventos": expone la creación de
+# una actividad anidada bajo su evento (POST /api/v1/eventos/{evento_id}/
+# actividades), a diferencia del resto de los endpoints de este módulo, que
+# operan sobre una actividad ya creada identificada por su propio id.
+evento_actividades_router = APIRouter(prefix="/api/v1/eventos", tags=["Actividades"])
 # Dependencia reutilizada en los endpoints de escritura: exige que el
 # usuario autenticado tenga el rol de sistema "organizador" (leer/listar
 # queda público, igual que en app/api/eventos.py y app/api/conferencistas.py).
@@ -45,19 +54,35 @@ def _get_conferencista_or_404(db: Session, conferencista_id: int) -> Conferencis
     return conferencista
 
 
+# Valida que la fecha de la actividad quede dentro del rango de fechas del
+# evento (fecha_inicio <= fecha <= fecha_fin). La coherencia entre
+# hora_inicio y hora_fin de la propia actividad ya la valida ActividadCreate
+# a nivel de schema; esta validación adicional necesita el evento cargado
+# desde la base de datos, por lo que se hace en el endpoint.
+def _validate_fecha_dentro_evento(evento: Evento, fecha: date) -> None:
+    if not (evento.fecha_inicio <= fecha <= evento.fecha_fin):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="La fecha de la actividad debe estar dentro del rango de fechas del evento",
+        )
+
+
 # Crea una nueva actividad dentro de un evento, validando que el evento
-# exista (la coherencia de horario ya la valida ActividadCreate a nivel de
-# schema).
-@router.post("", response_model=ActividadResponse, status_code=status.HTTP_201_CREATED)
+# exista y que la fecha de la actividad esté dentro de su rango de fechas.
+@evento_actividades_router.post(
+    "/{evento_id}/actividades", response_model=ActividadResponse, status_code=status.HTTP_201_CREATED
+)
 def create_actividad(
+    evento_id: int,
     data: ActividadCreate,
     db: Session = Depends(get_db),
     _: Usuario = organizer_required,
 ) -> ActividadResponse:
-    _get_evento_or_404(db, data.id_evento)
+    evento = _get_evento_or_404(db, evento_id)
+    _validate_fecha_dentro_evento(evento, data.fecha)
 
     actividad = Actividad(
-        id_evento=data.id_evento,
+        id_evento=evento.id_evento,
         nombre=data.nombre.strip(),
         descripcion=data.descripcion,
         fecha=data.fecha,
