@@ -162,6 +162,24 @@ class Inscripcion(Base):
     estado: Mapped[str] = mapped_column(String(30), nullable=False)
 
 
+# Representa a un conferencista/expositor invitado a exponer en actividades
+# del evento (charlas, talleres, paneles). Es independiente de Participante
+# y de Usuario: un conferencista no necesariamente se inscribe al evento ni
+# tiene una cuenta de acceso al sistema, solo sus datos profesionales para
+# mostrarlos en la agenda.
+class Conferencista(Base):
+    __tablename__ = "conferencista"
+
+    id_conferencista: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nombres: Mapped[str] = mapped_column(String(100), nullable=False)
+    apellidos: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    institucion: Mapped[str | None] = mapped_column(String(150))
+    especialidad: Mapped[str | None] = mapped_column(String(150))
+    biografia: Mapped[str | None] = mapped_column(String(1000))
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
 # Representa a un usuario registrado en el sistema (credenciales y datos
 # personales básicos). Se relaciona con RolSistema mediante la tabla
 # intermedia usuario_rol para saber qué roles/permisos tiene.

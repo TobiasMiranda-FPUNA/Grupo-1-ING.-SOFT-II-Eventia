@@ -161,6 +161,42 @@ class EventoResponse(BaseModel):
     politica: PoliticaInscripcionData | None = None
 
 
+# Campos comunes a la creación/actualización de un conferencista (expositor
+# invitado a exponer en actividades del evento).
+class ConferencistaBase(BaseModel):
+    nombres: str = Field(min_length=1, max_length=100)
+    apellidos: str = Field(min_length=1, max_length=100)
+    email: Email
+    institucion: str | None = Field(default=None, max_length=150)
+    especialidad: str | None = Field(default=None, max_length=150)
+    biografia: str | None = Field(default=None, max_length=1000)
+
+
+# Datos necesarios para crear un conferencista.
+class ConferencistaCreate(ConferencistaBase):
+    pass
+
+
+# Datos opcionales para actualizar un conferencista existente (todos los
+# campos son opcionales para permitir actualizaciones parciales).
+class ConferencistaUpdate(BaseModel):
+    nombres: str | None = Field(default=None, min_length=1, max_length=100)
+    apellidos: str | None = Field(default=None, min_length=1, max_length=100)
+    email: Email | None = None
+    institucion: str | None = Field(default=None, max_length=150)
+    especialidad: str | None = Field(default=None, max_length=150)
+    biografia: str | None = Field(default=None, max_length=1000)
+    activo: bool | None = None
+
+
+# Datos de un conferencista que se devuelven como respuesta de la API.
+class ConferencistaResponse(ConferencistaBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_conferencista: int
+    activo: bool
+
+
 # Datos que se esperan recibir al inscribir un participante a un evento.
 # Como la inscripción es pública (no requiere una cuenta de usuario), se
 # reciben los datos de contacto del participante junto con el evento y el

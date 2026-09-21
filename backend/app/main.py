@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.conferencistas import router as conferencistas_router
 from app.api.eventos import router as eventos_router
 from app.api.inscripciones import router as inscripciones_router
 from app.api.roles import router as roles_router
@@ -28,12 +29,14 @@ app.add_middleware(
 )
 
 # Se registran los routers de cada módulo (auth, roles, users, eventos,
-# inscripciones) en la app, incorporando así sus endpoints a la API principal.
+# inscripciones, conferencistas) en la app, incorporando así sus endpoints a
+# la API principal.
 app.include_router(auth_router)
 app.include_router(roles_router)
 app.include_router(users_router)
 app.include_router(eventos_router)
 app.include_router(inscripciones_router)
+app.include_router(conferencistas_router)
 
 
 # Endpoint de health check: permite verificar que la API está corriendo
