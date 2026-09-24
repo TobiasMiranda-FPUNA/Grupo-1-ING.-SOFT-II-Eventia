@@ -67,7 +67,7 @@ La documentación interactiva queda disponible en `/docs`. El endpoint de autent
 # SCRIPTS SQL DE LA BASE DE DATOS DEL SISTEMA
 La base de datos es en PostgresSQL
 ## Estructura general
-La base inicial está compuesta por cuatro tablas principales:
+La base inicial está compuesta por las siguientes tablas:
 ## Tabla	Finalidad
 - usuario	Almacena las cuentas que pueden autenticarse en la aplicación.
 - rol_sistema	Catálogo de roles utilizados para controlar permisos y acceso al sistema.
@@ -78,4 +78,8 @@ La base inicial está compuesta por cuatro tablas principales:
 - politica_inscripcion: almacena las reglas de inscripción de cada evento, como fecha límite, aprobación, lista de espera y asistencia mínima para certificado.
 - participante: almacena los datos de las personas que pueden participar o inscribirse en los eventos.
 - inscripcion: almacena la relación entre un participante y un evento, incluyendo su rol, fecha de inscripción y estado.
+- categoria_actividad: almacena las categorías utilizadas para clasificar las actividades de un evento, como conferencia, taller, charla o panel.
+- actividad: almacena las actividades programadas dentro de un evento, incluyendo título, fecha, horario, lugar, modalidad, cupo y categoría.
+- conferencista: almacena los datos de los expositores, moderadores, instructores u otros especialistas que participan en las actividades.
+- actividad_conferencista: tabla intermedia que relaciona las actividades con uno o varios conferencistas e indica el rol que cumple cada uno dentro de la actividad.
 
