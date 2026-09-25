@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.api.users import require_system_role
 from app.db import get_db
 from app.models import Evento, PoliticaInscripcion, TipoEvento, Usuario
-from app.schemas import EventoCreate, EventoResponse, EventoUpdate
+from app.schemas import EventoCreate, EventoResponse, EventoUpdate, TipoEventoResponse
 
 # Router con el prefijo "/api/v1/eventos", agrupado bajo el tag "Eventos".
 router = APIRouter(prefix="/api/v1/eventos", tags=["Eventos"])
@@ -72,6 +72,25 @@ def create_evento(
     db.add(politica)
     db.commit()
     db.refresh(evento)
+    return EventoResponse.model_validate(evento)
+
+
+# Devuelve los tipos de evento activos para alimentar el selector del
+# formulario de alta/edición del frontend.
+@router.get("/tipos", response_model=list[TipoEventoResponse])
+def list_tipos_evento(db: Session = Depends(get_db)) -> list[TipoEventoResponse]:
+    tipos = db.scalars(
+        select(TipoEvento).where(TipoEvento.activo.is_(True)).order_by(TipoEvento.nombre)
+    ).all()
+    return [TipoEventoResponse.model_validate(tipo) for tipo in tipos]
+
+
+# Devuelve un evento puntual para precargar el formulario de edición.
+@router.get("/{evento_id}", response_model=EventoResponse)
+def get_evento(evento_id: int, db: Session = Depends(get_db)) -> EventoResponse:
+    evento = db.get(Evento, evento_id)
+    if evento is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento no encontrado")
     return EventoResponse.model_validate(evento)
 
 
