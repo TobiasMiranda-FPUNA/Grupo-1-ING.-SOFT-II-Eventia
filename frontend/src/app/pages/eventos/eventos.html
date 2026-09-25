@@ -1,1 +1,85 @@
+<div class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Gestión de eventos</p>
+      <h1>Catálogo de eventos</h1>
+      <p>Consultá, filtrá y administrá los eventos registrados en Eventia.</p>
+    </div>
+    <a routerLink="/eventos/nuevo" class="btn-primary">+ Nuevo evento</a>
+  </header>
+
+  <section class="filters-card">
+    <div class="field grow">
+      <label>Buscar</label>
+      <input [(ngModel)]="busqueda" (keyup.enter)="cargarEventos()" placeholder="Nombre del evento..." />
+    </div>
+    <div class="field">
+      <label>Estado</label>
+      <select [(ngModel)]="estado">
+        <option value="">Todos</option>
+        <option value="borrador">Borrador</option>
+        <option value="publicado">Publicado</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Tipo</label>
+      <select [(ngModel)]="tipo">
+        <option value="">Todos</option>
+        <option *ngFor="let t of tipos()" [value]="t.id_tipo_evento">{{ t.nombre }}</option>
+      </select>
+    </div>
+    <button class="btn-secondary" (click)="cargarEventos()">Filtrar</button>
+    <button class="btn-link" (click)="limpiarFiltros()">Limpiar</button>
+  </section>
+
+  <div class="toolbar">
+    <strong>{{ eventos().length }} evento(s)</strong>
+    <div class="view-toggle">
+      <button [class.active]="vista === 'grilla'" (click)="vista = 'grilla'">Grilla</button>
+      <button [class.active]="vista === 'lista'" (click)="vista = 'lista'">Lista</button>
+    </div>
+  </div>
+
+  <div *ngIf="error()" class="alert error">{{ error() }}</div>
+  <div *ngIf="cargando()" class="empty">Cargando eventos...</div>
+
+  <section *ngIf="!cargando() && eventos().length && vista === 'grilla'" class="grid">
+    <article class="event-card" *ngFor="let evento of eventos()">
+      <div class="card-top">
+        <span class="badge" [class.published]="evento.estado === 'publicado'">{{ evento.estado }}</span>
+        <span class="type">{{ nombreTipo(evento.id_tipo_evento) }}</span>
+      </div>
+      <h3>{{ evento.nombre }}</h3>
+      <p class="description">{{ evento.descripcion || 'Sin descripción.' }}</p>
+      <dl>
+        <div><dt>Fecha</dt><dd>{{ evento.fecha_inicio | date:'dd/MM/yyyy' }} - {{ evento.fecha_fin | date:'dd/MM/yyyy' }}</dd></div>
+        <div><dt>Lugar</dt><dd>{{ evento.lugar || 'No definido' }}</dd></div>
+        <div><dt>Cupo</dt><dd>{{ evento.cupo_maximo }} personas</dd></div>
+      </dl>
+      <a [routerLink]="['/eventos', evento.id_evento, 'editar']" class="edit-link">Editar evento →</a>
+    </article>
+  </section>
+
+  <section *ngIf="!cargando() && eventos().length && vista === 'lista'" class="table-wrap">
+    <table>
+      <thead><tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Lugar</th><th>Cupo</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngFor="let evento of eventos()">
+          <td><strong>{{ evento.nombre }}</strong></td>
+          <td>{{ nombreTipo(evento.id_tipo_evento) }}</td>
+          <td>{{ evento.fecha_inicio | date:'dd/MM/yyyy' }}</td>
+          <td>{{ evento.lugar || '-' }}</td>
+          <td>{{ evento.cupo_maximo }}</td>
+          <td><span class="badge" [class.published]="evento.estado === 'publicado'">{{ evento.estado }}</span></td>
+          <td><a [routerLink]="['/eventos', evento.id_evento, 'editar']">Editar</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div *ngIf="!cargando() && !eventos().length" class="empty">
+    <h3>No hay eventos para mostrar</h3>
+    <p>Probá cambiando los filtros o registrá un nuevo evento.</p>
+  </div>
+</div>
 
