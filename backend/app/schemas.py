@@ -102,6 +102,17 @@ class PoliticaInscripcionData(BaseModel):
     min_asistencia_certificado: int = Field(default=75, ge=0, le=100)
 
 
+# Respuesta del catálogo de tipos de evento, utilizada por el frontend
+# para poblar el selector del formulario de alta/edición de eventos.
+class TipoEventoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_tipo_evento: int
+    nombre: str
+    descripcion: str | None
+    activo: bool
+
+
 # Campos comunes a la creación de un evento. La validación de fechas se hace
 # a nivel de modelo porque involucra dos campos (fecha_inicio y fecha_fin).
 class EventoBase(BaseModel):

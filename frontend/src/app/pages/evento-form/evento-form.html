@@ -1,0 +1,62 @@
+<div class="page-shell">
+  <header class="page-header">
+    <div><p class="eyebrow">Gestión de eventos</p><h1>{{ esEdicion ? 'Editar evento' : 'Crear nuevo evento' }}</h1><p>Completá la información en tres pasos.</p></div>
+    <a routerLink="/eventos" class="back">← Volver al catálogo</a>
+  </header>
+
+  <div class="steps">
+    <div [class.active]="paso() >= 1"><span>1</span><b>Datos generales</b></div>
+    <div [class.active]="paso() >= 2"><span>2</span><b>Política de inscripción</b></div>
+    <div [class.active]="paso() >= 3"><span>3</span><b>Confirmación</b></div>
+  </div>
+
+  <div *ngIf="error()" class="alert">{{ error() }}</div>
+  <div *ngIf="cargando()" class="card">Cargando evento...</div>
+
+  <form *ngIf="!cargando()" [formGroup]="form" class="card" (ngSubmit)="guardar()">
+    <section *ngIf="paso() === 1">
+      <h2>Datos generales</h2>
+      <div class="form-grid">
+        <div class="field"><label>Tipo de evento *</label><select formControlName="id_tipo_evento"><option value="">Seleccionar...</option><option *ngFor="let t of tipos()" [value]="t.id_tipo_evento">{{ t.nombre }}</option></select></div>
+        <div class="field"><label>Estado *</label><select formControlName="estado"><option value="borrador">Borrador</option><option value="publicado">Publicado</option></select></div>
+        <div class="field full"><label>Nombre *</label><input formControlName="nombre" placeholder="Ej: Congreso de Ingeniería de Software 2026" /></div>
+        <div class="field full"><label>Descripción</label><textarea rows="4" formControlName="descripcion" placeholder="Descripción general del evento"></textarea></div>
+        <div class="field"><label>Fecha de inicio *</label><input type="date" formControlName="fecha_inicio" /></div>
+        <div class="field"><label>Fecha de fin *</label><input type="date" formControlName="fecha_fin" /></div>
+        <div class="field"><label>Lugar</label><input formControlName="lugar" placeholder="Auditorio, sede, ciudad..." /></div>
+        <div class="field"><label>Cupo máximo *</label><input type="number" min="1" formControlName="cupo_maximo" /></div>
+      </div>
+    </section>
+
+    <section *ngIf="paso() === 2">
+      <h2>Política de inscripción</h2>
+      <div class="form-grid">
+        <div class="field"><label>Fecha límite de inscripción</label><input type="date" formControlName="fecha_limite" /></div>
+        <div class="field"><label>Asistencia mínima para certificado (%)</label><input type="number" min="0" max="100" formControlName="min_asistencia_certificado" /></div>
+        <label class="check full"><input type="checkbox" formControlName="requiere_aprobacion" /><span><b>Requiere aprobación</b><small>Las nuevas inscripciones necesitarán aprobación.</small></span></label>
+        <label class="check full"><input type="checkbox" formControlName="permite_lista_espera" /><span><b>Permitir lista de espera</b><small>Cuando se complete el cupo, las nuevas inscripciones podrán quedar en espera.</small></span></label>
+      </div>
+    </section>
+
+    <section *ngIf="paso() === 3" class="summary">
+      <h2>Confirmar datos</h2>
+      <div class="summary-grid">
+        <div><span>Nombre</span><strong>{{ form.value.nombre }}</strong></div>
+        <div><span>Tipo</span><strong>{{ nombreTipoSeleccionado() }}</strong></div>
+        <div><span>Fechas</span><strong>{{ form.value.fecha_inicio | date:'dd/MM/yyyy' }} - {{ form.value.fecha_fin | date:'dd/MM/yyyy' }}</strong></div>
+        <div><span>Lugar</span><strong>{{ form.value.lugar || 'No definido' }}</strong></div>
+        <div><span>Cupo</span><strong>{{ form.value.cupo_maximo }} personas</strong></div>
+        <div><span>Estado</span><strong>{{ form.value.estado }}</strong></div>
+        <div><span>Requiere aprobación</span><strong>{{ form.value.requiere_aprobacion ? 'Sí' : 'No' }}</strong></div>
+        <div><span>Lista de espera</span><strong>{{ form.value.permite_lista_espera ? 'Sí' : 'No' }}</strong></div>
+      </div>
+    </section>
+
+    <footer class="actions">
+      <button type="button" class="btn-light" *ngIf="paso() > 1" (click)="anterior()">Anterior</button>
+      <span></span>
+      <button type="button" class="btn-primary" *ngIf="paso() < 3" (click)="siguiente()">Continuar</button>
+      <button type="submit" class="btn-primary" *ngIf="paso() === 3" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Crear evento') }}</button>
+    </footer>
+  </form>
+</div>
