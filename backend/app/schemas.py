@@ -181,7 +181,7 @@ class EventoResponse(BaseModel):
 class ConferencistaBase(BaseModel):
     nombres: str = Field(min_length=1, max_length=100)
     apellidos: str = Field(min_length=1, max_length=100)
-    email: Email
+    email: Email = Field(max_length=150)
     institucion: str | None = Field(default=None, max_length=150)
     biografia: str | None = None
 
@@ -196,7 +196,7 @@ class ConferencistaCreate(ConferencistaBase):
 class ConferencistaUpdate(BaseModel):
     nombres: str | None = Field(default=None, min_length=1, max_length=100)
     apellidos: str | None = Field(default=None, min_length=1, max_length=100)
-    email: Email | None = None
+    email: Email | None = Field(default=None, max_length=150)
     institucion: str | None = Field(default=None, max_length=150)
     biografia: str | None = None
     activo: bool | None = None
@@ -207,6 +207,17 @@ class ConferencistaResponse(ConferencistaBase):
     model_config = ConfigDict(from_attributes=True)
 
     id_conferencista: int
+    activo: bool
+
+
+# Datos de una categoría de actividad (Conferencia, Taller, Panel, etc.)
+# que se devuelven como respuesta de la API.
+class CategoriaActividadResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_categoria: int
+    nombre: str
+    descripcion: str | None
     activo: bool
 
 

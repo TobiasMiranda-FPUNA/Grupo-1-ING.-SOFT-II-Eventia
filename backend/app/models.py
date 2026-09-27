@@ -176,7 +176,8 @@ class Conferencista(Base):
     id_conferencista: Mapped[int] = mapped_column(Integer, primary_key=True)
     nombres: Mapped[str] = mapped_column(String(100), nullable=False)
     apellidos: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    # VARCHAR(150), igual que en sql/crear_conferencista_actividad_conferencista.sql.
+    email: Mapped[str] = mapped_column(String(150), unique=True, index=True, nullable=False)
     institucion: Mapped[str | None] = mapped_column(String(150))
     biografia: Mapped[str | None] = mapped_column(Text)
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -214,8 +215,8 @@ class CategoriaActividad(Base):
 
 # Representa una actividad puntual de la agenda de un evento (charla, taller,
 # panel), con su horario dentro del rango de fechas del evento. Refleja la
-# tabla de sql/crear_categoria_actividad_actividad.sql; el CRUD de
-# categorías de actividad queda fuera de este alcance.
+# tabla de sql/crear_categoria_actividad_actividad.sql; las categorías se
+# cargan por SQL y se exponen en solo lectura (app/api/categorias_actividad.py).
 class Actividad(Base):
     __tablename__ = "actividad"
 

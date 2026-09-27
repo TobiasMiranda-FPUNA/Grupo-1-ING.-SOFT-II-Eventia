@@ -130,9 +130,9 @@ def update_conferencista(
     return ConferencistaResponse.model_validate(conferencista)
 
 
-# Elimina un conferencista. No hay todavía ninguna tabla que lo referencie
-# (la agenda/actividades es HU06, aún no implementada), por lo que no se
-# necesita ninguna validación de integridad adicional antes del borrado.
+# Elimina un conferencista. La única tabla que lo referencia es
+# actividad_conferencista, con ON DELETE CASCADE: al borrarlo se quitan
+# automáticamente sus asignaciones a actividades, sin validación adicional.
 @router.delete("/{conferencista_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_conferencista(
     conferencista_id: int,
