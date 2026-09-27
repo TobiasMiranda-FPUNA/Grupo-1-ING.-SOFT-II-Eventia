@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Roles (mockup)</title>
+  <link rel="stylesheet" href="css/mockup-bar.css" />
+  <link rel="stylesheet" href="css/roles.css" />
+</head>
+<body>
+  <div class="roles-container">
+    <header class="page-header">
+      <h1>Administración de Catálogos</h1>
+      <p>Gestión de Roles de Participantes y Sistema</p>
+    </header>
+
+    <!-- Mensajes de Notificación -->
+    <div class="alert alert-danger" id="errorMessage" hidden></div>
+    <div class="alert alert-success" id="successMessage" hidden></div>
+
+    <div class="content-grid">
+      <!-- Formulario para Crear Nuevo Rol -->
+      <section class="card form-card">
+        <h3>Crear Nuevo Rol</h3>
+        <form id="roleForm" novalidate>
+          <div class="form-group">
+            <label for="nombre">Nombre del Rol</label>
+            <input type="text" id="nombre" placeholder="Ej: Estudiante, Expositor, Invitado" />
+            <div class="error-feedback" id="nombreErrors" hidden>
+              <small data-error="required">El nombre es obligatorio.</small>
+              <small data-error="minlength">Mínimo 3 caracteres.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" rows="3" placeholder="Describa los permisos o categoría de este rol..."></textarea>
+            <div class="error-feedback" id="descripcionErrors" hidden>
+              <small data-error="required">La descripción es obligatoria.</small>
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn-primary" disabled>Guardar Rol</button>
+        </form>
+      </section>
+
+      <!-- Tabla con Listado de Roles -->
+      <section class="card table-card">
+        <h3>Roles Registrados</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rolesBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/roles.js"></script>
+  <script src="js/mockup-bar.js"></script>
+</body>
+</html>

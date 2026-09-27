@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Login (mockup)</title>
+  <link rel="stylesheet" href="css/mockup-bar.css" />
+  <link rel="stylesheet" href="css/login.css" />
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Iniciar Sesión</h2>
+        <p>Sistema de Gestión de Eventos</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <!-- Campo Correo -->
+        <div class="form-group">
+          <label for="email">Correo Electrónico</label>
+          <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" />
+          <div class="error-feedback" id="emailErrors" hidden>
+            <small data-error="required">El correo es obligatorio.</small>
+            <small data-error="email">Ingrese un correo electrónico válido.</small>
+          </div>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" />
+          <div class="error-feedback" id="passwordErrors" hidden>
+            <small data-error="required">La contraseña es obligatoria.</small>
+            <small data-error="minlength">Mínimo 6 caracteres.</small>
+          </div>
+        </div>
+
+        <!-- Botón de Envío -->
+        <button type="submit" id="submitBtn" class="btn-primary" disabled>Ingresar</button>
+      </form>
+
+      <div class="mk-hint">
+        <strong>Mockup:</strong> ingresá con <code>admin@eventia.test</code> u
+        <code>organizador@eventia.test</code> y cualquier contraseña de 6+ caracteres.
+        Otro correo muestra la alerta de credencial inválida.
+      </div>
+    </div>
+
+    <!-- Alerta de credenciales inválidas -->
+    <div class="modal-overlay" id="invalidAlert" hidden>
+      <div class="modal-box" role="alertdialog" aria-labelledby="invalid-credentials-title">
+        <h3 id="invalid-credentials-title" class="modal-title">Credencial invalida</h3>
+        <p class="modal-message">Ingrese correo y/o contraseña válido</p>
+        <button type="button" class="btn-primary" id="closeAlertBtn">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/mockup-bar.js"></script>
+</body>
+</html>
