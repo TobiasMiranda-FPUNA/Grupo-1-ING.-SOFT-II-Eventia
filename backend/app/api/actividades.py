@@ -11,14 +11,14 @@ from sqlalchemy.orm import Session
 # Dependencia que exige que el usuario autenticado tenga un rol específico.
 from app.api.users import require_system_role
 from app.db import get_db
-from app.models import Actividad, Conferencista, Evento, Usuario
+from app.models import Actividad, CategoriaActividad, Conferencista, Evento, Usuario
 from app.schemas import ActividadCreate, ActividadResponse
 
 # Router con el prefijo "/api/v1/actividades", agrupado bajo el tag
-# "Actividades" (agenda de un evento: charlas, talleres, paneles). Modelo
-# mínimo: solo cubre lo necesario para asociar/desasociar conferencistas a
-# una actividad (HU06); el CRUD completo de actividades queda fuera de este
-# alcance.
+# "Actividades" (agenda de un evento: charlas, talleres, paneles). Cubre la
+# creación de actividades, la agenda del evento y la asociación/
+# desasociación de conferencistas (HU06); el CRUD completo de actividades
+# queda fuera de este alcance.
 router = APIRouter(prefix="/api/v1/actividades", tags=["Actividades"])
 # Router separado con el prefijo "/api/v1/eventos": expone la creación de
 # una actividad anidada bajo su evento (POST /api/v1/eventos/{evento_id}/
@@ -38,6 +38,16 @@ def _get_evento_or_404(db: Session, id_evento: int) -> Evento:
     if evento is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento no encontrado")
     return evento
+
+
+# Busca una categoría de actividad activa por id y lanza 404 si no existe o
+# está desactivada, para no clasificar una actividad con una categoría que
+# ya no se ofrece.
+def _get_categoria_activa_or_404(db: Session, id_categoria: int) -> CategoriaActividad:
+    categoria = db.get(CategoriaActividad, id_categoria)
+    if categoria is None or not categoria.activo:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría de actividad no encontrada")
+    return categoria
 
 
 # Busca una actividad por id y lanza 404 si no existe.
@@ -69,8 +79,9 @@ def _validate_fecha_dentro_evento(evento: Evento, fecha: date) -> None:
         )
 
 
-# Crea una nueva actividad dentro de un evento, validando que el evento
-# exista y que la fecha de la actividad esté dentro de su rango de fechas.
+# Crea una nueva actividad dentro de un evento, validando que el evento y la
+# categoría existan y que la fecha de la actividad esté dentro del rango de
+# fechas del evento.
 @evento_actividades_router.post(
     "/{evento_id}/actividades", response_model=ActividadResponse, status_code=status.HTTP_201_CREATED
 )
@@ -81,16 +92,20 @@ def create_actividad(
     _: Usuario = organizer_required,
 ) -> ActividadResponse:
     evento = _get_evento_or_404(db, evento_id)
+    categoria = _get_categoria_activa_or_404(db, data.id_categoria)
     _validate_fecha_dentro_evento(evento, data.fecha)
 
     actividad = Actividad(
         id_evento=evento.id_evento,
-        nombre=data.nombre.strip(),
+        id_categoria=categoria.id_categoria,
+        titulo=data.titulo.strip(),
         descripcion=data.descripcion,
         fecha=data.fecha,
         hora_inicio=data.hora_inicio,
         hora_fin=data.hora_fin,
         lugar=data.lugar,
+        modalidad=data.modalidad,
+        cupo=data.cupo,
     )
     db.add(actividad)
     db.commit()

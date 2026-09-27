@@ -28,7 +28,6 @@ def _data(**overrides):
         apellidos="Lovelace",
         email="ada@example.test",
         institucion="Universidad Nacional",
-        especialidad="Ciencias de la computación",
         biografia="Pionera de la programación.",
     )
     base.update(overrides)

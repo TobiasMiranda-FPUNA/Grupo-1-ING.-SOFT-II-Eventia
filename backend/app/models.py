@@ -16,8 +16,10 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    Text,
     Time,
     UniqueConstraint,
+    text,
 )
 
 # Mapped/mapped_column: sintaxis moderna de SQLAlchemy ORM para tipar los
@@ -176,16 +178,17 @@ class Conferencista(Base):
     apellidos: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     institucion: Mapped[str | None] = mapped_column(String(150))
-    especialidad: Mapped[str | None] = mapped_column(String(150))
-    biografia: Mapped[str | None] = mapped_column(String(1000))
+    biografia: Mapped[str | None] = mapped_column(Text)
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
 
 # Tabla intermedia (muchos a muchos) que vincula actividades con los
-# conferencistas que exponen en ellas. Al igual que usuario_rol, no necesita
-# atributos propios más allá de las dos claves foráneas. ondelete="CASCADE"
-# en ambos lados: si se borra la actividad o el conferencista, se limpia
-# automáticamente el vínculo sin dejar filas huérfanas.
+# conferencistas que exponen en ellas. ondelete="CASCADE" en ambos lados: si
+# se borra la actividad o el conferencista, se limpia automáticamente el
+# vínculo sin dejar filas huérfanas. rol_en_actividad existe en la tabla de
+# sql/crear_conferencista_actividad_conferencista.sql; se declara con su
+# valor por defecto para que la relación Actividad.conferencistas pueda
+# insertar filas indicando solo las dos claves foráneas.
 actividad_conferencista = Table(
     "actividad_conferencista",
     Base.metadata,
@@ -193,26 +196,45 @@ actividad_conferencista = Table(
     Column(
         "id_conferencista", ForeignKey("conferencista.id_conferencista", ondelete="CASCADE"), primary_key=True
     ),
+    Column("rol_en_actividad", String(100), nullable=False, server_default=text("'CONFERENCISTA'")),
 )
 
 
+# Catálogo parametrizable de categorías para clasificar las actividades de un
+# evento (Conferencia, Taller, Mesa redonda, Panel, etc.). Cada actividad
+# pertenece obligatoriamente a una categoría.
+class CategoriaActividad(Base):
+    __tablename__ = "categoria_actividad"
+
+    id_categoria: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    descripcion: Mapped[str | None] = mapped_column(String(255))
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
 # Representa una actividad puntual de la agenda de un evento (charla, taller,
-# panel), con su horario dentro del rango de fechas del evento. Modelo
-# mínimo: cubre lo necesario para poder asociarle conferencistas (HU06);
-# categorías de actividad y su CRUD completo quedan fuera de este alcance.
+# panel), con su horario dentro del rango de fechas del evento. Refleja la
+# tabla de sql/crear_categoria_actividad_actividad.sql; el CRUD de
+# categorías de actividad queda fuera de este alcance.
 class Actividad(Base):
     __tablename__ = "actividad"
 
     id_actividad: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id_evento: Mapped[int] = mapped_column(
-        ForeignKey("evento.id_evento", ondelete="CASCADE"), nullable=False
+    # Sin ondelete: la base usa ON DELETE RESTRICT, no se puede borrar un
+    # evento que todavía tenga actividades en su agenda.
+    id_evento: Mapped[int] = mapped_column(ForeignKey("evento.id_evento"), nullable=False)
+    id_categoria: Mapped[int] = mapped_column(
+        ForeignKey("categoria_actividad.id_categoria"), nullable=False
     )
-    nombre: Mapped[str] = mapped_column(String(150), nullable=False)
-    descripcion: Mapped[str | None] = mapped_column(String(500))
+    titulo: Mapped[str] = mapped_column(String(150), nullable=False)
+    descripcion: Mapped[str | None] = mapped_column(Text)
     fecha: Mapped[date] = mapped_column(Date, nullable=False)
     hora_inicio: Mapped[time] = mapped_column(Time, nullable=False)
     hora_fin: Mapped[time] = mapped_column(Time, nullable=False)
     lugar: Mapped[str | None] = mapped_column(String(200))
+    # PRESENCIAL, VIRTUAL o HIBRIDA (restricción CHECK en la base).
+    modalidad: Mapped[str] = mapped_column(String(30), default="PRESENCIAL", nullable=False)
+    cupo: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # lazy="selectin" trae los conferencistas asociados en una segunda
     # consulta batched, igual que Usuario.roles.

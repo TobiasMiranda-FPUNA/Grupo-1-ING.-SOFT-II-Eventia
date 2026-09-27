@@ -54,7 +54,6 @@ def create_conferencista(
         apellidos=data.apellidos.strip(),
         email=data.email,
         institucion=data.institucion,
-        especialidad=data.especialidad,
         biografia=data.biografia,
     )
     db.add(conferencista)
@@ -121,8 +120,6 @@ def update_conferencista(
         conferencista.apellidos = data.apellidos.strip()
     if data.institucion is not None:
         conferencista.institucion = data.institucion
-    if data.especialidad is not None:
-        conferencista.especialidad = data.especialidad
     if data.biografia is not None:
         conferencista.biografia = data.biografia
     if data.activo is not None:

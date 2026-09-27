@@ -15,7 +15,7 @@ from app.api.actividades import (
 )
 from app.api.conferencistas import create_conferencista
 from app.db import Base
-from app.models import Evento, TipoEvento
+from app.models import CategoriaActividad, Evento, TipoEvento
 from app.schemas import ActividadCreate, ConferencistaCreate
 
 
@@ -47,6 +47,15 @@ def evento(db):
 
 
 @pytest.fixture
+def categoria(db):
+    categoria = CategoriaActividad(nombre="Conferencia")
+    db.add(categoria)
+    db.commit()
+    db.refresh(categoria)
+    return categoria
+
+
+@pytest.fixture
 def conferencista(db):
     return create_conferencista(
         ConferencistaCreate(nombres="Ada", apellidos="Lovelace", email="ada@example.test"), db
@@ -55,29 +64,63 @@ def conferencista(db):
 
 def _data(**overrides):
     base = dict(
-        nombre="Charla de apertura",
+        id_categoria=1,
+        titulo="Charla de apertura",
         descripcion="Introducción al evento",
         fecha=date(2026, 3, 1),
         hora_inicio=time(9, 0),
         hora_fin=time(10, 0),
         lugar="Auditorio principal",
+        cupo=30,
     )
     base.update(overrides)
     return ActividadCreate(**base)
 
 
-def test_create_actividad_persiste_sin_conferencistas(db, evento):
-    response = create_actividad(evento.id_evento, _data(), db)
+def test_create_actividad_persiste_sin_conferencistas(db, evento, categoria):
+    response = create_actividad(evento.id_evento, _data(id_categoria=categoria.id_categoria), db)
 
     assert response.id_actividad is not None
     assert response.id_evento == evento.id_evento
+    assert response.id_categoria == categoria.id_categoria
+    assert response.modalidad == "PRESENCIAL"
+    assert response.cupo == 30
     assert response.conferencistas == []
+
+
+def test_create_actividad_rechaza_categoria_inexistente(db, evento):
+    with pytest.raises(HTTPException) as error:
+        create_actividad(evento.id_evento, _data(id_categoria=999), db)
+
+    assert error.value.status_code == 404
+
+
+def test_create_actividad_rechaza_categoria_inactiva(db, evento, categoria):
+    categoria.activo = False
+    db.commit()
+
+    with pytest.raises(HTTPException) as error:
+        create_actividad(evento.id_evento, _data(id_categoria=categoria.id_categoria), db)
+
+    assert error.value.status_code == 404
+
+
+def test_actividad_create_rechaza_modalidad_invalida():
+    with pytest.raises(ValidationError):
+        _data(modalidad="MIXTA")
+
+
+def test_actividad_create_rechaza_cupo_negativo():
+    with pytest.raises(ValidationError):
+        _data(cupo=-1)
 
 
 def test_actividad_create_rechaza_hora_fin_anterior_o_igual_a_inicio():
     with pytest.raises(ValidationError):
         ActividadCreate(
-            nombre="Actividad inválida",
+            id_categoria=1,
+            titulo="Actividad inválida",
+            cupo=10,
             fecha=date(2026, 3, 1),
             hora_inicio=time(10, 0),
             hora_fin=time(10, 0),
@@ -91,7 +134,7 @@ def test_create_actividad_rechaza_evento_inexistente(db):
     assert error.value.status_code == 404
 
 
-def test_create_actividad_rechaza_fecha_fuera_del_rango_del_evento(db, evento):
+def test_create_actividad_rechaza_fecha_fuera_del_rango_del_evento(db, evento, categoria):
     # El evento va del 2026-03-01 al 2026-03-02 (ver fixture `evento`).
     data = _data(fecha=date(2026, 3, 3))
 
@@ -101,7 +144,7 @@ def test_create_actividad_rechaza_fecha_fuera_del_rango_del_evento(db, evento):
     assert error.value.status_code == 422
 
 
-def test_create_actividad_acepta_fecha_en_el_borde_del_rango_del_evento(db, evento):
+def test_create_actividad_acepta_fecha_en_el_borde_del_rango_del_evento(db, evento, categoria):
     data = _data(fecha=evento.fecha_fin)
 
     response = create_actividad(evento.id_evento, data, db)
@@ -116,7 +159,7 @@ def test_get_actividad_404_si_no_existe(db):
     assert error.value.status_code == 404
 
 
-def test_associate_conferencista_lo_asocia_a_la_actividad(db, evento, conferencista):
+def test_associate_conferencista_lo_asocia_a_la_actividad(db, evento, categoria, conferencista):
     actividad = create_actividad(evento.id_evento, _data(), db)
 
     response = associate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
@@ -127,7 +170,7 @@ def test_associate_conferencista_lo_asocia_a_la_actividad(db, evento, conferenci
     ]
 
 
-def test_associate_conferencista_rechaza_asociacion_duplicada(db, evento, conferencista):
+def test_associate_conferencista_rechaza_asociacion_duplicada(db, evento, categoria, conferencista):
     actividad = create_actividad(evento.id_evento, _data(), db)
     associate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
 
@@ -144,7 +187,7 @@ def test_associate_conferencista_404_si_actividad_no_existe(db, conferencista):
     assert error.value.status_code == 404
 
 
-def test_associate_conferencista_404_si_conferencista_no_existe(db, evento):
+def test_associate_conferencista_404_si_conferencista_no_existe(db, evento, categoria):
     actividad = create_actividad(evento.id_evento, _data(), db)
 
     with pytest.raises(HTTPException) as error:
@@ -153,7 +196,7 @@ def test_associate_conferencista_404_si_conferencista_no_existe(db, evento):
     assert error.value.status_code == 404
 
 
-def test_disassociate_conferencista_lo_quita_de_la_actividad(db, evento, conferencista):
+def test_disassociate_conferencista_lo_quita_de_la_actividad(db, evento, categoria, conferencista):
     actividad = create_actividad(evento.id_evento, _data(), db)
     associate_conferencista(actividad.id_actividad, conferencista.id_conferencista, db)
 
@@ -162,7 +205,7 @@ def test_disassociate_conferencista_lo_quita_de_la_actividad(db, evento, confere
     assert get_actividad(actividad.id_actividad, db).conferencistas == []
 
 
-def test_disassociate_conferencista_404_si_no_estaba_asociado(db, evento, conferencista):
+def test_disassociate_conferencista_404_si_no_estaba_asociado(db, evento, categoria, conferencista):
     actividad = create_actividad(evento.id_evento, _data(), db)
 
     with pytest.raises(HTTPException) as error:
@@ -178,15 +221,15 @@ def test_disassociate_conferencista_404_si_actividad_no_existe(db, conferencista
     assert error.value.status_code == 404
 
 
-def test_get_agenda_evento_ordena_por_fecha_y_hora_inicio(db, evento):
+def test_get_agenda_evento_ordena_por_fecha_y_hora_inicio(db, evento, categoria):
     tarde_dia1 = create_actividad(
-        evento.id_evento, _data(nombre="Tarde día 1", fecha=date(2026, 3, 1), hora_inicio=time(15, 0), hora_fin=time(16, 0)), db
+        evento.id_evento, _data(titulo="Tarde día 1", fecha=date(2026, 3, 1), hora_inicio=time(15, 0), hora_fin=time(16, 0)), db
     )
     manana_dia1 = create_actividad(
-        evento.id_evento, _data(nombre="Mañana día 1", fecha=date(2026, 3, 1), hora_inicio=time(9, 0), hora_fin=time(10, 0)), db
+        evento.id_evento, _data(titulo="Mañana día 1", fecha=date(2026, 3, 1), hora_inicio=time(9, 0), hora_fin=time(10, 0)), db
     )
     dia2 = create_actividad(
-        evento.id_evento, _data(nombre="Día 2", fecha=date(2026, 3, 2), hora_inicio=time(8, 0), hora_fin=time(9, 0)), db
+        evento.id_evento, _data(titulo="Día 2", fecha=date(2026, 3, 2), hora_inicio=time(8, 0), hora_fin=time(9, 0)), db
     )
 
     agenda = get_agenda_evento(evento.id_evento, db)
@@ -198,7 +241,7 @@ def test_get_agenda_evento_ordena_por_fecha_y_hora_inicio(db, evento):
     ]
 
 
-def test_get_agenda_evento_vacia_si_no_tiene_actividades(db, evento):
+def test_get_agenda_evento_vacia_si_no_tiene_actividades(db, evento, categoria):
     assert get_agenda_evento(evento.id_evento, db) == []
 
 

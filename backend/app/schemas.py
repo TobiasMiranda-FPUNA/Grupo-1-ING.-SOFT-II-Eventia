@@ -38,6 +38,10 @@ def _validate_email(value: str) -> str:
 
 Email = Annotated[str, BeforeValidator(_validate_email)]
 
+# Modalidades permitidas para una actividad (mismos valores que la
+# restricción CHECK ck_actividad_modalidad de la base de datos).
+ModalidadActividad = Literal["PRESENCIAL", "VIRTUAL", "HIBRIDA"]
+
 
 # Datos que se esperan recibir al hacer login: email y contraseña.
 class LoginRequest(BaseModel):
@@ -179,8 +183,7 @@ class ConferencistaBase(BaseModel):
     apellidos: str = Field(min_length=1, max_length=100)
     email: Email
     institucion: str | None = Field(default=None, max_length=150)
-    especialidad: str | None = Field(default=None, max_length=150)
-    biografia: str | None = Field(default=None, max_length=1000)
+    biografia: str | None = None
 
 
 # Datos necesarios para crear un conferencista.
@@ -195,8 +198,7 @@ class ConferencistaUpdate(BaseModel):
     apellidos: str | None = Field(default=None, min_length=1, max_length=100)
     email: Email | None = None
     institucion: str | None = Field(default=None, max_length=150)
-    especialidad: str | None = Field(default=None, max_length=150)
-    biografia: str | None = Field(default=None, max_length=1000)
+    biografia: str | None = None
     activo: bool | None = None
 
 
@@ -210,16 +212,17 @@ class ConferencistaResponse(ConferencistaBase):
 
 # Campos necesarios para crear una actividad de la agenda de un evento
 # (charla, taller, panel). El evento al que pertenece se toma del path
-# (POST /api/v1/eventos/{evento_id}/actividades), no del body. Modelo
-# mínimo: solo lo necesario para poder asociarle conferencistas (HU06); no
-# incluye categoría ni cupo propio.
+# (POST /api/v1/eventos/{evento_id}/actividades), no del body.
 class ActividadCreate(BaseModel):
-    nombre: str = Field(min_length=1, max_length=150)
-    descripcion: str | None = Field(default=None, max_length=500)
+    id_categoria: int
+    titulo: str = Field(min_length=1, max_length=150)
+    descripcion: str | None = None
     fecha: date
     hora_inicio: time
     hora_fin: time
     lugar: str | None = Field(default=None, max_length=200)
+    modalidad: ModalidadActividad = "PRESENCIAL"
+    cupo: int = Field(ge=0)
 
     @model_validator(mode="after")
     def check_horario(self) -> "ActividadCreate":
@@ -235,12 +238,15 @@ class ActividadResponse(BaseModel):
 
     id_actividad: int
     id_evento: int
-    nombre: str
+    id_categoria: int
+    titulo: str
     descripcion: str | None
     fecha: date
     hora_inicio: time
     hora_fin: time
     lugar: str | None
+    modalidad: str
+    cupo: int
     conferencistas: list[ConferencistaResponse] = []
 
 
