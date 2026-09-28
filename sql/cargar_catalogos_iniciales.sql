@@ -3,13 +3,14 @@
 -- Proyecto: Eventia
 -- Motor: PostgreSQL
 --
--- Carga de datos iniciales para los catálogos ROL_SISTEMA y
--- TIPO_EVENTO, según el informe de Sprint 1 (secciones 1.1 y 1.3)
--- y el diagrama entidad-relación de Eventia.
+-- Carga de datos iniciales para los catálogos ROL_SISTEMA,
+-- TIPO_EVENTO y CATEGORIA_ACTIVIDAD, según el informe de Sprint 1
+-- (secciones 1.1 y 1.3) y el diagrama entidad-relación de Eventia.
 --
 -- Dependencias:
---   rol_sistema  (crear_usuario_rol_sistema_usuario_rol.sql)
---   tipo_evento  (crear_tipo_evento_evento_politica.sql)
+--   rol_sistema          (crear_usuario_rol_sistema_usuario_rol.sql)
+--   tipo_evento          (crear_tipo_evento_evento_politica.sql)
+--   categoria_actividad  (crear_categoria_actividad_actividad.sql)
 -- ============================================================
 
 BEGIN;
@@ -54,6 +55,27 @@ VALUES
 ON CONFLICT (codigo) DO UPDATE
 SET
     nombre = EXCLUDED.nombre,
+    descripcion = EXCLUDED.descripcion,
+    activo = TRUE,
+    actualizado_en = CURRENT_TIMESTAMP;
+
+-- Categorías parametrizables para clasificar las actividades de la
+-- agenda de un evento (HU06), según los ejemplos de
+-- crear_categoria_actividad_actividad.sql.
+INSERT INTO categoria_actividad (nombre, descripcion)
+VALUES
+    ('Conferencia',
+     'Exposición magistral de uno o más conferencistas sobre un tema específico.'),
+    ('Taller',
+     'Actividad práctica y participativa orientada al desarrollo de habilidades.'),
+    ('Mesa redonda',
+     'Debate moderado entre varios especialistas con distintos puntos de vista.'),
+    ('Charla',
+     'Exposición breve e informal, de corta duración, sobre un tema puntual.'),
+    ('Panel',
+     'Sesión con varios panelistas que responden preguntas de un moderador y del público.')
+ON CONFLICT (nombre) DO UPDATE
+SET
     descripcion = EXCLUDED.descripcion,
     activo = TRUE,
     actualizado_en = CURRENT_TIMESTAMP;

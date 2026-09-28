@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Formulario de evento (mockup)</title>
+  <link rel="stylesheet" href="css/mockup-bar.css" />
+  <link rel="stylesheet" href="css/evento-form.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="page-header">
+      <div><p class="eyebrow">Gestión de eventos</p><h1 id="titulo">Crear nuevo evento</h1><p>Completá la información en tres pasos.</p></div>
+      <a href="eventos.html" class="back">← Volver al catálogo</a>
+    </header>
+
+    <div class="steps">
+      <div data-paso="1"><span>1</span><b>Datos generales</b></div>
+      <div data-paso="2"><span>2</span><b>Política de inscripción</b></div>
+      <div data-paso="3"><span>3</span><b>Confirmación</b></div>
+    </div>
+
+    <div class="alert" id="error" hidden></div>
+    <div class="card" id="cargando" hidden>Cargando evento...</div>
+
+    <form class="card" id="form" novalidate>
+      <section data-seccion="1">
+        <h2>Datos generales</h2>
+        <div class="form-grid">
+          <div class="field"><label for="id_tipo_evento">Tipo de evento *</label><select id="id_tipo_evento" name="id_tipo_evento"><option value="">Seleccionar...</option></select></div>
+          <div class="field"><label for="estado">Estado *</label><select id="estado" name="estado"><option value="borrador">Borrador</option><option value="publicado">Publicado</option></select></div>
+          <div class="field full"><label for="nombre">Nombre *</label><input id="nombre" name="nombre" maxlength="150" placeholder="Ej: Congreso de Ingeniería de Software 2026" /></div>
+          <div class="field full"><label for="descripcion">Descripción</label><textarea id="descripcion" name="descripcion" rows="4" maxlength="500" placeholder="Descripción general del evento"></textarea></div>
+          <div class="field"><label for="fecha_inicio">Fecha de inicio *</label><input type="date" id="fecha_inicio" name="fecha_inicio" /></div>
+          <div class="field"><label for="fecha_fin">Fecha de fin *</label><input type="date" id="fecha_fin" name="fecha_fin" /></div>
+          <div class="field"><label for="lugar">Lugar</label><input id="lugar" name="lugar" placeholder="Auditorio, sede, ciudad..." /></div>
+          <div class="field"><label for="cupo_maximo">Cupo máximo *</label><input type="number" min="1" id="cupo_maximo" name="cupo_maximo" value="1" /></div>
+        </div>
+      </section>
+
+      <section data-seccion="2" hidden>
+        <h2>Política de inscripción</h2>
+        <div class="form-grid">
+          <div class="field"><label for="fecha_limite">Fecha límite de inscripción</label><input type="date" id="fecha_limite" name="fecha_limite" /></div>
+          <div class="field"><label for="min_asistencia_certificado">Asistencia mínima para certificado (%)</label><input type="number" min="0" max="100" id="min_asistencia_certificado" name="min_asistencia_certificado" value="75" /></div>
+          <label class="check full"><input type="checkbox" name="requiere_aprobacion" /><span><b>Requiere aprobación</b><small>Las nuevas inscripciones necesitarán aprobación.</small></span></label>
+          <label class="check full"><input type="checkbox" name="permite_lista_espera" /><span><b>Permitir lista de espera</b><small>Cuando se complete el cupo, las nuevas inscripciones podrán quedar en espera.</small></span></label>
+        </div>
+      </section>
+
+      <section data-seccion="3" class="summary" hidden>
+        <h2>Confirmar datos</h2>
+        <div class="summary-grid" id="resumen"></div>
+      </section>
+
+      <footer class="actions">
+        <button type="button" class="btn-light" id="anteriorBtn" hidden>Anterior</button>
+        <span></span>
+        <button type="button" class="btn-primary" id="siguienteBtn">Continuar</button>
+        <button type="submit" class="btn-primary" id="guardarBtn" hidden>Crear evento</button>
+      </footer>
+    </form>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/evento-form.js"></script>
+  <script src="js/mockup-bar.js"></script>
+</body>
+</html>

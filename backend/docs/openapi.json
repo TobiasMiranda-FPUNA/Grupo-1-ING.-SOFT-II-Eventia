@@ -1,0 +1,2649 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Eventia API",
+    "description": "\nAPI REST del sistema **Eventia** para la gestión de eventos académicos:\neventos, actividades (agenda), conferencistas, inscripciones y\nparametrización de roles.\n\n### Cómo autenticarse\n1. Ejecutar `POST /api/v1/auth/login` con email y contraseña.\n2. Copiar el `access_token` de la respuesta.\n3. Presionar **Authorize** e ingresar el token (sin el prefijo `Bearer`).\n\n### Permisos por rol\n* **administrador**: parametrización de roles (`/api/v1/roles/...`).\n* **organizador**: alta/edición de eventos, actividades y conferencistas.\n* Los endpoints de consulta (GET públicos), el login y las inscripciones no\n  requieren token.\n",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roles/sistema": {
+      "get": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "List System Roles",
+        "operationId": "list_system_roles_api_v1_roles_sistema_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoleResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List System Roles Api V1 Roles Sistema Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Create System Role",
+        "operationId": "create_system_role_api_v1_roles_sistema_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/roles/sistema/{role_id}": {
+      "patch": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Update System Role",
+        "operationId": "update_system_role_api_v1_roles_sistema__role_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Update System Role",
+        "operationId": "update_system_role_api_v1_roles_sistema__role_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Delete System Role",
+        "operationId": "delete_system_role_api_v1_roles_sistema__role_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roles/participantes": {
+      "get": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "List Participant Roles",
+        "operationId": "list_participant_roles_api_v1_roles_participantes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoleResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Participant Roles Api V1 Roles Participantes Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Create Participant Role",
+        "operationId": "create_participant_role_api_v1_roles_participantes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/roles/participantes/{role_id}": {
+      "patch": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Update Participant Role",
+        "operationId": "update_participant_role_api_v1_roles_participantes__role_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Update Participant Role",
+        "operationId": "update_participant_role_api_v1_roles_participantes__role_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Parametrización"
+        ],
+        "summary": "Delete Participant Role",
+        "operationId": "delete_participant_role_api_v1_roles_participantes__role_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Get Profile",
+        "operationId": "get_profile_api_v1_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/eventos": {
+      "post": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Create Evento",
+        "operationId": "create_evento_api_v1_eventos_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventoCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "List Eventos",
+        "operationId": "list_eventos_api_v1_eventos_get",
+        "parameters": [
+          {
+            "name": "id_tipo_evento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Id Tipo Evento"
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Estado"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "fecha_desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fecha Desde"
+            }
+          },
+          {
+            "name": "fecha_hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fecha Hasta"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventoResponse"
+                  },
+                  "title": "Response List Eventos Api V1 Eventos Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/eventos/tipos": {
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "List Tipos Evento",
+        "operationId": "list_tipos_evento_api_v1_eventos_tipos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TipoEventoResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Tipos Evento Api V1 Eventos Tipos Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/eventos/{evento_id}": {
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Get Evento",
+        "operationId": "get_evento_api_v1_eventos__evento_id__get",
+        "parameters": [
+          {
+            "name": "evento_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Evento Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Update Evento",
+        "operationId": "update_evento_api_v1_eventos__evento_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "evento_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Evento Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventoUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inscripciones": {
+      "post": {
+        "tags": [
+          "Inscripciones"
+        ],
+        "summary": "Create Inscripcion",
+        "operationId": "create_inscripcion_api_v1_inscripciones_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InscripcionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InscripcionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conferencistas": {
+      "post": {
+        "tags": [
+          "Conferencistas"
+        ],
+        "summary": "Create Conferencista",
+        "operationId": "create_conferencista_api_v1_conferencistas_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConferencistaCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConferencistaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Conferencistas"
+        ],
+        "summary": "List Conferencistas",
+        "operationId": "list_conferencistas_api_v1_conferencistas_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "activo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Activo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConferencistaResponse"
+                  },
+                  "title": "Response List Conferencistas Api V1 Conferencistas Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conferencistas/{conferencista_id}": {
+      "get": {
+        "tags": [
+          "Conferencistas"
+        ],
+        "summary": "Get Conferencista",
+        "operationId": "get_conferencista_api_v1_conferencistas__conferencista_id__get",
+        "parameters": [
+          {
+            "name": "conferencista_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conferencista Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConferencistaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Conferencistas"
+        ],
+        "summary": "Update Conferencista",
+        "operationId": "update_conferencista_api_v1_conferencistas__conferencista_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conferencista_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conferencista Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConferencistaUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConferencistaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Conferencistas"
+        ],
+        "summary": "Update Conferencista",
+        "operationId": "update_conferencista_api_v1_conferencistas__conferencista_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conferencista_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conferencista Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConferencistaUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConferencistaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Conferencistas"
+        ],
+        "summary": "Delete Conferencista",
+        "operationId": "delete_conferencista_api_v1_conferencistas__conferencista_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conferencista_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conferencista Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categorias-actividad": {
+      "get": {
+        "tags": [
+          "Categorías de actividad"
+        ],
+        "summary": "List Categorias Actividad",
+        "operationId": "list_categorias_actividad_api_v1_categorias_actividad_get",
+        "parameters": [
+          {
+            "name": "activo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Activo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaActividadResponse"
+                  },
+                  "title": "Response List Categorias Actividad Api V1 Categorias Actividad Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categorias-actividad/{categoria_id}": {
+      "get": {
+        "tags": [
+          "Categorías de actividad"
+        ],
+        "summary": "Get Categoria Actividad",
+        "operationId": "get_categoria_actividad_api_v1_categorias_actividad__categoria_id__get",
+        "parameters": [
+          {
+            "name": "categoria_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Categoria Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaActividadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/actividades/{actividad_id}": {
+      "get": {
+        "tags": [
+          "Actividades"
+        ],
+        "summary": "Get Actividad",
+        "operationId": "get_actividad_api_v1_actividades__actividad_id__get",
+        "parameters": [
+          {
+            "name": "actividad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Actividad Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActividadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/actividades/{actividad_id}/conferencistas/{conferencista_id}": {
+      "post": {
+        "tags": [
+          "Actividades"
+        ],
+        "summary": "Associate Conferencista",
+        "operationId": "associate_conferencista_api_v1_actividades__actividad_id__conferencistas__conferencista_id__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "actividad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Actividad Id"
+            }
+          },
+          {
+            "name": "conferencista_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conferencista Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActividadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Actividades"
+        ],
+        "summary": "Disassociate Conferencista",
+        "operationId": "disassociate_conferencista_api_v1_actividades__actividad_id__conferencistas__conferencista_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "actividad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Actividad Id"
+            }
+          },
+          {
+            "name": "conferencista_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conferencista Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/eventos/{evento_id}/actividades": {
+      "post": {
+        "tags": [
+          "Actividades"
+        ],
+        "summary": "Create Actividad",
+        "operationId": "create_actividad_api_v1_eventos__evento_id__actividades_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "evento_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Evento Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActividadCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActividadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/eventos/{evento_id}/agenda": {
+      "get": {
+        "tags": [
+          "Actividades"
+        ],
+        "summary": "Get Agenda Evento",
+        "operationId": "get_agenda_evento_api_v1_eventos__evento_id__agenda_get",
+        "parameters": [
+          {
+            "name": "evento_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Evento Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActividadResponse"
+                  },
+                  "title": "Response Get Agenda Evento Api V1 Eventos  Evento Id  Agenda Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Sistema"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActividadCreate": {
+        "properties": {
+          "id_categoria": {
+            "type": "integer",
+            "title": "Id Categoria"
+          },
+          "titulo": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Titulo"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha"
+          },
+          "hora_inicio": {
+            "type": "string",
+            "format": "time",
+            "title": "Hora Inicio"
+          },
+          "hora_fin": {
+            "type": "string",
+            "format": "time",
+            "title": "Hora Fin"
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "PRESENCIAL",
+              "VIRTUAL",
+              "HIBRIDA"
+            ],
+            "title": "Modalidad",
+            "default": "PRESENCIAL"
+          },
+          "cupo": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cupo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_categoria",
+          "titulo",
+          "fecha",
+          "hora_inicio",
+          "hora_fin",
+          "cupo"
+        ],
+        "title": "ActividadCreate"
+      },
+      "ActividadResponse": {
+        "properties": {
+          "id_actividad": {
+            "type": "integer",
+            "title": "Id Actividad"
+          },
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "id_categoria": {
+            "type": "integer",
+            "title": "Id Categoria"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha"
+          },
+          "hora_inicio": {
+            "type": "string",
+            "format": "time",
+            "title": "Hora Inicio"
+          },
+          "hora_fin": {
+            "type": "string",
+            "format": "time",
+            "title": "Hora Fin"
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "modalidad": {
+            "type": "string",
+            "title": "Modalidad"
+          },
+          "cupo": {
+            "type": "integer",
+            "title": "Cupo"
+          },
+          "conferencistas": {
+            "items": {
+              "$ref": "#/components/schemas/ConferencistaResponse"
+            },
+            "type": "array",
+            "title": "Conferencistas",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_actividad",
+          "id_evento",
+          "id_categoria",
+          "titulo",
+          "descripcion",
+          "fecha",
+          "hora_inicio",
+          "hora_fin",
+          "lugar",
+          "modalidad",
+          "cupo"
+        ],
+        "title": "ActividadResponse"
+      },
+      "CategoriaActividadResponse": {
+        "properties": {
+          "id_categoria": {
+            "type": "integer",
+            "title": "Id Categoria"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_categoria",
+          "nombre",
+          "descripcion",
+          "activo"
+        ],
+        "title": "CategoriaActividadResponse"
+      },
+      "ConferencistaCreate": {
+        "properties": {
+          "nombres": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Apellidos"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 150,
+            "title": "Email"
+          },
+          "institucion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institucion"
+          },
+          "biografia": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Biografia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombres",
+          "apellidos",
+          "email"
+        ],
+        "title": "ConferencistaCreate"
+      },
+      "ConferencistaResponse": {
+        "properties": {
+          "nombres": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Apellidos"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 150,
+            "title": "Email"
+          },
+          "institucion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institucion"
+          },
+          "biografia": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Biografia"
+          },
+          "id_conferencista": {
+            "type": "integer",
+            "title": "Id Conferencista"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombres",
+          "apellidos",
+          "email",
+          "id_conferencista",
+          "activo"
+        ],
+        "title": "ConferencistaResponse"
+      },
+      "ConferencistaUpdate": {
+        "properties": {
+          "nombres": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apellidos"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "institucion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institucion"
+          },
+          "biografia": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Biografia"
+          },
+          "activo": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "title": "ConferencistaUpdate"
+      },
+      "EventoCreate": {
+        "properties": {
+          "id_tipo_evento": {
+            "type": "integer",
+            "title": "Id Tipo Evento"
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "fecha_inicio": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Inicio"
+          },
+          "fecha_fin": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Fin"
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "cupo_maximo": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Cupo Maximo"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "borrador",
+              "publicado"
+            ],
+            "title": "Estado",
+            "default": "borrador"
+          },
+          "politica": {
+            "$ref": "#/components/schemas/PoliticaInscripcionData"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_tipo_evento",
+          "nombre",
+          "fecha_inicio",
+          "fecha_fin",
+          "cupo_maximo"
+        ],
+        "title": "EventoCreate"
+      },
+      "EventoResponse": {
+        "properties": {
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "id_tipo_evento": {
+            "type": "integer",
+            "title": "Id Tipo Evento"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "fecha_inicio": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Inicio"
+          },
+          "fecha_fin": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Fin"
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "cupo_maximo": {
+            "type": "integer",
+            "title": "Cupo Maximo"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "politica": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PoliticaInscripcionData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_evento",
+          "id_tipo_evento",
+          "nombre",
+          "descripcion",
+          "fecha_inicio",
+          "fecha_fin",
+          "lugar",
+          "cupo_maximo",
+          "estado"
+        ],
+        "title": "EventoResponse"
+      },
+      "EventoUpdate": {
+        "properties": {
+          "id_tipo_evento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Tipo Evento"
+          },
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "fecha_inicio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Inicio"
+          },
+          "fecha_fin": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Fin"
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "cupo_maximo": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cupo Maximo"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "borrador",
+                  "publicado"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado"
+          },
+          "politica": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PoliticaInscripcionData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "EventoUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InscripcionCreate": {
+        "properties": {
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "id_rol_participante": {
+            "type": "integer",
+            "title": "Id Rol Participante"
+          },
+          "documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documento"
+          },
+          "nombres": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Apellidos"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "institucion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institucion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_evento",
+          "id_rol_participante",
+          "nombres",
+          "apellidos",
+          "email"
+        ],
+        "title": "InscripcionCreate"
+      },
+      "InscripcionResponse": {
+        "properties": {
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "id_participante": {
+            "type": "integer",
+            "title": "Id Participante"
+          },
+          "id_rol_participante": {
+            "type": "integer",
+            "title": "Id Rol Participante"
+          },
+          "fecha_inscripcion": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Inscripcion"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_inscripcion",
+          "id_evento",
+          "id_participante",
+          "id_rol_participante",
+          "fecha_inscripcion",
+          "estado"
+        ],
+        "title": "InscripcionResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "PoliticaInscripcionData": {
+        "properties": {
+          "fecha_limite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Limite"
+          },
+          "requiere_aprobacion": {
+            "type": "boolean",
+            "title": "Requiere Aprobacion",
+            "default": false
+          },
+          "permite_lista_espera": {
+            "type": "boolean",
+            "title": "Permite Lista Espera",
+            "default": false
+          },
+          "min_asistencia_certificado": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Min Asistencia Certificado",
+            "default": 75
+          }
+        },
+        "type": "object",
+        "title": "PoliticaInscripcionData"
+      },
+      "RoleCreate": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre"
+        ],
+        "title": "RoleCreate"
+      },
+      "RoleResponse": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "id",
+          "activo"
+        ],
+        "title": "RoleResponse"
+      },
+      "RoleUpdate": {
+        "properties": {
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "activo": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "title": "RoleUpdate"
+      },
+      "TipoEventoResponse": {
+        "properties": {
+          "id_tipo_evento": {
+            "type": "integer",
+            "title": "Id Tipo Evento"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_tipo_evento",
+          "nombre",
+          "descripcion",
+          "activo"
+        ],
+        "title": "TipoEventoResponse"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in",
+          "user"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserResponse": {
+        "properties": {
+          "id_usuario": {
+            "type": "integer",
+            "title": "Id Usuario"
+          },
+          "nombres": {
+            "type": "string",
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "type": "string",
+            "title": "Apellidos"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_usuario",
+          "nombres",
+          "apellidos",
+          "email",
+          "roles"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Autenticación",
+      "description": "Login con email y contraseña; devuelve el token JWT."
+    },
+    {
+      "name": "Usuarios",
+      "description": "Datos del usuario autenticado."
+    },
+    {
+      "name": "Parametrización",
+      "description": "ABM de roles del sistema y roles de participante. Requiere rol **administrador**."
+    },
+    {
+      "name": "Eventos",
+      "description": "Alta, edición y consulta de eventos. Crear/editar requiere rol **organizador**."
+    },
+    {
+      "name": "Actividades",
+      "description": "Actividades de un evento (agenda) y asignación de conferencistas. Crear/asignar requiere rol **organizador**."
+    },
+    {
+      "name": "Conferencistas",
+      "description": "ABM de conferencistas. Crear/editar/eliminar requiere rol **organizador**."
+    },
+    {
+      "name": "Categorías de actividad",
+      "description": "Consulta de las categorías de actividad."
+    },
+    {
+      "name": "Inscripciones",
+      "description": "Inscripción pública de participantes a un evento."
+    },
+    {
+      "name": "Sistema",
+      "description": "Health check de la API."
+    }
+  ],
+  "servers": [
+    {
+      "url": "/",
+      "description": "Mismo servidor que sirve la documentación"
+    },
+    {
+      "url": "http://localhost:8000",
+      "description": "Backend local (uvicorn)"
+    }
+  ]
+}

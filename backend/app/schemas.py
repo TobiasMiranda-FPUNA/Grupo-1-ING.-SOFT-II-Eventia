@@ -1,6 +1,6 @@
-# date/datetime: tipos usados en los campos de fecha de eventos y en la
-# fecha de registro de una inscripción.
-from datetime import date, datetime
+# date/datetime/time: tipos usados en los campos de fecha de eventos y
+# actividades, y en la fecha de registro de una inscripción.
+from datetime import date, datetime, time
 # Literal: restringe un campo a un conjunto fijo de valores permitidos
 # (ej: el estado de un evento solo puede ser "borrador" o "publicado").
 # Annotated: permite adjuntarle un validador propio a un tipo (usado en
@@ -37,6 +37,10 @@ def _validate_email(value: str) -> str:
 
 
 Email = Annotated[str, BeforeValidator(_validate_email)]
+
+# Modalidades permitidas para una actividad (mismos valores que la
+# restricción CHECK ck_actividad_modalidad de la base de datos).
+ModalidadActividad = Literal["PRESENCIAL", "VIRTUAL", "HIBRIDA"]
 
 
 # Datos que se esperan recibir al hacer login: email y contraseña.
@@ -170,6 +174,91 @@ class EventoResponse(BaseModel):
     cupo_maximo: int
     estado: str
     politica: PoliticaInscripcionData | None = None
+
+
+# Campos comunes a la creación/actualización de un conferencista (expositor
+# invitado a exponer en actividades del evento).
+class ConferencistaBase(BaseModel):
+    nombres: str = Field(min_length=1, max_length=100)
+    apellidos: str = Field(min_length=1, max_length=100)
+    email: Email = Field(max_length=150)
+    institucion: str | None = Field(default=None, max_length=150)
+    biografia: str | None = None
+
+
+# Datos necesarios para crear un conferencista.
+class ConferencistaCreate(ConferencistaBase):
+    pass
+
+
+# Datos opcionales para actualizar un conferencista existente (todos los
+# campos son opcionales para permitir actualizaciones parciales).
+class ConferencistaUpdate(BaseModel):
+    nombres: str | None = Field(default=None, min_length=1, max_length=100)
+    apellidos: str | None = Field(default=None, min_length=1, max_length=100)
+    email: Email | None = Field(default=None, max_length=150)
+    institucion: str | None = Field(default=None, max_length=150)
+    biografia: str | None = None
+    activo: bool | None = None
+
+
+# Datos de un conferencista que se devuelven como respuesta de la API.
+class ConferencistaResponse(ConferencistaBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_conferencista: int
+    activo: bool
+
+
+# Datos de una categoría de actividad (Conferencia, Taller, Panel, etc.)
+# que se devuelven como respuesta de la API.
+class CategoriaActividadResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_categoria: int
+    nombre: str
+    descripcion: str | None
+    activo: bool
+
+
+# Campos necesarios para crear una actividad de la agenda de un evento
+# (charla, taller, panel). El evento al que pertenece se toma del path
+# (POST /api/v1/eventos/{evento_id}/actividades), no del body.
+class ActividadCreate(BaseModel):
+    id_categoria: int
+    titulo: str = Field(min_length=1, max_length=150)
+    descripcion: str | None = None
+    fecha: date
+    hora_inicio: time
+    hora_fin: time
+    lugar: str | None = Field(default=None, max_length=200)
+    modalidad: ModalidadActividad = "PRESENCIAL"
+    cupo: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def check_horario(self) -> "ActividadCreate":
+        if self.hora_fin <= self.hora_inicio:
+            raise ValueError("La hora de fin debe ser posterior a la hora de inicio")
+        return self
+
+
+# Datos de una actividad que se devuelven como respuesta de la API,
+# incluyendo los conferencistas actualmente asociados a ella.
+class ActividadResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_actividad: int
+    id_evento: int
+    id_categoria: int
+    titulo: str
+    descripcion: str | None
+    fecha: date
+    hora_inicio: time
+    hora_fin: time
+    lugar: str | None
+    modalidad: str
+    cupo: int
+    conferencistas: list[ConferencistaResponse] = []
 
 
 # Datos que se esperan recibir al inscribir un participante a un evento.

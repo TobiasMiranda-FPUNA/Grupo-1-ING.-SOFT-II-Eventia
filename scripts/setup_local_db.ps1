@@ -50,6 +50,8 @@ $SqlFiles = @(
     "crear_rol_participante_y_catalogo.sql",
     "crear_tipo_evento_evento_politica.sql",
     "crear_participante_inscripcion.sql",
+    "crear_categoria_actividad_actividad.sql",
+    "crear_conferencista_actividad_conferencista.sql",
     "cargar_catalogos_iniciales.sql",
     "cargar_datos_ejemplo.sql"
 )

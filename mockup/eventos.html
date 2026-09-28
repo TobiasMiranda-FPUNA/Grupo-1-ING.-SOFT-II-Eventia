@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Eventos (mockup)</title>
+  <link rel="stylesheet" href="css/mockup-bar.css" />
+  <link rel="stylesheet" href="css/eventos.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Gestión de eventos</p>
+        <h1>Catálogo de eventos</h1>
+        <p>Consultá, filtrá y administrá los eventos registrados en Eventia.</p>
+      </div>
+      <a href="evento-form.html" class="btn-primary">+ Nuevo evento</a>
+    </header>
+
+    <section class="filters-card">
+      <div class="field grow">
+        <label for="busqueda">Buscar</label>
+        <input id="busqueda" placeholder="Nombre del evento..." />
+      </div>
+      <div class="field">
+        <label for="estado">Estado</label>
+        <select id="estado">
+          <option value="">Todos</option>
+          <option value="borrador">Borrador</option>
+          <option value="publicado">Publicado</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="tipo">Tipo</label>
+        <select id="tipo">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <button class="btn-secondary" id="filtrarBtn">Filtrar</button>
+      <button class="btn-link" id="limpiarBtn">Limpiar</button>
+    </section>
+
+    <div class="toolbar">
+      <strong id="contador">0 evento(s)</strong>
+      <div class="view-toggle">
+        <button data-vista="grilla" class="active">Grilla</button>
+        <button data-vista="lista">Lista</button>
+      </div>
+    </div>
+
+    <div class="alert error" id="error" hidden></div>
+    <div class="empty" id="cargando" hidden>Cargando eventos...</div>
+
+    <section class="grid" id="grilla" hidden></section>
+
+    <section class="table-wrap" id="lista" hidden>
+      <table>
+        <thead><tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Lugar</th><th>Cupo</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="listaBody"></tbody>
+      </table>
+    </section>
+
+    <div class="empty" id="vacio" hidden>
+      <h3>No hay eventos para mostrar</h3>
+      <p>Probá cambiando los filtros o registrá un nuevo evento.</p>
+    </div>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/eventos.js"></script>
+  <script src="js/mockup-bar.js"></script>
+</body>
+</html>

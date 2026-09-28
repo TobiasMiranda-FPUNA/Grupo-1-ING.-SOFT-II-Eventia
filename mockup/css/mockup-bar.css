@@ -1,0 +1,37 @@
+/* Barra de navegación del mockup (no forma parte del diseño real). */
+body { margin: 0; }
+body.mk-with-bar { padding-bottom: 44px; }
+
+.mk-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #0f172a;
+  font: 13px/1.2 system-ui, -apple-system, sans-serif;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.mk-bar a,
+.mk-bar button {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mk-bar a:hover,
+.mk-bar button:hover { background: #1e293b; color: #fff; }
+.mk-bar a.mk-active { background: #2563eb; color: #fff; }
+.mk-bar .mk-brand { color: #facc15; font-weight: 700; margin-right: 8px; }
+.mk-bar .mk-reset { margin-left: auto; border: 1px solid #334155; }

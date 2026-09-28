@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Mockup de pantallas</title>
+  <style>
+    body { margin: 0; min-height: 100vh; background: #f5f7fb; color: #1f2937; font-family: system-ui, -apple-system, sans-serif; }
+    .wrap { max-width: 900px; margin: auto; padding: 48px 16px; }
+    .eyebrow { color: #2563eb; text-transform: uppercase; font-weight: 700; font-size: 12px; letter-spacing: .08em; margin: 0 0 6px; }
+    h1 { margin: 0 0 8px; font-size: 32px; }
+    .lead { margin: 0 0 32px; color: #64748b; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+    a.card { display: block; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px; text-decoration: none; color: inherit; box-shadow: 0 3px 18px #0f172a10; transition: transform .15s, border-color .15s; }
+    a.card:hover { transform: translateY(-2px); border-color: #2563eb; }
+    .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #2563eb; color: #fff; font-weight: 700; font-size: 13px; }
+    h2 { margin: 12px 0 6px; font-size: 18px; }
+    p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.45; }
+    code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    .note { margin-top: 32px; font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow">Mockup interactivo</p>
+    <h1>Pantallas de Eventia</h1>
+    <p class="lead">Réplica estática del frontend Angular, con datos simulados (no necesita backend ni base de datos).</p>
+
+    <div class="grid">
+      <a class="card" href="login.html">
+        <span class="num">1</span>
+        <h2>Login</h2>
+        <p>Inicio de sesión con validaciones y alerta de credencial inválida. Ruta <code>/login</code>.</p>
+      </a>
+      <a class="card" href="roles.html">
+        <span class="num">2</span>
+        <h2>Roles</h2>
+        <p>Alta y baja de roles de participante; bloquea eliminar roles en uso. Ruta <code>/roles</code>.</p>
+      </a>
+      <a class="card" href="eventos.html">
+        <span class="num">3</span>
+        <h2>Catálogo de eventos</h2>
+        <p>Búsqueda, filtros por estado y tipo, vista grilla o lista. Ruta <code>/eventos</code>.</p>
+      </a>
+      <a class="card" href="evento-form.html">
+        <span class="num">4</span>
+        <h2>Formulario de evento</h2>
+        <p>Asistente de 3 pasos para crear o editar. Rutas <code>/eventos/nuevo</code> y <code>/eventos/:id/editar</code>.</p>
+      </a>
+    </div>
+
+    <p class="note">Los cambios se guardan en el navegador (localStorage). Usá “Reiniciar datos” en la barra inferior de cada pantalla para volver a los datos de ejemplo.</p>
+  </main>
+</body>
+</html>
