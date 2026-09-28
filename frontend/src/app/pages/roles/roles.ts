@@ -1,27 +1,38 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ParticipantRole, RolesService } from '../../services/roles';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { RolesService } from '../../services/roles-service';
+import { BaseComponent } from '../../core/base.component';
+import { RolParticipante } from '../../models/rol-participante.model';
 
 @Component({
-imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-roles',
+  imports: [CommonModule, ReactiveFormsModule],
   styleUrl: './roles.scss',
   templateUrl: './roles.html',
 })
-export class Roles implements OnInit {
+export class Roles extends BaseComponent implements OnInit {
+
   private fb = inject(FormBuilder);
   private rolesService = inject(RolesService);
+  private destroyRef = inject(DestroyRef);
 
-  rolesList = signal<ParticipantRole[]>([]);
+  rolesList = signal<RolParticipante[]>([]);
+
   roleForm: FormGroup;
 
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
-  isLoading = signal(false);
-
   constructor() {
+    super();
+
     this.roleForm = this.fb.group({
+      codigo: ['', [Validators.required, Validators.maxLength(50)]],
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       descripcion: ['', [Validators.required]]
     });
@@ -32,19 +43,46 @@ export class Roles implements OnInit {
   }
 
   loadRoles(): void {
-    this.rolesService.getRoles().subscribe({
-      next: (data) => {
-        this.rolesList.set(data);
-      },
-      error: () => {
-        // Carga de datos de respaldo visual mientras el backend no esté conectado
-        this.rolesList.set([
-          { id: 1, nombre: 'Estudiante', descripcion: 'Participante matriculado en institución', activo: true, enUso: true },
-          { id: 2, nombre: 'Expositor', descripcion: 'Conferencista o ponente de actividad', activo: true, enUso: false },
-          { id: 3, nombre: 'General', descripcion: 'Público general asistente', activo: true, enUso: false }
-        ]);
-      }
-    });
+    this.startLoading();
+
+    this.rolesService
+      .getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.rolesList.set(
+            data.map(rol => new RolParticipante(rol))
+          );
+
+          this.stopLoading();
+        },
+
+        error: () => {
+          this.rolesList.set([
+            new RolParticipante({
+              id_rol_participante: 1,
+              codigo: 'EST',
+              nombre: 'Estudiante',
+              descripcion: 'Matriculado',
+              activo: true,
+              en_uso: true
+            }),
+            new RolParticipante({
+              id_rol_participante: 2,
+              codigo: 'EXP',
+              nombre: 'Expositor',
+              descripcion: 'Conferencista',
+              activo: true,
+              en_uso: false
+            })
+          ]);
+
+          this.errorMessage =
+            'No se pudo conectar con el servidor. Se muestran datos de respaldo.';
+
+          this.stopLoading();
+        }
+      });
   }
 
   onSubmitRole(): void {
@@ -53,57 +91,69 @@ export class Roles implements OnInit {
       return;
     }
 
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
+    this.startLoading();
 
-    const newRole: ParticipantRole = {
+    const newRole = new RolParticipante({
+      codigo: this.roleForm.value.codigo,
       nombre: this.roleForm.value.nombre,
       descripcion: this.roleForm.value.descripcion,
-      activo: true
-    };
-
-    this.rolesService.createRole(newRole).subscribe({
-      next: (created) => {
-        this.isLoading.set(false);
-        this.successMessage.set('Rol creado exitosamente.');
-        this.rolesList.update(roles => [...roles, created]);
-        this.roleForm.reset();
-      },
-      error: () => {
-        // Simulación visual en frontend si no hay conexión backend
-        this.isLoading.set(false);
-        newRole.id = Date.now();
-        newRole.enUso = false;
-        this.rolesList.update(roles => [...roles, newRole]);
-        this.successMessage.set('Rol registrado en la vista local.');
-        this.roleForm.reset();
-      }
+      activo: true,
+      en_uso: false
     });
+
+    this.rolesService
+      .create(newRole)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (created) => {
+          this.stopLoading();
+
+          this.successMessage = 'Rol creado exitosamente.';
+
+          this.rolesList.update(roles => [
+            ...roles,
+            new RolParticipante(created)
+          ]);
+
+          this.roleForm.reset();
+        },
+
+        error: () => {
+          this.stopLoading();
+          this.errorMessage = 'No se pudo registrar el rol.';
+        }
+      });
   }
 
-  onDeleteRole(role: ParticipantRole): void {
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
+  onDeleteRole(role: RolParticipante): void {
+    this.clearMessages();
 
-    // Cumplimiento del Criterio de Aceptación:
-    // Bloquear eliminación y notificar si el rol está asignado a inscripciones activas
-    if (role.enUso) {
-      this.errorMessage.set(`No se puede eliminar el rol "${role.nombre}" porque actualmente se encuentra asignado a inscripciones activas.`);
+    if (role.en_uso) {
+      this.errorMessage =
+        `No se puede eliminar el rol "${role.nombre}" porque actualmente se encuentra asignado a inscripciones activas.`;
       return;
     }
 
-    if (role.id) {
-      this.rolesService.deleteRole(role.id).subscribe({
-        next: () => {
-          this.rolesList.update(roles => roles.filter(r => r.id !== role.id));
-          this.successMessage.set('Rol eliminado correctamente.');
-        },
-        error: () => {
-          this.rolesList.update(roles => roles.filter(r => r.id !== role.id));
-          this.successMessage.set('Rol eliminado de la vista local.');
-        }
-      });
+    if (role.id_rol_participante) {
+      this.rolesService
+        .delete(role.id_rol_participante)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.rolesList.update(
+              roles =>
+                roles.filter(
+                  r => r.id_rol_participante !== role.id_rol_participante
+                )
+            );
+
+            this.successMessage = 'Rol eliminado correctamente.';
+          },
+
+          error: () => {
+            this.errorMessage = 'No se pudo eliminar el rol.';
+          }
+        });
     }
   }
 }
