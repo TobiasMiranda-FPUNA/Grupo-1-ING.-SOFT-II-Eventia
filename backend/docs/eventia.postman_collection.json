@@ -1,0 +1,1258 @@
+{
+  "info": {
+    "name": "Eventia API",
+    "description": "Colección generada desde el OpenAPI de Eventia (backend/docs/generate_postman_collection.py).\n\n1. Ejecutar un request de la carpeta **Autenticación** (login).\n2. El token queda guardado en `{{token}}` y se usa en los endpoints protegidos.\n   - Rol **administrador**: Parametrización (roles).\n   - Rol **organizador**: eventos, actividades y conferencistas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Login como administrador (guarda {{token}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const token = pm.response.json().access_token;",
+                  "    pm.collectionVariables.set('token', token);",
+                  "    console.log('Token guardado en {{token}}');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@eventia.test\",\n  \"password\": \"Admin123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Usuario de ejemplo de sql/cargar_datos_ejemplo.sql con rol administrador."
+          }
+        },
+        {
+          "name": "Login como organizador (guarda {{token}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const token = pm.response.json().access_token;",
+                  "    pm.collectionVariables.set('token', token);",
+                  "    console.log('Token guardado en {{token}}');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"organizador@eventia.test\",\n  \"password\": \"Organizador123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Usuario de ejemplo de sql/cargar_datos_ejemplo.sql con rol organizador."
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/login — Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@eventia.test\",\n  \"password\": \"Secreto123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const token = pm.response.json().access_token;",
+                  "    pm.collectionVariables.set('token', token);",
+                  "    console.log('Token guardado en {{token}}');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "GET /api/v1/users/me — Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Parametrización",
+      "item": [
+        {
+          "name": "GET /api/v1/roles/sistema — List System Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/sistema",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "sistema"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/roles/sistema — Create System Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/sistema",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "sistema"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/v1/roles/sistema/{role_id} — Update System Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/sistema/:role_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "sistema",
+                ":role_id"
+              ],
+              "variable": [
+                {
+                  "key": "role_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /api/v1/roles/sistema/{role_id} — Update System Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/sistema/:role_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "sistema",
+                ":role_id"
+              ],
+              "variable": [
+                {
+                  "key": "role_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/v1/roles/sistema/{role_id} — Delete System Role",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/sistema/:role_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "sistema",
+                ":role_id"
+              ],
+              "variable": [
+                {
+                  "key": "role_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "GET /api/v1/roles/participantes — List Participant Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/participantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "participantes"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/roles/participantes — Create Participant Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/participantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "participantes"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/v1/roles/participantes/{role_id} — Update Participant Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/participantes/:role_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "participantes",
+                ":role_id"
+              ],
+              "variable": [
+                {
+                  "key": "role_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /api/v1/roles/participantes/{role_id} — Update Participant Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/participantes/:role_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "participantes",
+                ":role_id"
+              ],
+              "variable": [
+                {
+                  "key": "role_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/v1/roles/participantes/{role_id} — Delete Participant Role",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/participantes/:role_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "participantes",
+                ":role_id"
+              ],
+              "variable": [
+                {
+                  "key": "role_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos",
+      "item": [
+        {
+          "name": "POST /api/v1/eventos — Create Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_tipo_evento\": 1,\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"fecha_inicio\": \"2026-11-15\",\n  \"fecha_fin\": \"2026-11-15\",\n  \"lugar\": \"texto de ejemplo (lugar)\",\n  \"cupo_maximo\": 1,\n  \"estado\": \"borrador\",\n  \"politica\": {\n    \"fecha_limite\": \"2026-11-15\",\n    \"requiere_aprobacion\": false,\n    \"permite_lista_espera\": false,\n    \"min_asistencia_certificado\": 75\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/eventos — List Eventos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos"
+              ],
+              "query": [
+                {
+                  "key": "id_tipo_evento",
+                  "value": "1",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "estado",
+                  "value": "texto de ejemplo (estado)",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "texto de ejemplo (q)",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "fecha_desde",
+                  "value": "2026-11-15",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "fecha_hasta",
+                  "value": "2026-11-15",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/eventos/tipos — List Tipos Evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/tipos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                "tipos"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/eventos/{evento_id} — Get Evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/:evento_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                ":evento_id"
+              ],
+              "variable": [
+                {
+                  "key": "evento_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "PUT /api/v1/eventos/{evento_id} — Update Evento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/:evento_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                ":evento_id"
+              ],
+              "variable": [
+                {
+                  "key": "evento_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_tipo_evento\": 1,\n  \"nombre\": \"texto de ejemplo (nombre)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"fecha_inicio\": \"2026-11-15\",\n  \"fecha_fin\": \"2026-11-15\",\n  \"lugar\": \"texto de ejemplo (lugar)\",\n  \"cupo_maximo\": 1,\n  \"estado\": \"borrador\",\n  \"politica\": {\n    \"fecha_limite\": \"2026-11-15\",\n    \"requiere_aprobacion\": false,\n    \"permite_lista_espera\": false,\n    \"min_asistencia_certificado\": 75\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Actividades",
+      "item": [
+        {
+          "name": "GET /api/v1/actividades/{actividad_id} — Get Actividad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/actividades/:actividad_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "actividades",
+                ":actividad_id"
+              ],
+              "variable": [
+                {
+                  "key": "actividad_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/actividades/{actividad_id}/conferencistas/{conferencista_id} — Associate Conferencista",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/actividades/:actividad_id/conferencistas/:conferencista_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "actividades",
+                ":actividad_id",
+                "conferencistas",
+                ":conferencista_id"
+              ],
+              "variable": [
+                {
+                  "key": "actividad_id",
+                  "value": "1",
+                  "description": ""
+                },
+                {
+                  "key": "conferencista_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "DELETE /api/v1/actividades/{actividad_id}/conferencistas/{conferencista_id} — Disassociate Conferencista",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/actividades/:actividad_id/conferencistas/:conferencista_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "actividades",
+                ":actividad_id",
+                "conferencistas",
+                ":conferencista_id"
+              ],
+              "variable": [
+                {
+                  "key": "actividad_id",
+                  "value": "1",
+                  "description": ""
+                },
+                {
+                  "key": "conferencista_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/eventos/{evento_id}/actividades — Create Actividad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/:evento_id/actividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                ":evento_id",
+                "actividades"
+              ],
+              "variable": [
+                {
+                  "key": "evento_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_categoria\": 1,\n  \"titulo\": \"texto de ejemplo (titulo)\",\n  \"descripcion\": \"texto de ejemplo (descripcion)\",\n  \"fecha\": \"2026-11-15\",\n  \"hora_inicio\": \"09:00:00\",\n  \"hora_fin\": \"09:00:00\",\n  \"lugar\": \"texto de ejemplo (lugar)\",\n  \"modalidad\": \"PRESENCIAL\",\n  \"cupo\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/eventos/{evento_id}/agenda — Get Agenda Evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/:evento_id/agenda",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                ":evento_id",
+                "agenda"
+              ],
+              "variable": [
+                {
+                  "key": "evento_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conferencistas",
+      "item": [
+        {
+          "name": "POST /api/v1/conferencistas — Create Conferencista",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/conferencistas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conferencistas"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"biografia\": \"texto de ejemplo (biografia)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/conferencistas — List Conferencistas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/conferencistas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conferencistas"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "texto de ejemplo (q)",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "activo",
+                  "value": "true",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/conferencistas/{conferencista_id} — Get Conferencista",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/conferencistas/:conferencista_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conferencistas",
+                ":conferencista_id"
+              ],
+              "variable": [
+                {
+                  "key": "conferencista_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/v1/conferencistas/{conferencista_id} — Update Conferencista",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/conferencistas/:conferencista_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conferencistas",
+                ":conferencista_id"
+              ],
+              "variable": [
+                {
+                  "key": "conferencista_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"biografia\": \"texto de ejemplo (biografia)\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /api/v1/conferencistas/{conferencista_id} — Update Conferencista",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/conferencistas/:conferencista_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conferencistas",
+                ":conferencista_id"
+              ],
+              "variable": [
+                {
+                  "key": "conferencista_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"biografia\": \"texto de ejemplo (biografia)\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/v1/conferencistas/{conferencista_id} — Delete Conferencista",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/conferencistas/:conferencista_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conferencistas",
+                ":conferencista_id"
+              ],
+              "variable": [
+                {
+                  "key": "conferencista_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías de actividad",
+      "item": [
+        {
+          "name": "GET /api/v1/categorias-actividad — List Categorias Actividad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias-actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias-actividad"
+              ],
+              "query": [
+                {
+                  "key": "activo",
+                  "value": "true",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/categorias-actividad/{categoria_id} — Get Categoria Actividad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias-actividad/:categoria_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias-actividad",
+                ":categoria_id"
+              ],
+              "variable": [
+                {
+                  "key": "categoria_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inscripciones",
+      "item": [
+        {
+          "name": "POST /api/v1/inscripciones — Create Inscripcion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inscripciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inscripciones"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_evento\": 1,\n  \"id_rol_participante\": 1,\n  \"documento\": \"texto de ejemplo (documento)\",\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sistema",
+      "item": [
+        {
+          "name": "GET /health — Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

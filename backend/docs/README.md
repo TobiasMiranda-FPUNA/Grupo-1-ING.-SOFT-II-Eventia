@@ -11,6 +11,8 @@ con el botón *Try it out*.
 | `index.html` | Swagger UI. Carga `openapi.json` de esta carpeta. |
 | `openapi.json` | Esquema OpenAPI 3 exportado desde la app FastAPI. |
 | `generate_openapi.py` | Regenera `openapi.json` a partir del código. |
+| `eventia.postman_collection.json` | Colección para Postman / Insomnia / Bruno con todos los endpoints. |
+| `generate_postman_collection.py` | Regenera la colección a partir del código. |
 
 ## Forma rápida (un solo comando)
 
@@ -65,7 +67,41 @@ archivo desde la carpeta `backend` (no hace falta la base de datos):
 
 ```bash
 python docs/generate_openapi.py
+python docs/generate_postman_collection.py
 ```
+
+## Probar desde clientes de API (Postman, Insomnia, Bruno)
+
+Desde la raíz del repositorio (con Postgres corriendo):
+
+```bash
+./scripts/api_clients_up.sh          # macOS / Linux
+.\scripts\api_clients_up.ps1         # Windows (PowerShell)
+```
+
+El script crea `backend/.venv` y `backend/.env` si faltan, regenera
+`openapi.json` y `eventia.postman_collection.json`, levanta el backend (si
+no estaba corriendo) y hace un login de prueba para verificar la conexión
+a la base. Ctrl+C detiene el backend. Para usar otro puerto:
+`BACKEND_PORT=8001 ./scripts/api_clients_up.sh`.
+
+Luego, en el cliente de API:
+
+1. Importar `backend/docs/eventia.postman_collection.json` (Postman,
+   Insomnia y Bruno aceptan este formato). Otra opción es importar el
+   OpenAPI desde http://localhost:8000/openapi.json.
+2. Ejecutar **Autenticación → Login como administrador** u **organizador**.
+   El token queda guardado en la variable `{{token}}` y se envía
+   automáticamente en los endpoints protegidos.
+3. Ajustar los valores de ejemplo de los bodies (IDs, fechas, etc.) antes
+   de enviar.
+
+Usuarios de ejemplo (cargados por `sql/cargar_datos_ejemplo.sql`):
+
+| Email | Contraseña | Rol |
+|---|---|---|
+| admin@eventia.test | Admin123! | administrador (roles) |
+| organizador@eventia.test | Organizador123! | organizador (eventos, actividades, conferencistas) |
 
 ## Endpoints disponibles
 
