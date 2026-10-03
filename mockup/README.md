@@ -51,13 +51,15 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
 ```
 mockup/
 ├── index.html            selector de pantallas
-├── login.html  roles.html  eventos.html  evento-form.html
+├── login.html  roles.html  eventos.html  expositores.html  evento-form.html
 ├── css/                  estilos de cada pantalla (traducidos de los .scss)
 │   └── mockup-bar.css    barra inferior propia del mockup
 └── js/
     ├── mock-data.js      API simulada y datos de ejemplo
     ├── mockup-bar.js     navegación entre pantallas
     └── <pantalla>.js     lógica de cada pantalla (réplica de su .ts)
+
+La pantalla Expositores incluye datos de ejemplo y operaciones locales de alta, búsqueda y eliminación; no se conecta a la API real.
 ```
 
 Si se modifica una pantalla del frontend, hay que actualizar a mano su
