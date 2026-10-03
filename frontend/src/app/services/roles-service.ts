@@ -8,7 +8,7 @@ import { RolParticipante } from '../models/rol-participante.model';
     providedIn: 'root'
 })
 export class RolesService extends BaseHttpService<RolParticipante> {
-    protected baseUrl = 'http://localhost:8000/api/v1/roles-participante';
+    protected baseUrl = 'http://localhost:8000/api/v1/roles/participantes';
 
     constructor() {
         super(inject(HttpClient));

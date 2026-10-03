@@ -1,16 +1,10 @@
-import { RolBase } from "./base.model";
+import { RolBase } from './base.model';
 
 export class RolParticipante extends RolBase {
-    id_rol_participante?: number;
-    en_uso: boolean;
+    id?: number;
 
     constructor(data?: Partial<RolParticipante>) {
         super(data);
-        this.id_rol_participante = data?.id_rol_participante;
-        this.en_uso = data?.en_uso ?? false;
-    }
-
-    desactivar(): void {
-        this.activo = false;
+        this.id = data?.id;
     }
 }

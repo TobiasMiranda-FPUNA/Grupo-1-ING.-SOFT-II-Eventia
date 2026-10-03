@@ -1,0 +1,167 @@
+<div class="expositores-page">
+  <header class="page-header">
+    <span class="eyebrow">GESTIÓN ACADÉMICA</span>
+    <h1>Expositores</h1>
+    <p>Consultá y administrá los conferencistas registrados y sus actividades.</p>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="alert alert-error" role="alert">
+      {{ errorMessage() }}
+      <button type="button" aria-label="Cerrar" (click)="errorMessage.set(null)">×</button>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert alert-success" role="status">
+      {{ successMessage() }}
+      <button type="button" aria-label="Cerrar" (click)="successMessage.set(null)">×</button>
+    </div>
+  }
+
+  <section class="form-panel">
+    <h2>Registrar expositor</h2>
+
+    <form [formGroup]="expositoresForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="nombres">Nombres <span>*</span></label>
+          <input id="nombres" formControlName="nombres" autocomplete="given-name">
+          @if (expositoresForm.get('nombres')?.touched && expositoresForm.get('nombres')?.invalid) {
+            <small class="field-error">Ingresá al menos 2 caracteres.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="apellidos">Apellidos <span>*</span></label>
+          <input id="apellidos" formControlName="apellidos" autocomplete="family-name">
+          @if (expositoresForm.get('apellidos')?.touched && expositoresForm.get('apellidos')?.invalid) {
+            <small class="field-error">Ingresá al menos 2 caracteres.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Correo electrónico <span>*</span></label>
+          <input id="email" type="email" formControlName="email" autocomplete="email">
+          @if (expositoresForm.get('email')?.touched && expositoresForm.get('email')?.invalid) {
+            <small class="field-error">Ingresá un correo válido.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="institucion">Institución</label>
+          <input id="institucion" formControlName="institucion">
+        </div>
+
+        <div class="field">
+          <label for="especialidad">Especialidad</label>
+          <input id="especialidad" formControlName="especialidad">
+        </div>
+
+        <div class="field field-full">
+          <label for="biografia">Biografía</label>
+          <textarea id="biografia" rows="3" formControlName="biografia"></textarea>
+        </div>
+
+        <div class="field field-full">
+          <label for="actividades">Actividades asociadas (opcional)</label>
+          <select
+            id="actividades"
+            multiple
+            (change)="onActividadesChange($event)"
+            [disabled]="actividades().length === 0">
+            @for (actividad of actividades(); track actividad.id_actividad) {
+              <option [value]="actividad.id_actividad">{{ actividad.titulo }}</option>
+            }
+          </select>
+          <small class="field-hint">Podés seleccionar varias actividades con Ctrl (Windows) o Cmd (Mac).</small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="primary-button" type="submit" [disabled]="isLoading()">
+          @if (isLoading()) { Registrando… } @else { + Registrar expositor }
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="list-section">
+    <div class="list-heading">
+      <div>
+        <h2>Expositores registrados</h2>
+        <p class="list-count">{{ expositoresFiltrados().length }} de {{ expositores().length }} expositores</p>
+      </div>
+
+      <label class="search-box">
+        <span class="sr-only">Buscar por nombre o especialidad</span>
+        <input
+          type="search"
+          [value]="busqueda()"
+          (input)="onBuscar($event)"
+          placeholder="Buscar por nombre o especialidad">
+      </label>
+    </div>
+
+    @if (isLoading() && expositores().length === 0) {
+      <div class="empty-state">Cargando expositores…</div>
+    } @else if (expositoresFiltrados().length === 0) {
+      <div class="empty-state">
+        <strong>{{ busqueda() ? 'No se encontraron coincidencias' : 'Todavía no hay expositores registrados' }}</strong>
+        <span>{{ busqueda() ? 'Probá con otro nombre o especialidad.' : 'Completá el formulario para registrar el primero.' }}</span>
+      </div>
+    } @else {
+      <div class="expositores-grid">
+        @for (expositor of expositoresFiltrados(); track expositor.id_conferencista) {
+          <article class="expositor-card">
+            <div class="card-person">
+              <div class="avatar" aria-hidden="true">{{ iniciales(expositor) }}</div>
+              <div class="person-data">
+                <h3>{{ expositor.nombres }} {{ expositor.apellidos }}</h3>
+                <a [href]="'mailto:' + expositor.email">{{ expositor.email }}</a>
+              </div>
+            </div>
+
+            <div class="person-details">
+              @if (expositor.institucion) {
+                <p><strong>Institución:</strong> {{ expositor.institucion }}</p>
+              }
+              <p class="detail-line">
+                <strong>Especialidad:</strong>
+                {{ expositor.especialidad?.trim() || 'No especificada' }}
+              </p>
+              @if (expositor.biografia) {
+                <p class="biography">{{ expositor.biografia }}</p>
+              }
+            </div>
+
+            <div class="activities">
+              <h4>Actividades asociadas</h4>
+              @if (expositor.actividades.length > 0) {
+                <div class="activity-list">
+                  @for (actividad of expositor.actividades; track actividad.id_actividad) {
+                    <div class="activity-item">
+                      <span class="activity-tag">{{ actividad.titulo }}</span>
+                      <p class="activity-date"><strong>Fecha de inicio:</strong> {{ fechaActividad(actividad.fecha) }}</p>
+                      <p class="activity-time"><strong>Hora de inicio:</strong> {{ actividad.hora_inicio }}</p>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <span class="no-activities">Sin actividades asignadas</span>
+              }
+            </div>
+
+            <div class="card-actions">
+              <button
+                type="button"
+                class="delete-button"
+                (click)="onDelete(expositor)"
+                [disabled]="isLoading()">× Eliminar</button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

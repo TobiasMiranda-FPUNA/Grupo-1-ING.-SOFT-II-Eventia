@@ -32,7 +32,6 @@ export class Roles extends BaseComponent implements OnInit {
     super();
 
     this.roleForm = this.fb.group({
-      codigo: ['', [Validators.required, Validators.maxLength(50)]],
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       descripcion: ['', [Validators.required]]
     });
@@ -54,31 +53,19 @@ export class Roles extends BaseComponent implements OnInit {
             data.map(rol => new RolParticipante(rol))
           );
 
+          this.errorMessage = '';
           this.stopLoading();
         },
 
-        error: () => {
-          this.rolesList.set([
-            new RolParticipante({
-              id_rol_participante: 1,
-              codigo: 'EST',
-              nombre: 'Estudiante',
-              descripcion: 'Matriculado',
-              activo: true,
-              en_uso: true
-            }),
-            new RolParticipante({
-              id_rol_participante: 2,
-              codigo: 'EXP',
-              nombre: 'Expositor',
-              descripcion: 'Conferencista',
-              activo: true,
-              en_uso: false
-            })
-          ]);
+        error: (error) => {
+          this.rolesList.set([]);
 
           this.errorMessage =
-            'No se pudo conectar con el servidor. Se muestran datos de respaldo.';
+            error.status === 401
+              ? 'Tu sesión no es válida. Iniciá sesión nuevamente.'
+              : error.status === 403
+                ? 'No tenés permisos para consultar los roles.'
+                : 'No se pudieron cargar los roles desde el servidor.';
 
           this.stopLoading();
         }
@@ -93,34 +80,35 @@ export class Roles extends BaseComponent implements OnInit {
 
     this.startLoading();
 
-    const newRole = new RolParticipante({
-      codigo: this.roleForm.value.codigo,
+    const newRole = {
       nombre: this.roleForm.value.nombre,
-      descripcion: this.roleForm.value.descripcion,
-      activo: true,
-      en_uso: false
-    });
+      descripcion: this.roleForm.value.descripcion
+    };
 
     this.rolesService
-      .create(newRole)
+      .create(newRole as RolParticipante)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (created) => {
+        next: () => {
           this.stopLoading();
 
           this.successMessage = 'Rol creado exitosamente.';
-
-          this.rolesList.update(roles => [
-            ...roles,
-            new RolParticipante(created)
-          ]);
-
           this.roleForm.reset();
+
+          this.loadRoles();
         },
 
-        error: () => {
+        error: (error) => {
           this.stopLoading();
-          this.errorMessage = 'No se pudo registrar el rol.';
+
+          this.errorMessage =
+            error.status === 409
+              ? 'Ya existe un rol con ese nombre.'
+              : error.status === 401
+                ? 'Tu sesión expiró. Iniciá sesión nuevamente.'
+                : error.status === 403
+                  ? 'No tenés permisos para crear roles.'
+                  : 'No se pudo registrar el rol.';
         }
       });
   }
@@ -128,32 +116,30 @@ export class Roles extends BaseComponent implements OnInit {
   onDeleteRole(role: RolParticipante): void {
     this.clearMessages();
 
-    if (role.en_uso) {
-      this.errorMessage =
-        `No se puede eliminar el rol "${role.nombre}" porque actualmente se encuentra asignado a inscripciones activas.`;
+    if (role.id === undefined) {
+      this.errorMessage = 'No se encontró el identificador del rol.';
       return;
     }
 
-    if (role.id_rol_participante) {
-      this.rolesService
-        .delete(role.id_rol_participante)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
-            this.rolesList.update(
-              roles =>
-                roles.filter(
-                  r => r.id_rol_participante !== role.id_rol_participante
-                )
-            );
+    this.rolesService
+      .delete(role.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Rol eliminado correctamente.';
+          this.loadRoles();
+        },
 
-            this.successMessage = 'Rol eliminado correctamente.';
-          },
-
-          error: () => {
-            this.errorMessage = 'No se pudo eliminar el rol.';
-          }
-        });
-    }
+        error: (error) => {
+          this.errorMessage =
+            error.status === 409
+              ? 'No se puede eliminar el rol porque está siendo utilizado.'
+              : error.status === 401
+                ? 'Tu sesión expiró. Iniciá sesión nuevamente.'
+                : error.status === 403
+                  ? 'No tenés permisos para eliminar roles.'
+                  : 'No se pudo eliminar el rol.';
+        }
+      });
   }
 }

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Expositores (mockup)</title>
+  <link rel="stylesheet" href="css/mockup-bar.css" />
+  <link rel="stylesheet" href="css/expositores.css" />
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <div><p class="eyebrow">Gestión académica</p><h1>Expositores</h1><p>Consultá y administrá los conferencistas registrados y sus actividades.</p></div>
+    </header>
+    <section class="form-card">
+      <h2>Registrar expositor</h2>
+      <form id="formExpositor">
+        <div class="form-grid">
+          <div class="field"><label for="nombres">Nombres *</label><input id="nombres" required maxlength="100" /></div>
+          <div class="field"><label for="apellidos">Apellidos *</label><input id="apellidos" required maxlength="100" /></div>
+          <div class="field"><label for="email">Correo electrónico *</label><input id="email" type="email" required maxlength="255" /></div>
+          <div class="field"><label for="institucion">Institución</label><input id="institucion" maxlength="150" /></div>
+          <div class="field"><label for="especialidad">Especialidad</label><input id="especialidad" maxlength="150" /></div>
+          <div class="field wide"><label for="biografia">Biografía</label><textarea id="biografia" rows="2" maxlength="1000"></textarea></div>
+        </div>
+        <button class="btn-primary" type="submit">+ Registrar expositor</button>
+      </form>
+    </section>
+    <section class="list-heading"><h2>Expositores registrados</h2><input id="buscar" type="search" placeholder="Buscar por nombre o especialidad..." aria-label="Buscar expositor" /></section>
+    <div class="alert" id="mensaje" role="status" hidden></div>
+    <section class="speaker-grid" id="lista" aria-live="polite"></section>
+    <div class="empty" id="vacio" hidden>No se encontraron expositores.</div>
+  </main>
+  <script src="js/mock-data.js"></script>
+  <script src="js/expositores.js"></script>
+  <script src="js/mockup-bar.js"></script>
+</body>
+</html>

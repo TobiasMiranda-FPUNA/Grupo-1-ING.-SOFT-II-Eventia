@@ -9,6 +9,7 @@
     { archivo: 'login.html', nombre: 'Login' },
     { archivo: 'roles.html', nombre: 'Roles' },
     { archivo: 'eventos.html', nombre: 'Eventos' },
+    { archivo: 'expositores.html', nombre: 'Expositores' },
     { archivo: 'evento-form.html', nombre: 'Nuevo evento' },
     { archivo: 'evento-form.html?id=1', nombre: 'Editar evento' },
   ];

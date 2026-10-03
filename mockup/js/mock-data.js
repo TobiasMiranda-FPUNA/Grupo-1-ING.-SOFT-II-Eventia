@@ -19,6 +19,10 @@
       { id: 2, nombre: 'Expositor', descripcion: 'Conferencista o ponente de actividad', activo: true, enUso: false },
       { id: 3, nombre: 'General', descripcion: 'Público general asistente', activo: true, enUso: false },
     ],
+    expositores: [
+      { id: 1, nombres: 'Juan', apellidos: 'Pérez', email: 'juan.perez@eventia.test', institucion: 'FP-UNA', especialidad: 'Testing de software', biografia: 'Especialista en pruebas y calidad de software.', actividades: ['Taller de Introducción al Testing'] },
+      { id: 2, nombres: 'Carlos Alberto', apellidos: 'Benítez Ramírez', email: 'carlos.benitez@eventia.test', institucion: 'Comunidad tecnológica', especialidad: 'Desarrollo de software', biografia: 'Ponente invitado en actividades de tecnología.', actividades: ['Taller de Introducción al Testing'] },
+    ],
     tipos: [
       { id_tipo_evento: 1, nombre: 'Congreso', activo: true },
       { id_tipo_evento: 2, nombre: 'Seminario', activo: true },
@@ -104,6 +108,14 @@
       return demora(null, 250);
     },
 
+    getExpositores() { return demora(datos.expositores, 250); },
+    createExpositor(expositor) {
+      const nuevo = { ...expositor, id: siguienteId(datos.expositores, 'id'), actividades: [] };
+      datos.expositores.push(nuevo); guardar(); return demora(nuevo, 350);
+    },
+    deleteExpositor(id) {
+      datos.expositores = datos.expositores.filter(e => e.id !== id); guardar(); return demora(null, 250);
+    },
     getTiposEvento() { return demora(datos.tipos, 150); },
     getEventos(filtros) {
       const q = (filtros?.q || '').toLowerCase();

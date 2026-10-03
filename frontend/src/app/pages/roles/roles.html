@@ -1,3 +1,4 @@
+
 <div class="roles-container">
 
     <header class="page-header">
@@ -5,7 +6,7 @@
         <p>Gestión de Roles de Participantes y Sistema</p>
     </header>
 
-    <!-- Mensajes de Notificación heredados de BaseComponent -->
+    <!-- Mensajes de notificación -->
     <div class="alert alert-danger" *ngIf="errorMessage">
         <strong>¡Acción Bloqueada!</strong> {{ errorMessage }}
     </div>
@@ -16,38 +17,16 @@
 
     <div class="content-grid">
 
-        <!-- Formulario para Crear Nuevo Rol -->
+        <!-- Formulario para crear un nuevo rol -->
         <section class="card form-card">
 
             <h3>Crear Nuevo Rol</h3>
 
-            <form [formGroup]="roleForm" (ngSubmit)="onSubmitRole()" novalidate>
-
-                <!-- Código -->
-                <div class="form-group">
-                    <label for="codigo">Código del Rol</label>
-
-                    <input
-                        type="text"
-                        id="codigo"
-                        formControlName="codigo"
-                        placeholder="Ej: EST, EXP, MOD"
-                        [class.is-invalid]="roleForm.get('codigo')?.touched && roleForm.get('codigo')?.invalid"
-                    />
-
-                    <div
-                        class="error-feedback"
-                        *ngIf="roleForm.get('codigo')?.touched && roleForm.get('codigo')?.invalid"
-                    >
-                        <small *ngIf="roleForm.get('codigo')?.errors?.['required']">
-                            El código es obligatorio.
-                        </small>
-
-                        <small *ngIf="roleForm.get('codigo')?.errors?.['maxlength']">
-                            Máximo 50 caracteres.
-                        </small>
-                    </div>
-                </div>
+            <form
+                [formGroup]="roleForm"
+                (ngSubmit)="onSubmitRole()"
+                novalidate
+            >
 
                 <!-- Nombre -->
                 <div class="form-group">
@@ -83,7 +62,7 @@
                         id="descripcion"
                         formControlName="descripcion"
                         rows="3"
-                        placeholder="Describa los permisos o categoría de este rol..."
+                        placeholder="Describa la función de este rol..."
                         [class.is-invalid]="roleForm.get('descripcion')?.touched && roleForm.get('descripcion')?.invalid"
                     ></textarea>
 
@@ -97,6 +76,7 @@
                     </div>
                 </div>
 
+                <!-- Botón de registro -->
                 <button
                     type="submit"
                     [disabled]="roleForm.invalid || isLoading"
@@ -109,7 +89,7 @@
 
         </section>
 
-        <!-- Tabla con Listado de Roles -->
+        <!-- Tabla de roles registrados -->
         <section class="card table-card">
 
             <h3>Roles Registrados</h3>
@@ -120,7 +100,7 @@
 
                     <thead>
                         <tr>
-                            <th>Código</th>
+                            <th>ID</th>
                             <th>Nombre</th>
                             <th>Descripción</th>
                             <th>Estado</th>
@@ -133,7 +113,7 @@
                         <tr *ngFor="let role of rolesList()">
 
                             <td>
-                                <strong>{{ role.codigo }}</strong>
+                                <strong>{{ role.id }}</strong>
                             </td>
 
                             <td>
@@ -147,24 +127,19 @@
                             <td>
                                 <span
                                     class="badge"
-                                    [class.badge-inuse]="role.en_uso"
-                                    [class.badge-free]="!role.en_uso"
+                                    [class.badge-inuse]="!role.activo"
+                                    [class.badge-free]="role.activo"
                                 >
-                                    {{ role.en_uso
-                                        ? 'En Uso (Inscripciones)'
-                                        : 'Disponible'
-                                    }}
+                                    {{ role.activo ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </td>
 
                             <td>
                                 <button
+                                    type="button"
                                     class="btn-danger"
                                     (click)="onDeleteRole(role)"
-                                    [disabled]="role.en_uso"
-                                    [title]="role.en_uso
-                                        ? 'Asignado a inscripciones activas'
-                                        : 'Eliminar rol'"
+                                    [title]="'Eliminar rol: ' + role.nombre"
                                 >
                                     Eliminar
                                 </button>
