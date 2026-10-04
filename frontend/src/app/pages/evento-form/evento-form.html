@@ -24,7 +24,16 @@
         <div class="field"><label>Fecha de inicio *</label><input type="date" formControlName="fecha_inicio" /></div>
         <div class="field"><label>Fecha de fin *</label><input type="date" formControlName="fecha_fin" /></div>
         <div class="field"><label>Lugar</label><input formControlName="lugar" placeholder="Auditorio, sede, ciudad..." /></div>
-        <div class="field"><label>Cupo máximo *</label><input type="number" min="1" formControlName="cupo_maximo" /></div>
+        <div class="field">
+          <label>Cupo máximo *</label>
+          <input type="number" min="1" formControlName="cupo_maximo" />
+          <small class="field-error" *ngIf="form.get('cupo_maximo')?.touched && form.get('cupo_maximo')?.hasError('required')">
+            El cupo máximo es obligatorio.
+          </small>
+          <small class="field-error" *ngIf="form.get('cupo_maximo')?.touched && form.get('cupo_maximo')?.hasError('min')">
+            El cupo máximo debe ser mayor que cero.
+          </small>
+        </div>
       </div>
     </section>
 

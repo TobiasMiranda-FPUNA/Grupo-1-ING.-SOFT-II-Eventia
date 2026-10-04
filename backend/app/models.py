@@ -80,8 +80,14 @@ class RolParticipante(Base):
         primary_key=True
     )
 
+    codigo: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False
+    )
+
     nombre: Mapped[str] = mapped_column(
-        String(80),
+        String(100),
         unique=True,
         nullable=False
     )
@@ -91,6 +97,19 @@ class RolParticipante(Base):
     activo: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
+        nullable=False
+    )
+
+    creado_en: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False
+    )
+
+    actualizado_en: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
 

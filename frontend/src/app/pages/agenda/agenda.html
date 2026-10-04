@@ -1,0 +1,86 @@
+<div class="agenda-page">
+  <header class="topbar">
+    <div class="brand">▦ EVENTIA</div>
+    <nav><a routerLink="/eventos">Eventos</a><a class="active" href="/agenda">Agenda</a><a href="/expositores">Expositores</a><a href="/roles">Roles</a></nav>
+    <span class="user-label">Usuario</span>
+  </header>
+
+  <main class="page-shell">
+    <a class="back" routerLink="/eventos">← Volver a eventos</a>
+    <div class="page-heading">
+      <div>
+        <h1>Congreso de Innovación Tecnológica 2026</h1>
+        <p>10–12 de junio de 2026 · Centro de Convenciones – Asunción</p>
+      </div>
+      <button class="outline-button" type="button" (click)="imprimir()">⇩ Descargar agenda</button>
+    </div>
+
+    <div class="organizer-note" *ngIf="esOrganizador()">
+      Vista de organizador: este prototipo permite consultar el cronograma. La creación y edición se conectarán posteriormente con el backend.
+    </div>
+
+    <div class="day-tabs" role="tablist" aria-label="Días del evento">
+      <button type="button" *ngFor="let dia of dias; let i = index"
+        [class.active]="diaSeleccionado() === i" (click)="seleccionarDia(i)">{{ dia }}</button>
+    </div>
+
+    <section class="filters">
+      <label>Filtrar por sala
+        <select [ngModel]="salaFiltro()" (ngModelChange)="salaFiltro.set($event)">
+          <option>Todas</option><option *ngFor="let sala of salas">{{ sala }}</option>
+        </select>
+      </label>
+      <label>Filtrar por tipo
+        <select [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
+          <option>Todos</option><option>Conferencia</option><option>Taller</option><option>Panel</option><option>Networking</option>
+        </select>
+      </label>
+      <input aria-label="Buscar actividad" placeholder="⌕ Buscar actividad..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)">
+    </section>
+
+    <div class="agenda-layout">
+      <section class="schedule-wrap" aria-label="Cronograma por horario y sala">
+        <div class="schedule">
+          <div class="grid-cell column-heading">Hora</div>
+          <div class="grid-cell column-heading room-a">Sala A</div>
+          <div class="grid-cell column-heading room-b">Sala B</div>
+          <div class="grid-cell column-heading room-c">Sala C</div>
+          <div class="grid-cell column-heading room-d">Sala D</div>
+
+          <ng-container *ngFor="let h of horas">
+            <div class="grid-cell time-cell">{{ hora(h) }}</div>
+            <div class="grid-cell" *ngFor="let sala of salas">
+              <button *ngIf="tieneActividad(sala, h) as actividad"
+                type="button" class="activity-card"
+                [class.green]="actividad.tipo === 'Taller'"
+                [class.orange]="actividad.tipo === 'Panel'"
+                [class.pink]="actividad.tipo === 'Networking'"
+                [class.selected]="actividadSeleccionada() === actividad.id"
+                (click)="seleccionarActividad(actividad.id)">
+                <strong>{{ actividad.titulo }}</strong>
+                <span>{{ hora(actividad.inicio) }}–{{ hora(actividad.fin) }}</span>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+        <p class="empty" *ngIf="actividadesFiltradas().length === 0">No se encontraron actividades con esos filtros.</p>
+      </section>
+
+      <aside class="detail-card" *ngIf="seleccionada() as actividad">
+        <h2>{{ actividad.titulo }}</h2>
+        <span class="tag">{{ actividad.tipo }}</span>
+        <p>▣ &nbsp; {{ dias[actividad.dia] }} de 2026</p>
+        <p>◷ &nbsp; {{ hora(actividad.inicio) }} – {{ hora(actividad.fin) }}</p>
+        <p>⌖ &nbsp; {{ actividad.sala }} – Centro de Convenciones</p>
+        <p class="description">{{ actividad.descripcion }}</p>
+        <div class="speaker"><b>Expositor</b><strong>{{ actividad.expositor }}</strong></div>
+        <span class="tag category">Tecnología</span>
+        <button class="primary-button" type="button" (click)="alternarAgendaPersonal(actividad.id)">
+          {{ estaEnAgenda(actividad.id) ? '✓ Agregada a mi agenda' : '+ Agregar a mi agenda' }}
+        </button>
+        <small class="hint">La agenda personal es una demostración local; aún no se guarda en el servidor.</small>
+      </aside>
+      <aside class="detail-card empty-detail" *ngIf="!seleccionada()">Seleccioná una actividad para ver sus detalles.</aside>
+    </div>
+  </main>
+</div>

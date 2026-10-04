@@ -80,7 +80,22 @@ export class EventoForm implements OnInit {
     if (this.paso() === 1) {
       const names = ['id_tipo_evento','nombre','fecha_inicio','fecha_fin','cupo_maximo'];
       names.forEach(n => this.form.get(n)?.markAsTouched());
-      if (names.some(n => this.form.get(n)?.invalid)) return;
+
+      const cupo = this.form.get('cupo_maximo');
+      if (cupo?.invalid) {
+        this.error.set(
+          cupo.hasError('min')
+            ? 'El cupo máximo debe ser mayor que cero.'
+            : 'El cupo máximo es obligatorio.'
+        );
+        return;
+      }
+
+      if (names.some(n => this.form.get(n)?.invalid)) {
+        this.error.set('Revisá los campos obligatorios antes de continuar.');
+        return;
+      }
+
       const inicio = this.form.value.fecha_inicio!;
       const fin = this.form.value.fecha_fin!;
       if (fin < inicio) { this.error.set('La fecha de fin no puede ser anterior a la fecha de inicio.'); return; }

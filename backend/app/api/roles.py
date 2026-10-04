@@ -4,28 +4,24 @@ from fastapi import APIRouter, Depends, HTTPException, status
 # select: construcción declarativa de consultas SQL.
 from sqlalchemy import func, select
 # IntegrityError: excepción que lanza SQLAlchemy cuando una operación viola
-# una restricción de la base de datos (ej: una clave foránea en uso).
+# una restricción de la base de datos.
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+import re
+import unicodedata
+from uuid import uuid4
 
 # Dependencia que exige que el usuario autenticado tenga un rol específico.
 from app.api.users import require_system_role
 from app.db import get_db
-# Modelos ORM involucrados: inscripciones, roles de participante/sistema,
-# usuarios y la tabla intermedia usuario-rol.
+# Modelos ORM involucrados.
 from app.models import Inscripcion, RolParticipante, RolSistema, Usuario, usuario_rol
 from app.schemas import RoleCreate, RoleResponse, RoleUpdate
 
 
-# Router con el prefijo "/api/v1/roles", agrupado bajo el tag "Parametrización".
 router = APIRouter(prefix="/api/v1/roles", tags=["Parametrización"])
-# Dependencia reutilizada en todos los endpoints de este router: exige que
-# el usuario autenticado tenga el rol de sistema "administrador".
 admin_required = Depends(require_system_role("administrador"))
-# Estados de una inscripción que se consideran "activos" (no cancelados),
-# usados para impedir borrar un rol de participante que esté en uso.
-# Incluye "lista_de_espera" (ver app/api/inscripciones.py): una inscripción
-# en espera de cupo sigue en uso, no debe permitir borrar su rol asociado.
+
 ACTIVE_INSCRIPTION_STATES = {
     "pendiente",
     "confirmada",
@@ -36,8 +32,6 @@ ACTIVE_INSCRIPTION_STATES = {
 }
 
 
-# Construye el error 409 Conflict que se devuelve cuando ya existe un rol
-# con el mismo nombre (evita duplicados).
 def duplicate_error() -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_409_CONFLICT,
@@ -45,10 +39,6 @@ def duplicate_error() -> HTTPException:
     )
 
 
-# Convierte un modelo de rol (de sistema o de participante) al schema de
-# respuesta RoleResponse. Como ambos modelos usan una columna de id
-# distinta (id_rol / id_rol_participante), se obtiene la que corresponda
-# con getattr para reutilizar la misma función en ambos casos.
 def role_response(role: RolSistema | RolParticipante) -> RoleResponse:
     role_id = getattr(role, "id_rol", getattr(role, "id_rol_participante", None))
     return RoleResponse(
@@ -59,16 +49,19 @@ def role_response(role: RolSistema | RolParticipante) -> RoleResponse:
     )
 
 
-# Lista todos los roles de sistema, ordenados por nombre. Solo accesible
-# para administradores.
+def participant_code_prefix(name: str) -> str:
+    normalized = unicodedata.normalize("NFKD", name)
+    ascii_name = normalized.encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", ascii_name).strip("-").upper()
+    return slug or "ROL"
+
+
 @router.get("/sistema", response_model=list[RoleResponse])
 def list_system_roles(db: Session = Depends(get_db), _: Usuario = admin_required):
     roles = db.scalars(select(RolSistema).order_by(RolSistema.nombre)).all()
     return [role_response(role) for role in roles]
 
 
-# Crea un nuevo rol de sistema, validando que no exista ya otro con el
-# mismo nombre (comparación insensible a mayúsculas).
 @router.post("/sistema", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
 def create_system_role(
     data: RoleCreate,
@@ -80,15 +73,15 @@ def create_system_role(
         raise duplicate_error()
     role = RolSistema(nombre=name, descripcion=data.descripcion)
     db.add(role)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise duplicate_error() from None
     db.refresh(role)
     return role_response(role)
 
 
-# Actualiza un rol de sistema existente (nombre, descripción y/o estado
-# activo). Registrado tanto para PUT como PATCH, ya que todos los campos
-# del schema RoleUpdate son opcionales y se actualizan solo si vienen
-# presentes en la petición.
 @router.put("/sistema/{role_id}", response_model=RoleResponse)
 @router.patch("/sistema/{role_id}", response_model=RoleResponse)
 def update_system_role(
@@ -115,14 +108,15 @@ def update_system_role(
         role.descripcion = data.descripcion
     if data.activo is not None:
         role.activo = data.activo
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise duplicate_error() from None
     db.refresh(role)
     return role_response(role)
 
 
-# Elimina un rol de sistema, siempre que no esté asignado a ningún usuario
-# (se verifica contra la tabla intermedia usuario_rol) para no dejar
-# referencias rotas.
 @router.delete("/sistema/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_system_role(
     role_id: int,
@@ -139,15 +133,12 @@ def delete_system_role(
     db.commit()
 
 
-# Lista todos los roles de participante, ordenados por nombre.
 @router.get("/participantes", response_model=list[RoleResponse])
 def list_participant_roles(db: Session = Depends(get_db), _: Usuario = admin_required):
     roles = db.scalars(select(RolParticipante).order_by(RolParticipante.nombre)).all()
     return [role_response(role) for role in roles]
 
 
-# Crea un nuevo rol de participante, validando que no exista ya otro con
-# el mismo nombre.
 @router.post("/participantes", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
 def create_participant_role(
     data: RoleCreate,
@@ -157,15 +148,30 @@ def create_participant_role(
     name = data.nombre.strip()
     if db.scalar(select(RolParticipante).where(func.lower(RolParticipante.nombre) == name.lower())):
         raise duplicate_error()
-    role = RolParticipante(nombre=name, descripcion=data.descripcion)
+
+    # Se usa un código temporal para insertar y obtener el ID generado por la BD.
+    # Luego se reemplaza por un código legible y único basado en nombre + ID.
+    role = RolParticipante(
+        codigo=f"TMP-{uuid4().hex.upper()}",
+        nombre=name,
+        descripcion=data.descripcion,
+    )
     db.add(role)
-    db.commit()
+
+    try:
+        db.flush()
+        prefix = participant_code_prefix(name)
+        suffix = f"-{role.id_rol_participante}"
+        role.codigo = f"{prefix[:50 - len(suffix)]}{suffix}"
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise duplicate_error() from None
+
     db.refresh(role)
     return role_response(role)
 
 
-# Actualiza un rol de participante existente (nombre, descripción y/o
-# estado activo), igual que update_system_role pero sobre RolParticipante.
 @router.put("/participantes/{role_id}", response_model=RoleResponse)
 @router.patch("/participantes/{role_id}", response_model=RoleResponse)
 def update_participant_role(
@@ -192,15 +198,15 @@ def update_participant_role(
         role.descripcion = data.descripcion
     if data.activo is not None:
         role.activo = data.activo
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise duplicate_error() from None
     db.refresh(role)
     return role_response(role)
 
 
-# Elimina un rol de participante, siempre que no tenga inscripciones
-# activas asociadas (ver ACTIVE_INSCRIPTION_STATES). Además captura
-# IntegrityError como resguardo extra por si la base de datos rechaza el
-# borrado por alguna otra restricción no contemplada en la validación previa.
 @router.delete("/participantes/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_participant_role(
     role_id: int,
