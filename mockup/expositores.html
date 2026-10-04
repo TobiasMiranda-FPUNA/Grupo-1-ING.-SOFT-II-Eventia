@@ -9,29 +9,91 @@
   <link rel="stylesheet" href="css/expositores.css" />
 </head>
 <body>
-  <main class="page-shell">
+  <div class="expositores-page">
     <header class="page-header">
-      <div><p class="eyebrow">Gestión académica</p><h1>Expositores</h1><p>Consultá y administrá los conferencistas registrados y sus actividades.</p></div>
+      <span class="eyebrow">GESTIÓN ACADÉMICA</span>
+      <h1>Expositores</h1>
+      <p>Consultá y administrá los conferencistas registrados y sus actividades.</p>
     </header>
-    <section class="form-card">
+
+    <div class="alert alert-error" id="errorMessage" role="alert" hidden>
+      <span></span>
+      <button type="button" aria-label="Cerrar">×</button>
+    </div>
+
+    <div class="alert alert-success" id="successMessage" role="status" hidden>
+      <span></span>
+      <button type="button" aria-label="Cerrar">×</button>
+    </div>
+
+    <section class="form-panel">
       <h2>Registrar expositor</h2>
-      <form id="formExpositor">
+
+      <form id="expositoresForm" novalidate>
         <div class="form-grid">
-          <div class="field"><label for="nombres">Nombres *</label><input id="nombres" required maxlength="100" /></div>
-          <div class="field"><label for="apellidos">Apellidos *</label><input id="apellidos" required maxlength="100" /></div>
-          <div class="field"><label for="email">Correo electrónico *</label><input id="email" type="email" required maxlength="255" /></div>
-          <div class="field"><label for="institucion">Institución</label><input id="institucion" maxlength="150" /></div>
-          <div class="field"><label for="especialidad">Especialidad</label><input id="especialidad" maxlength="150" /></div>
-          <div class="field wide"><label for="biografia">Biografía</label><textarea id="biografia" rows="2" maxlength="1000"></textarea></div>
+          <div class="field">
+            <label for="nombres">Nombres <span>*</span></label>
+            <input id="nombres" autocomplete="given-name">
+            <small class="field-error" data-error-for="nombres" hidden>Ingresá al menos 2 caracteres.</small>
+          </div>
+
+          <div class="field">
+            <label for="apellidos">Apellidos <span>*</span></label>
+            <input id="apellidos" autocomplete="family-name">
+            <small class="field-error" data-error-for="apellidos" hidden>Ingresá al menos 2 caracteres.</small>
+          </div>
+
+          <div class="field">
+            <label for="email">Correo electrónico <span>*</span></label>
+            <input id="email" type="email" autocomplete="email">
+            <small class="field-error" data-error-for="email" hidden>Ingresá un correo válido.</small>
+          </div>
+
+          <div class="field">
+            <label for="institucion">Institución</label>
+            <input id="institucion">
+          </div>
+
+          <div class="field">
+            <label for="especialidad">Especialidad</label>
+            <input id="especialidad">
+          </div>
+
+          <div class="field field-full">
+            <label for="biografia">Biografía</label>
+            <textarea id="biografia" rows="3"></textarea>
+          </div>
+
+          <div class="field field-full">
+            <label for="actividades">Actividades asociadas (opcional)</label>
+            <select id="actividades" multiple disabled></select>
+            <small class="field-hint">Podés seleccionar varias actividades con Ctrl (Windows) o Cmd (Mac).</small>
+          </div>
         </div>
-        <button class="btn-primary" type="submit">+ Registrar expositor</button>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit" id="submitBtn">+ Registrar expositor</button>
+        </div>
       </form>
     </section>
-    <section class="list-heading"><h2>Expositores registrados</h2><input id="buscar" type="search" placeholder="Buscar por nombre o especialidad..." aria-label="Buscar expositor" /></section>
-    <div class="alert" id="mensaje" role="status" hidden></div>
-    <section class="speaker-grid" id="lista" aria-live="polite"></section>
-    <div class="empty" id="vacio" hidden>No se encontraron expositores.</div>
-  </main>
+
+    <section class="list-section">
+      <div class="list-heading">
+        <div>
+          <h2>Expositores registrados</h2>
+          <p class="list-count" id="listCount">0 de 0 expositores</p>
+        </div>
+
+        <label class="search-box">
+          <span class="sr-only">Buscar por nombre o especialidad</span>
+          <input type="search" id="busqueda" placeholder="Buscar por nombre o especialidad">
+        </label>
+      </div>
+
+      <div id="lista"></div>
+    </section>
+  </div>
+
   <script src="js/mock-data.js"></script>
   <script src="js/expositores.js"></script>
   <script src="js/mockup-bar.js"></script>

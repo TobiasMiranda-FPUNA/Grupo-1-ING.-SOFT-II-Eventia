@@ -15,7 +15,8 @@ Uso:
   .\scripts\mockup_up.ps1 <pantalla>   # abre esa pantalla
   .\scripts\mockup_up.ps1 -List        # lista las pantallas
 
-Pantallas: todas, login, roles, eventos, evento-nuevo, evento-editar
+Pantallas: todas, login, roles, eventos, evento-nuevo, evento-editar,
+           expositores
 
 Si PowerShell bloquea la ejecución de scripts, corré antes
 (una sola vez, por usuario):
@@ -47,6 +48,7 @@ $Pantallas = [ordered]@{
   "eventos"       = @{ Pagina = "eventos.html";          Desc = "Catálogo de eventos (/eventos)" }
   "evento-nuevo"  = @{ Pagina = "evento-form.html";      Desc = "Crear evento (/eventos/nuevo)" }
   "evento-editar" = @{ Pagina = "evento-form.html?id=1"; Desc = "Editar evento (/eventos/:id/editar)" }
+  "expositores"   = @{ Pagina = "expositores.html";      Desc = "Gestión de expositores (/expositores)" }
 }
 $Nombres = @($Pantallas.Keys)
 
