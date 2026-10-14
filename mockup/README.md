@@ -36,6 +36,7 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
 | `eventos`      | `eventos.html`            | `/eventos`              |
 | `evento-nuevo` | `evento-form.html`        | `/eventos/nuevo`        |
 | `evento-editar`| `evento-form.html?id=1`   | `/eventos/:id/editar`   |
+| `expositores`  | `expositores.html`        | `/expositores`          |
 
 ## Datos de prueba
 
@@ -44,6 +45,9 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
   de credencial inválida.
 - El rol "Estudiante" está marcado como en uso, para probar el bloqueo al
   eliminarlo.
+- Expositores: hay 4 actividades de ejemplo para asociar al registrar. Si se
+  usa un correo ya registrado (p. ej. `juan.perez@eventia.test`) se muestra el
+  error de duplicado (409).
 - "Reiniciar datos" (barra inferior) vuelve a los datos de ejemplo.
 
 ## Estructura
@@ -58,8 +62,6 @@ mockup/
     ├── mock-data.js      API simulada y datos de ejemplo
     ├── mockup-bar.js     navegación entre pantallas
     └── <pantalla>.js     lógica de cada pantalla (réplica de su .ts)
-
-La pantalla Expositores incluye datos de ejemplo y operaciones locales de alta, búsqueda y eliminación; no se conecta a la API real.
 ```
 
 Si se modifica una pantalla del frontend, hay que actualizar a mano su

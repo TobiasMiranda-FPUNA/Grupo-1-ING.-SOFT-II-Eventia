@@ -59,15 +59,15 @@
     }
     tbody.innerHTML = roles.map(r => `
       <tr>
-        <td>#${escapar(r.id)}</td>
-        <td><strong>${escapar(r.nombre)}</strong></td>
+        <td><strong>${escapar(r.id)}</strong></td>
+        <td>${escapar(r.nombre)}</td>
         <td>${escapar(r.descripcion)}</td>
         <td>
-          <span class="badge ${r.enUso ? 'badge-inuse' : 'badge-free'}">
-            ${r.enUso ? 'En Uso (Inscripciones)' : 'Disponible'}
+          <span class="badge ${r.activo ? 'badge-free' : 'badge-inuse'}">
+            ${r.activo ? 'Activo' : 'Inactivo'}
           </span>
         </td>
-        <td><button class="btn-danger" data-id="${r.id}" title="Eliminar rol">Eliminar</button></td>
+        <td><button type="button" class="btn-danger" data-id="${r.id}" title="Eliminar rol: ${escapar(r.nombre)}">Eliminar</button></td>
       </tr>`).join('');
   }
 
@@ -93,6 +93,15 @@
     mostrarMensajes(null, null);
     renderFormulario();
 
+    // El backend responde 409 si ya existe un rol con ese nombre.
+    const nombre = campos.nombre.input.value.trim();
+    if (roles.some(r => r.nombre.toLowerCase() === nombre.toLowerCase())) {
+      cargando = false;
+      mostrarMensajes('Ya existe un rol con ese nombre.', null);
+      renderFormulario();
+      return;
+    }
+
     MockApi.createRole({
       nombre: campos.nombre.input.value,
       descripcion: campos.descripcion.input.value,
@@ -107,7 +116,7 @@
     });
   });
 
-  // Criterio de aceptación: bloquear la eliminación si el rol está en uso.
+  // El backend responde 409 si el rol está siendo utilizado.
   tbody.addEventListener('click', e => {
     const boton = e.target.closest('button[data-id]');
     if (!boton) return;
@@ -115,7 +124,7 @@
     mostrarMensajes(null, null);
 
     if (rol.enUso) {
-      mostrarMensajes(`No se puede eliminar el rol "${rol.nombre}" porque actualmente se encuentra asignado a inscripciones activas.`, null);
+      mostrarMensajes('No se puede eliminar el rol porque está siendo utilizado.', null);
       return;
     }
 
