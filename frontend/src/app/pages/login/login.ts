@@ -39,7 +39,7 @@ export class Login {
     this.authService.login(credentials).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/roles']);
+        this.router.navigate(['/inicio']);
       },
       error: () => {
         this.isLoading.set(false);

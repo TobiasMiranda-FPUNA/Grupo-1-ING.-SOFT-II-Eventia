@@ -937,7 +937,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"biografia\": \"texto de ejemplo (biografia)\"\n}",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"especialidad\": \"texto de ejemplo (especialidad)\",\n  \"biografia\": \"texto de ejemplo (biografia)\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1044,7 +1044,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"biografia\": \"texto de ejemplo (biografia)\",\n  \"activo\": true\n}",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"especialidad\": \"texto de ejemplo (especialidad)\",\n  \"biografia\": \"texto de ejemplo (biografia)\",\n  \"activo\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1085,7 +1085,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"biografia\": \"texto de ejemplo (biografia)\",\n  \"activo\": true\n}",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\",\n  \"especialidad\": \"texto de ejemplo (especialidad)\",\n  \"biografia\": \"texto de ejemplo (biografia)\",\n  \"activo\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"

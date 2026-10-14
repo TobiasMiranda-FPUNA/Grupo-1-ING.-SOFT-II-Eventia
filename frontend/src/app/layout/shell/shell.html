@@ -1,0 +1,27 @@
+<header class="topbar">
+  <a class="brand" routerLink="/inicio">▦ EVENTIA</a>
+
+  <button type="button" class="menu-toggle" aria-label="Abrir menú" (click)="menuAbierto.set(!menuAbierto())">☰</button>
+
+  <nav [class.open]="menuAbierto()" (click)="menuAbierto.set(false)">
+    <a routerLink="/inicio" routerLinkActive="active">Inicio</a>
+    @for (op of menu(); track op.ruta) {
+      <a [routerLink]="op.ruta" routerLinkActive="active">{{ op.titulo }}</a>
+    }
+  </nav>
+
+  @if (usuario(); as u) {
+    <div class="user">
+      <span class="avatar">{{ iniciales() }}</span>
+      <span class="user-info">
+        <strong>{{ u.nombres }} {{ u.apellidos }}</strong>
+        <small>{{ u.roles.join(', ') || 'Sin rol asignado' }}</small>
+      </span>
+      <button type="button" class="logout" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  }
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
