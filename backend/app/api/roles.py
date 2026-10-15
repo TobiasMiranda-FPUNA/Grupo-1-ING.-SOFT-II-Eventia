@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 # func: funciones SQL (ej: lower(), trim()) usadas en las consultas.
 # select: construcción declarativa de consultas SQL.
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 # IntegrityError: excepción que lanza SQLAlchemy cuando una operación viola
 # una restricción de la base de datos.
 from sqlalchemy.exc import IntegrityError
@@ -32,6 +32,19 @@ ACTIVE_INSCRIPTION_STATES = {
 }
 
 
+# PostgreSQL no reutiliza valores de secuencia consumidos por inserts fallidos
+# o por roles eliminados, lo que genera saltos grandes en los IDs.
+# Antes de insertar se alinea la secuencia con el mayor ID existente para que
+# el nuevo rol reciba MAX(id) + 1.
+def sync_id_sequence(db: Session, table: str, column: str) -> None:
+    db.execute(
+        text(
+            f"SELECT setval(pg_get_serial_sequence('{table}', '{column}'), "
+            f"COALESCE((SELECT MAX({column}) FROM {table}), 0) + 1, false)"
+        )
+    )
+
+
 def duplicate_error() -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_409_CONFLICT,
@@ -58,7 +71,7 @@ def participant_code_prefix(name: str) -> str:
 
 @router.get("/sistema", response_model=list[RoleResponse])
 def list_system_roles(db: Session = Depends(get_db), _: Usuario = admin_required):
-    roles = db.scalars(select(RolSistema).order_by(RolSistema.nombre)).all()
+    roles = db.scalars(select(RolSistema).order_by(RolSistema.id_rol)).all()
     return [role_response(role) for role in roles]
 
 
@@ -71,6 +84,7 @@ def create_system_role(
     name = data.nombre.strip()
     if db.scalar(select(RolSistema).where(func.lower(RolSistema.nombre) == name.lower())):
         raise duplicate_error()
+    sync_id_sequence(db, "rol_sistema", "id_rol_sistema")
     role = RolSistema(nombre=name, descripcion=data.descripcion)
     db.add(role)
     try:
@@ -135,7 +149,7 @@ def delete_system_role(
 
 @router.get("/participantes", response_model=list[RoleResponse])
 def list_participant_roles(db: Session = Depends(get_db), _: Usuario = admin_required):
-    roles = db.scalars(select(RolParticipante).order_by(RolParticipante.nombre)).all()
+    roles = db.scalars(select(RolParticipante).order_by(RolParticipante.id_rol_participante)).all()
     return [role_response(role) for role in roles]
 
 
@@ -148,6 +162,8 @@ def create_participant_role(
     name = data.nombre.strip()
     if db.scalar(select(RolParticipante).where(func.lower(RolParticipante.nombre) == name.lower())):
         raise duplicate_error()
+
+    sync_id_sequence(db, "rol_participante", "id_rol_participante")
 
     # Se usa un código temporal para insertar y obtener el ID generado por la BD.
     # Luego se reemplaza por un código legible y único basado en nombre + ID.
