@@ -40,7 +40,9 @@ Requisitos previos:
 Variables de entorno opcionales:
   BACKEND_PORT=8000
   FRONTEND_PORT=4200
-  TUNNEL=cloudflared|ngrok   (por defecto, el primero que esté instalado)
+  TUNNEL=cloudflared|ngrok|vscode   (por defecto, el primero que esté instalado;
+                                    vscode = no abre túnel, se reenvía el puerto
+                                    desde la pestaña "Puertos" de VS Code)
   NO_BROWSER=1               (no abrir el navegador automáticamente)
 ============================================================
 #>
@@ -126,7 +128,7 @@ try {
             if (Get-Command cloudflared -ErrorAction SilentlyContinue) { $Tunnel = "cloudflared" }
             elseif (Get-Command ngrok -ErrorAction SilentlyContinue)   { $Tunnel = "ngrok" }
         }
-        if (-not $Tunnel -or -not (Get-Command $Tunnel -ErrorAction SilentlyContinue)) {
+        if ($Tunnel -ne "vscode" -and (-not $Tunnel -or -not (Get-Command $Tunnel -ErrorAction SilentlyContinue)))) {
             throw "Modo remote: no se encontró cloudflared ni ngrok. Instalá uno, por ejemplo: winget install --id Cloudflare.cloudflared"
         }
     }
@@ -187,7 +189,7 @@ try {
     $PublicUrl = $null
 
     # --- Abrir túnel (solo modo remote) ---
-    if ($Mode -eq "remote") {
+    if ($Mode -eq "remote" -and $Tunnel -ne "vscode") {
         Write-Host "==> Abriendo túnel con $Tunnel ..."
         $TunnelLog = [System.IO.Path]::GetTempFileName()
 
@@ -198,9 +200,11 @@ try {
                 -WindowStyle Hidden -PassThru
             for ($i = 0; $i -lt 30 -and -not $PublicUrl; $i++) {
                 Start-Sleep -Seconds 1
-                $match = Select-String -Path $TunnelLog -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' -ErrorAction SilentlyContinue | Select-Object -First 1
+                # Se excluye api.trycloudflare.com, que aparece en los mensajes de error.
+                $match = Select-String -Path $TunnelLog -Pattern 'https://(?!api\.)[a-z0-9-]+\.trycloudflare\.com' -ErrorAction SilentlyContinue | Select-Object -First 1
                 if ($match) { $PublicUrl = $match.Matches[0].Value }
                 if ($TunnelProcess.HasExited) { break }
+                if (Select-String -Path $TunnelLog -Pattern 'failed to request quick Tunnel' -Quiet -ErrorAction SilentlyContinue) { break }
             }
         } else {
             $TunnelProcess = Start-Process -FilePath "ngrok" `
@@ -219,13 +223,22 @@ try {
 
         if (-not $PublicUrl) {
             Get-Content $TunnelLog, "$TunnelLog.out" -ErrorAction SilentlyContinue | Write-Host
+            if (Select-String -Path $TunnelLog -Pattern 'no such host' -Quiet -ErrorAction SilentlyContinue) {
+                Write-Host ""
+                Write-Host "El DNS de tu red no resuelve trycloudflare.com (algunos routers/ISP lo bloquean)."
+                Write-Host "Cambiá el DNS del adaptador a 1.1.1.1 / 8.8.8.8, o usá ngrok: `$env:TUNNEL='ngrok'"
+            }
             throw "No se pudo obtener la URL pública del túnel (log de $Tunnel arriba)."
         }
         Write-Host "==> Túnel listo."
     }
 
     Write-Host ""
-    if ($Mode -eq "remote") {
+    if ($Mode -eq "remote" -and $Tunnel -eq "vscode") {
+        Write-Host "Modo remote sin túnel propio. En VS Code abrí la pestaña 'Puertos',"
+        Write-Host "reenviá el puerto $FrontendPort y poné su visibilidad en 'Público'."
+        Write-Host "Local: http://localhost:$FrontendPort"
+    } elseif ($Mode -eq "remote") {
         Open-Browser $PublicUrl
         Write-Host "URL pública (compartila): $PublicUrl"
         Write-Host "API pública (Swagger):    $PublicUrl/docs"

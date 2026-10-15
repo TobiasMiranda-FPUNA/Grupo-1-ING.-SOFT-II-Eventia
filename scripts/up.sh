@@ -32,7 +32,9 @@
 # Variables de entorno opcionales:
 #   BACKEND_PORT=8000
 #   FRONTEND_PORT=4200
-#   TUNNEL=cloudflared|ngrok   (por defecto, el primero que esté instalado)
+#   TUNNEL=cloudflared|ngrok|vscode   (por defecto, el primero que esté instalado;
+#                                     vscode = no abre túnel, se reenvía el puerto
+#                                     desde la pestaña "Puertos" de VS Code)
 #   NO_BROWSER=1               (no abrir el navegador automáticamente)
 # ============================================================
 
@@ -47,7 +49,7 @@ export BACKEND_PORT
 case "$MODE" in
   local|remote) ;;
   -h|--help)
-    sed -n '2,38p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
   *)
@@ -116,7 +118,7 @@ port_in_use() {
 }
 
 # --- Elegir herramienta de túnel (solo modo remote) ---
-if [[ "$MODE" == "remote" ]]; then
+if [[ "$MODE" == "remote" && "$TUNNEL" != "vscode" ]]; then
   if [[ -z "$TUNNEL" ]]; then
     if command -v cloudflared >/dev/null 2>&1; then
       TUNNEL="cloudflared"
@@ -191,7 +193,7 @@ echo "==> Frontend listo."
 PUBLIC_URL=""
 
 # --- Abrir túnel (solo modo remote) ---
-if [[ "$MODE" == "remote" ]]; then
+if [[ "$MODE" == "remote" && "$TUNNEL" != "vscode" ]]; then
   TUNNEL_LOG="$(mktemp -t eventia-tunnel.XXXXXX)"
   echo "==> Abriendo túnel con $TUNNEL ..."
 
@@ -199,8 +201,11 @@ if [[ "$MODE" == "remote" ]]; then
     cloudflared tunnel --no-autoupdate --url "http://localhost:$FRONTEND_PORT" >"$TUNNEL_LOG" 2>&1 &
     TUNNEL_PID=$!
     for _ in $(seq 1 30); do
-      PUBLIC_URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$TUNNEL_LOG" | head -n 1 || true)"
+      # Se excluye api.trycloudflare.com, que aparece en los mensajes de error.
+      PUBLIC_URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$TUNNEL_LOG" \
+        | grep -v '^https://api\.' | head -n 1 || true)"
       [[ -n "$PUBLIC_URL" ]] && break
+      grep -q 'failed to request quick Tunnel' "$TUNNEL_LOG" && break
       kill -0 "$TUNNEL_PID" 2>/dev/null || break
       sleep 1
     done
@@ -219,12 +224,24 @@ if [[ "$MODE" == "remote" ]]; then
   if [[ -z "$PUBLIC_URL" ]]; then
     echo "No se pudo obtener la URL pública del túnel. Log de $TUNNEL:" >&2
     cat "$TUNNEL_LOG" >&2
+    if grep -q 'no such host' "$TUNNEL_LOG"; then
+      echo >&2
+      echo "El DNS de tu red no resuelve trycloudflare.com (algunos routers/ISP lo bloquean)." >&2
+      echo "Cambiá el DNS a 1.1.1.1 / 8.8.8.8, por ejemplo en macOS:" >&2
+      echo "  networksetup -setdnsservers Wi-Fi 1.1.1.1 8.8.8.8" >&2
+      echo "o usá ngrok: TUNNEL=ngrok ./scripts/up.sh remote" >&2
+    fi
     exit 1
   fi
   echo "==> Túnel listo."
 fi
 
-if [[ "$MODE" == "remote" ]]; then
+if [[ "$MODE" == "remote" && "$TUNNEL" == "vscode" ]]; then
+  echo
+  echo "Modo remote sin túnel propio. En VS Code abrí la pestaña 'Puertos',"
+  echo "reenviá el puerto $FRONTEND_PORT y poné su visibilidad en 'Público'."
+  echo "Local: http://localhost:$FRONTEND_PORT"
+elif [[ "$MODE" == "remote" ]]; then
   open_browser "$PUBLIC_URL"
   echo
   echo "URL pública (compartila): $PUBLIC_URL"

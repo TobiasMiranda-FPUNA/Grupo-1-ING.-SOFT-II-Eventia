@@ -79,7 +79,7 @@
             "remote": {
               "buildTarget": "frontend-app:build:remote",
               "proxyConfig": "proxy.conf.mjs",
-              "allowedHosts": [".trycloudflare.com", ".ngrok-free.app", ".ngrok-free.dev", ".ngrok.app"],
+              "allowedHosts": [".trycloudflare.com", ".devtunnels.ms", ".ngrok-free.app", ".ngrok-free.dev", ".ngrok.app"],
               "liveReload": false,
               "hmr": false
             }
