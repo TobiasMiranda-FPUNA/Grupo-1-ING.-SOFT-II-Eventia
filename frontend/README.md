@@ -57,3 +57,19 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+## Funcionalidades de Eventia
+
+Rutas públicas:
+- `/inscripciones`: inscripción a eventos con respuesta Confirmada/Lista de espera.
+- `/agenda`: agenda pública del evento.
+- `/certificados/verificar`: verificación pública de certificados.
+
+Rutas autenticadas:
+- `/inicio`: panel inicial según rol.
+- `/eventos`: catálogo de eventos.
+- `/eventos/nuevo`: alta de evento.
+- `/expositores`: gestión de conferencistas.
+- `/asistencias`: registro de presentes/ausentes por actividad.
+- `/certificados`: cálculo de elegibilidad, emisión y descarga de certificados.
