@@ -86,3 +86,41 @@ La base inicial está compuesta por las siguientes tablas:
 - `asistencia`: registra la presencia de una inscripción en una actividad e impide duplicados mediante `UNIQUE (id_inscripcion, id_actividad)`.
 - `certificado`: registra certificados emitidos y genera un código único para su verificación pública.
 
+
+
+---
+
+## Funcionalidades integradas del Sprint 4
+
+### Registro de asistencia (HU07)
+- Vista autenticada en `/asistencias`.
+- Selección de evento y actividad.
+- Lista únicamente las inscripciones confirmadas del evento.
+- Permite marcar cada participante como `presente` o `ausente`.
+- El backend actualiza el registro si ya existía y conserva la restricción
+  `UNIQUE (id_inscripcion, id_actividad)` para impedir duplicados.
+- Acceso para Organizador, Administrador y Personal de acreditación.
+
+### Certificados (HU08)
+- Vista autenticada en `/certificados`.
+- Calcula el porcentaje de asistencia usando las actividades del evento.
+- Compara el porcentaje obtenido con `min_asistencia_certificado` de la
+  política de inscripción.
+- El botón **Generar** solo queda habilitado cuando el participante cumple
+  el mínimo configurado.
+- Cada certificado posee un `codigo_validacion` único.
+- Un certificado emitido puede descargarse y verificarse desde la interfaz
+  pública `/certificados/verificar`.
+
+### Flujo integrado
+`Evento → Inscripción → Agenda/Actividad → Asistencia → Certificado → Verificación pública`
+
+### Pruebas
+Desde `backend/` se puede ejecutar:
+
+```bash
+DATABASE_URL=sqlite:///:memory: python -m pytest -q
+```
+
+La suite incluye pruebas específicas de asistencia, elegibilidad/emisión de
+certificados y un flujo integrado de Sprint 4.
