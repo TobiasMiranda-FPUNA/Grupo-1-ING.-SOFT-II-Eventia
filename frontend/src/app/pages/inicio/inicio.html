@@ -1,0 +1,56 @@
+<div class="inicio-page">
+  @if (usuario(); as u) {
+    <section class="hero">
+      <div>
+        <p class="eyebrow">{{ saludo() }}</p>
+        <h1>¡Bienvenido/a, {{ u.nombres }}!</h1>
+        <p>Desde aquí podés acceder a las operaciones habilitadas para tu perfil en Eventia.</p>
+      </div>
+      <div class="perfil">
+        <span class="perfil-label">Tu perfil</span>
+        <div class="roles">
+          @for (rol of u.roles; track rol) {
+            <span class="rol">{{ rol }}</span>
+          } @empty {
+            <span class="rol sin-rol">Sin rol asignado</span>
+          }
+        </div>
+        <small>{{ u.email }}</small>
+      </div>
+    </section>
+
+    <h2>¿Qué querés hacer hoy?</h2>
+    <section class="grid">
+      @for (op of disponibles(); track op.ruta) {
+        <a class="card" [routerLink]="op.ruta">
+          <span class="icono">{{ op.icono }}</span>
+          <div>
+            <h3>{{ op.titulo }}</h3>
+            <p>{{ op.descripcion }}</p>
+          </div>
+          <span class="historia">{{ op.historia }}</span>
+          <span class="ir">Ingresar →</span>
+        </a>
+      } @empty {
+        <p class="empty">Tu usuario no tiene operaciones habilitadas. Contactá al administrador.</p>
+      }
+    </section>
+
+    @if (proximas().length) {
+      <h2>Próximamente</h2>
+      <section class="grid">
+        @for (op of proximas(); track op.ruta) {
+          <div class="card disabled" aria-disabled="true">
+            <span class="icono">{{ op.icono }}</span>
+            <div>
+              <h3>{{ op.titulo }}</h3>
+              <p>{{ op.descripcion }}</p>
+            </div>
+            <span class="historia">{{ op.historia }}</span>
+            <span class="badge">En desarrollo</span>
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

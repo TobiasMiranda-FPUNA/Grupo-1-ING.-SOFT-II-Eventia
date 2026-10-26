@@ -1752,6 +1752,18 @@
             ],
             "title": "Institucion"
           },
+          "especialidad": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Especialidad"
+          },
           "biografia": {
             "anyOf": [
               {
@@ -1802,6 +1814,18 @@
               }
             ],
             "title": "Institucion"
+          },
+          "especialidad": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Especialidad"
           },
           "biografia": {
             "anyOf": [
@@ -1884,6 +1908,18 @@
               }
             ],
             "title": "Institucion"
+          },
+          "especialidad": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Especialidad"
           },
           "biografia": {
             "anyOf": [

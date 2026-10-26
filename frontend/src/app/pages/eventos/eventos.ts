@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService, ROLES } from '../../services/auth';
 import { Evento, EventosService, TipoEvento } from '../../services/eventos';
 
 @Component({
@@ -12,6 +13,12 @@ import { Evento, EventosService, TipoEvento } from '../../services/eventos';
 })
 export class Eventos implements OnInit {
   private eventosService = inject(EventosService);
+  private auth = inject(AuthService);
+
+  // Solo el organizador puede crear o editar eventos; el resto solo los consulta.
+  get puedeGestionar(): boolean {
+    return this.auth.hasRole(ROLES.ORGANIZADOR);
+  }
 
   eventos = signal<Evento[]>([]);
   tipos = signal<TipoEvento[]>([]);

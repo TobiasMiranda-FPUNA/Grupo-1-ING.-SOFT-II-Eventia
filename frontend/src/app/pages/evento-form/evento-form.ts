@@ -63,7 +63,7 @@ export class EventoForm implements OnInit {
         this.form.patchValue({
           id_tipo_evento: String(e.id_tipo_evento), nombre: e.nombre, descripcion: e.descripcion ?? '',
           fecha_inicio: e.fecha_inicio, fecha_fin: e.fecha_fin, lugar: e.lugar ?? '',
-          cupo_maximo: e.cupo_maximo, estado: e.estado,
+          cupo_maximo: e.cupo_maximo, estado: e.estado?.toLowerCase() ?? 'borrador',
           fecha_limite: e.politica?.fecha_limite ?? '',
           requiere_aprobacion: e.politica?.requiere_aprobacion ?? false,
           permite_lista_espera: e.politica?.permite_lista_espera ?? false,
@@ -126,8 +126,17 @@ export class EventoForm implements OnInit {
     const request = this.eventoId ? this.service.updateEvento(this.eventoId, payload) : this.service.createEvento(payload);
     request.subscribe({
       next: () => this.router.navigate(['/eventos']),
-      error: err => { this.guardando.set(false); this.error.set(err?.error?.detail || 'No se pudo guardar el evento.'); }
+      error: err => { this.guardando.set(false); this.error.set(this.mensajeError(err?.error?.detail)); }
     });
+  }
+
+  // FastAPI devuelve `detail` como texto o, en errores 422, como lista de objetos.
+  private mensajeError(detail: unknown): string {
+    if (typeof detail === 'string' && detail) return detail;
+    if (Array.isArray(detail) && detail.length) {
+      return detail.map(d => d?.msg ?? String(d)).join(' · ');
+    }
+    return 'No se pudo guardar el evento.';
   }
 
   nombreTipoSeleccionado(): string {

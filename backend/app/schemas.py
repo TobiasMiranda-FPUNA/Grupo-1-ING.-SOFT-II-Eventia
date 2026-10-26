@@ -139,6 +139,15 @@ class TipoEventoResponse(BaseModel):
 # EVENTOS
 # ============================================================
 
+# La base guarda el estado en mayúsculas ("PUBLICADO"); se acepta
+# cualquier capitalización y se normaliza a minúsculas para validar.
+EstadoEvento = Annotated[
+    Literal["borrador", "publicado"],
+    BeforeValidator(
+        lambda v: v.strip().lower() if isinstance(v, str) else v
+    ),
+]
+
 class EventoBase(BaseModel):
     id_tipo_evento: int
 
@@ -162,7 +171,7 @@ class EventoBase(BaseModel):
 
     cupo_maximo: int = Field(gt=0)
 
-    estado: Literal["borrador", "publicado"] = "borrador"
+    estado: EstadoEvento = "borrador"
 
     @model_validator(mode="after")
     def check_fechas(self) -> "EventoBase":
@@ -207,7 +216,7 @@ class EventoUpdate(BaseModel):
         gt=0
     )
 
-    estado: Literal["borrador", "publicado"] | None = None
+    estado: EstadoEvento | None = None
 
     politica: PoliticaInscripcionData | None = None
 

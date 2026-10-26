@@ -52,6 +52,17 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "remote": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.remote.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -64,6 +75,13 @@
             },
             "development": {
               "buildTarget": "frontend-app:build:development"
+            },
+            "remote": {
+              "buildTarget": "frontend-app:build:remote",
+              "proxyConfig": "proxy.conf.mjs",
+              "allowedHosts": [".trycloudflare.com", ".devtunnels.ms", ".ngrok-free.app", ".ngrok-free.dev", ".ngrok.app"],
+              "liveReload": false,
+              "hmr": false
             }
           },
           "defaultConfiguration": "development"

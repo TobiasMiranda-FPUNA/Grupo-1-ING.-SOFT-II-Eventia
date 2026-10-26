@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService, ROLES } from '../../services/auth';
 
 type TipoActividad = 'Conferencia' | 'Taller' | 'Panel' | 'Networking';
 interface Actividad {
@@ -18,7 +19,7 @@ interface Actividad {
 
 @Component({
   selector: 'app-agenda',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './agenda.html',
   styleUrl: './agenda.scss',
 })
@@ -33,7 +34,7 @@ export class Agenda {
   busqueda = signal('');
   actividadSeleccionada = signal<number | null>(2);
   agendaPersonal = signal<number[]>([]);
-  esOrganizador = signal(false);
+  esOrganizador = signal(inject(AuthService).hasRole(ROLES.ORGANIZADOR));
 
   readonly actividades: Actividad[] = [
     { id: 1, dia: 0, inicio: 8, fin: 9, sala: 'Sala A', titulo: 'Apertura del evento', tipo: 'Conferencia', expositor: 'Comité organizador', descripcion: 'Bienvenida e introducción a las actividades del congreso.' },
@@ -70,7 +71,7 @@ export class Agenda {
 
   constructor(route: ActivatedRoute) {
     const rol = route.snapshot.queryParamMap.get('rol');
-    this.esOrganizador.set(rol === 'organizador' || rol === 'admin');
+    if (rol) this.esOrganizador.set(rol === 'organizador' || rol === 'admin');
   }
 
   seleccionarDia(index: number): void {
