@@ -5,7 +5,7 @@
       <h1>Catálogo de eventos</h1>
       <p>Consultá, filtrá y administrá los eventos registrados en Eventia.</p>
     </div>
-    <a *ngIf="puedeGestionar" routerLink="/eventos/nuevo" class="btn-primary">+ Nuevo evento</a>
+    <a routerLink="/eventos/nuevo" class="btn-primary">+ Nuevo evento</a>
   </header>
 
   <section class="filters-card">
@@ -56,7 +56,11 @@
         <div><dt>Lugar</dt><dd>{{ evento.lugar || 'No definido' }}</dd></div>
         <div><dt>Cupo</dt><dd>{{ evento.cupo_maximo }} personas</dd></div>
       </dl>
-      <a *ngIf="puedeGestionar" [routerLink]="['/eventos', evento.id_evento, 'editar']" class="edit-link">Editar evento →</a>
+      <div class="card-actions">
+        <a [routerLink]="['/eventos', evento.id_evento, 'agenda']">Agenda</a>
+        <a *ngIf="evento.estado === 'publicado'" [routerLink]="['/eventos', evento.id_evento, 'inscribirse']">Inscripción pública</a>
+        <a [routerLink]="['/eventos', evento.id_evento, 'editar']" class="edit-link">Editar →</a>
+      </div>
     </article>
   </section>
 
@@ -71,7 +75,11 @@
           <td>{{ evento.lugar || '-' }}</td>
           <td>{{ evento.cupo_maximo }}</td>
           <td><span class="badge" [class.published]="evento.estado === 'publicado'">{{ evento.estado }}</span></td>
-          <td><a *ngIf="puedeGestionar" [routerLink]="['/eventos', evento.id_evento, 'editar']">Editar</a></td>
+          <td class="row-actions">
+            <a [routerLink]="['/eventos', evento.id_evento, 'agenda']">Agenda</a>
+            <a *ngIf="evento.estado === 'publicado'" [routerLink]="['/eventos', evento.id_evento, 'inscribirse']">Inscribir</a>
+            <a [routerLink]="['/eventos', evento.id_evento, 'editar']">Editar</a>
+          </td>
         </tr>
       </tbody>
     </table>
