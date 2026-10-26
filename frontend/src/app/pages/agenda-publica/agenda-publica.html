@@ -1,0 +1,78 @@
+<div class="agenda-page">
+  <header class="agenda-header">
+    <div>
+      <span class="eyebrow">EVENTIA</span>
+      <h1>Agenda del evento</h1>
+      <p>Consultá el cronograma por día y sala.</p>
+    </div>
+    <div class="public-links"><a routerLink="/inscripciones" class="secondary-link">Inscribirme</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
+  </header>
+
+  <section class="selector-card">
+    <label for="evento">Evento</label>
+    <select
+      id="evento"
+      [ngModel]="eventoId()"
+      (ngModelChange)="cambiarEvento($event)">
+      @for (evento of eventos(); track evento.id_evento) {
+        <option [ngValue]="evento.id_evento">{{ evento.nombre }}</option>
+      }
+    </select>
+  </section>
+
+  @if (eventoActual()) {
+    <section class="event-summary">
+      <div>
+        <h2>{{ eventoActual()?.nombre }}</h2>
+        <p>{{ eventoActual()?.lugar || 'Lugar a confirmar' }}</p>
+      </div>
+      <span>{{ eventoActual()?.fecha_inicio | date:'dd/MM/yyyy' }} - {{ eventoActual()?.fecha_fin | date:'dd/MM/yyyy' }}</span>
+    </section>
+  }
+
+  @if (error()) {
+    <div class="alert">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="empty">Cargando agenda…</div>
+  } @else if (!actividades().length) {
+    <div class="empty">Este evento todavía no tiene actividades publicadas.</div>
+  } @else {
+    <nav class="days" aria-label="Días del evento">
+      @for (dia of dias(); track dia) {
+        <button
+          type="button"
+          [class.active]="diaSeleccionado() === dia"
+          (click)="diaSeleccionado.set(dia)">
+          {{ etiquetaDia(dia) }}
+        </button>
+      }
+    </nav>
+
+    <section class="schedule-grid" [style.--room-count]="salas().length">
+      @for (sala of salas(); track sala) {
+        <div class="room-column">
+          <h3>{{ sala }}</h3>
+          <div class="activity-stack">
+            @for (actividad of actividadesSala(sala); track actividad.id_actividad) {
+              <article class="activity-card">
+                <div class="time">{{ actividad.hora_inicio.slice(0,5) }} - {{ actividad.hora_fin.slice(0,5) }}</div>
+                <h4>{{ actividad.titulo }}</h4>
+                @if (actividad.descripcion) {
+                  <p>{{ actividad.descripcion }}</p>
+                }
+                <div class="meta">
+                  <span>{{ actividad.modalidad }}</span>
+                  <span>Cupo: {{ actividad.cupo }}</span>
+                </div>
+              </article>
+            } @empty {
+              <div class="room-empty">Sin actividades</div>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  }
+</div>
