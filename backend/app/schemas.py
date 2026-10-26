@@ -139,15 +139,6 @@ class TipoEventoResponse(BaseModel):
 # EVENTOS
 # ============================================================
 
-# La base guarda el estado en mayúsculas ("PUBLICADO"); se acepta
-# cualquier capitalización y se normaliza a minúsculas para validar.
-EstadoEvento = Annotated[
-    Literal["borrador", "publicado"],
-    BeforeValidator(
-        lambda v: v.strip().lower() if isinstance(v, str) else v
-    ),
-]
-
 class EventoBase(BaseModel):
     id_tipo_evento: int
 
@@ -171,7 +162,7 @@ class EventoBase(BaseModel):
 
     cupo_maximo: int = Field(gt=0)
 
-    estado: EstadoEvento = "borrador"
+    estado: Literal["borrador", "publicado"] = "borrador"
 
     @model_validator(mode="after")
     def check_fechas(self) -> "EventoBase":
@@ -216,7 +207,7 @@ class EventoUpdate(BaseModel):
         gt=0
     )
 
-    estado: EstadoEvento | None = None
+    estado: Literal["borrador", "publicado"] | None = None
 
     politica: PoliticaInscripcionData | None = None
 
@@ -428,3 +419,30 @@ class InscripcionResponse(BaseModel):
     id_rol_participante: int
     fecha_inscripcion: datetime
     estado: str
+
+# ============================================================
+# ROLES PÚBLICOS PARA INSCRIPCIÓN
+# ============================================================
+
+class RolParticipantePublicResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_rol_participante: int
+    nombre: str
+    descripcion: str | None
+
+
+# ============================================================
+# CERTIFICADOS - VERIFICACIÓN PÚBLICA
+# ============================================================
+
+class CertificadoVerificacionResponse(BaseModel):
+    valido: bool = True
+    codigo_validacion: str
+    tipo: str
+    fecha_emision: datetime
+    id_inscripcion: int
+    participante: str
+    evento: str
+    fecha_inicio_evento: date
+    fecha_fin_evento: date

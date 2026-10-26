@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, UTC
+import uuid
 
 from sqlalchemy import (
     Boolean,
@@ -80,14 +81,8 @@ class RolParticipante(Base):
         primary_key=True
     )
 
-    codigo: Mapped[str] = mapped_column(
-        String(50),
-        unique=True,
-        nullable=False
-    )
-
     nombre: Mapped[str] = mapped_column(
-        String(100),
+        String(80),
         unique=True,
         nullable=False
     )
@@ -97,19 +92,6 @@ class RolParticipante(Base):
     activo: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
-        nullable=False
-    )
-
-    creado_en: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=text("CURRENT_TIMESTAMP"),
-        nullable=False
-    )
-
-    actualizado_en: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=text("CURRENT_TIMESTAMP"),
-        onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
 
@@ -506,6 +488,90 @@ class Actividad(Base):
     conferencistas: Mapped[list[Conferencista]] = relationship(
         secondary=actividad_conferencista,
         lazy="selectin"
+    )
+
+
+# ============================================================
+# ASISTENCIA
+# ============================================================
+
+class Asistencia(Base):
+    __tablename__ = "asistencia"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "id_inscripcion",
+            "id_actividad",
+            name="uq_asistencia_inscripcion_actividad",
+        ),
+    )
+
+    id_asistencia: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    id_inscripcion: Mapped[int] = mapped_column(
+        ForeignKey("inscripcion.id_inscripcion", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    id_actividad: Mapped[int] = mapped_column(
+        ForeignKey("actividad.id_actividad", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    fecha_hora_registro: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    estado: Mapped[str] = mapped_column(
+        String(20),
+        default="presente",
+        nullable=False,
+    )
+
+
+# ============================================================
+# CERTIFICADOS
+# ============================================================
+
+class Certificado(Base):
+    __tablename__ = "certificado"
+
+    id_certificado: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    id_inscripcion: Mapped[int] = mapped_column(
+        ForeignKey("inscripcion.id_inscripcion", ondelete="RESTRICT"),
+        unique=True,
+        nullable=False,
+    )
+
+    tipo: Mapped[str] = mapped_column(
+        String(50),
+        default="participacion",
+        nullable=False,
+    )
+
+    fecha_emision: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # PostgreSQL genera este valor por defecto desde crear_certificado.sql.
+    # El default Python mantiene compatibilidad con SQLite en pruebas.
+    codigo_validacion: Mapped[str] = mapped_column(
+        String(32),
+        unique=True,
+        index=True,
+        default=lambda: uuid.uuid4().hex.upper(),
+        nullable=False,
     )
 
 
