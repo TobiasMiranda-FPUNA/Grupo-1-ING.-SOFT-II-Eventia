@@ -26,9 +26,6 @@
 -- únicamente para pruebas locales/desarrollo. No usar en producción.
 --   admin@eventia.test        / Admin123!
 --   organizador@eventia.test  / Organizador123!
---   participante@eventia.test / Participante123!
---   conferencista@eventia.test / Conferencista123!
---   acreditacion@eventia.test / Acreditacion123!
 -- Los hashes fueron generados con Argon2 (misma librería que usa
 -- el backend en app/core/security.py) para que el login funcione
 -- de verdad contra estos datos de ejemplo.
@@ -46,13 +43,7 @@ VALUES
     ('Ana', 'Duarte', 'admin@eventia.test',
      '$argon2id$v=19$m=65536,t=3,p=4$rtUP+TyGwUvWG48J0oml2Q$HqQIuYYQCC+SFTPfCx6MFjtzG4hi612MLp3wiPPdvIA'),
     ('Carlos', 'Benítez', 'organizador@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$GTaSo+LO8hgmOMufEKVP1g$AdoLESyVY4iOsMCZV5Rl9oKKtTx+d2iesc/Lo56a9E4'),
-    ('Lucía', 'Giménez', 'participante@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$4cDLmlvnQJAf1ZQys34ajQ$mUvsEGSp0jAknBUWNqXSpH/MTIerVyvPUxWdNwOAQOg'),
-    ('Laura', 'Méndez', 'conferencista@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$AtqWe2SK8OLT/Vs+7BxFsA$LErA8RHaiW5O08jm53wAg/aWCUM4PoTXGsQ4G78eTx4'),
-    ('Pedro', 'Ayala', 'acreditacion@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$sLW+4Z9n/76w6Fo2VPjefQ$QJdIf8MUbAAdfJ7zvyFOOtpLzKcUnUC0lz9vKqrToQ8')
+     '$argon2id$v=19$m=65536,t=3,p=4$GTaSo+LO8hgmOMufEKVP1g$AdoLESyVY4iOsMCZV5Rl9oKKtTx+d2iesc/Lo56a9E4')
 ON CONFLICT (correo) DO NOTHING;
 
 -- USUARIO_ROL: asigna el rol de sistema correspondiente a cada
@@ -71,17 +62,6 @@ JOIN rol_sistema rs ON rs.codigo = 'ORGANIZADOR'
 WHERE u.correo = 'organizador@eventia.test'
 ON CONFLICT (id_usuario, id_rol_sistema) DO NOTHING;
 
-INSERT INTO usuario_rol (id_usuario, id_rol_sistema)
-SELECT u.id_usuario, rs.id_rol_sistema
-FROM (VALUES
-    ('participante@eventia.test',  'PARTICIPANTE'),
-    ('conferencista@eventia.test', 'CONFERENCISTA'),
-    ('acreditacion@eventia.test',  'ACREDITACION')
-) AS v(correo, codigo_rol)
-JOIN usuario u ON u.correo = v.correo
-JOIN rol_sistema rs ON rs.codigo = v.codigo_rol
-ON CONFLICT (id_usuario, id_rol_sistema) DO NOTHING;
-
 -- ------------------------------------------------------------
 -- EVENTO: un evento por cada tipo relevante mencionado en el
 -- informe (congreso, taller, seminario).
@@ -95,13 +75,13 @@ SELECT te.id_tipo_evento, v.nombre, v.descripcion,
 FROM (VALUES
     ('CONGRESO', 'Congreso Nacional de Tecnología 2026',
      'Congreso académico con ponencias sobre desarrollo de software e innovación.',
-     DATE '2026-11-10', DATE '2026-11-12', 'Facultad Politécnica - San Lorenzo', 200, 'PUBLICADO'),
+     DATE '2026-11-10', DATE '2026-11-12', 'Facultad Politécnica - San Lorenzo', 200, 'publicado'),
     ('TALLER', 'Taller de Testing Ágil',
      'Taller práctico sobre técnicas de testing en equipos ágiles.',
-     DATE '2026-10-05', DATE '2026-10-05', 'Laboratorio de Informática 3', 30, 'PUBLICADO'),
+     DATE '2026-10-05', DATE '2026-10-05', 'Laboratorio de Informática 3', 30, 'publicado'),
     ('SEMINARIO', 'Seminario de Arquitectura de Software',
      'Seminario introductorio a arquitecturas monolíticas y de microservicios.',
-     DATE '2026-09-25', DATE '2026-09-25', 'Auditorio Central', 80, 'BORRADOR')
+     DATE '2026-09-25', DATE '2026-09-25', 'Auditorio Central', 80, 'borrador')
 ) AS v(codigo_tipo, nombre, descripcion, fecha_inicio, fecha_fin, lugar, cupo_maximo, estado)
 JOIN tipo_evento te ON te.codigo = v.codigo_tipo
 WHERE NOT EXISTS (
@@ -149,11 +129,11 @@ WHERE NOT EXISTS (
 INSERT INTO inscripcion (id_evento, id_participante, id_rol_participante, estado)
 SELECT e.id_evento, p.id_participante, rp.id_rol_participante, v.estado
 FROM (VALUES
-    ('Congreso Nacional de Tecnología 2026', 'lucia.fernandez@example.com', 'ASISTENTE', 'CONFIRMADA'),
-    ('Congreso Nacional de Tecnología 2026', 'marcos.ortiz@example.com', 'ASISTENTE', 'CONFIRMADA'),
-    ('Congreso Nacional de Tecnología 2026', 'diego.caceres@example.com', 'MODERADOR', 'CONFIRMADA'),
-    ('Taller de Testing Ágil', 'valeria.gomez@example.com', 'ASISTENTE', 'PENDIENTE'),
-    ('Taller de Testing Ágil', 'marcos.ortiz@example.com', 'ASISTENTE', 'LISTA_ESPERA')
+    ('Congreso Nacional de Tecnología 2026', 'lucia.fernandez@example.com', 'ASISTENTE', 'confirmada'),
+    ('Congreso Nacional de Tecnología 2026', 'marcos.ortiz@example.com', 'ASISTENTE', 'confirmada'),
+    ('Congreso Nacional de Tecnología 2026', 'diego.caceres@example.com', 'MODERADOR', 'confirmada'),
+    ('Taller de Testing Ágil', 'valeria.gomez@example.com', 'ASISTENTE', 'pendiente'),
+    ('Taller de Testing Ágil', 'marcos.ortiz@example.com', 'ASISTENTE', 'lista_de_espera')
 ) AS v(nombre_evento, email_participante, codigo_rol, estado)
 JOIN evento e ON e.nombre = v.nombre_evento
 JOIN participante p ON p.email = v.email_participante

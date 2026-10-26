@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS conferencista (
     apellidos           VARCHAR(100) NOT NULL,
     email               VARCHAR(150) NOT NULL,
     institucion         VARCHAR(150),
+    especialidad        VARCHAR(150),
     biografia           TEXT,
     activo              BOOLEAN      NOT NULL DEFAULT TRUE,
     creado_en           TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,

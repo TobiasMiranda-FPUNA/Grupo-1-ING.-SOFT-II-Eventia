@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS evento (
     fecha_fin DATE NOT NULL,
     lugar VARCHAR(200) NOT NULL,
     cupo_maximo INTEGER NOT NULL,
-    estado VARCHAR(20) NOT NULL DEFAULT 'BORRADOR',
+    estado VARCHAR(20) NOT NULL DEFAULT 'borrador',
     creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS evento (
     CONSTRAINT ck_evento_fechas CHECK (fecha_fin >= fecha_inicio),
     CONSTRAINT ck_evento_cupo_maximo CHECK (cupo_maximo > 0),
     CONSTRAINT ck_evento_estado
-        CHECK (estado IN ('BORRADOR', 'PUBLICADO', 'FINALIZADO', 'CANCELADO'))
+        CHECK (estado IN ('borrador', 'publicado', 'finalizado', 'cancelado'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_evento_id_tipo_evento
