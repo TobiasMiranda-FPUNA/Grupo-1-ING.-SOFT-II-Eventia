@@ -1,1 +1,17 @@
+:host { display:block; min-height:100vh; background:#f5f7fb; color:#1f2937; font-family:Arial,sans-serif; }
+.verify-page { max-width:900px; margin:auto; padding:42px 22px 70px; }
+.verify-header { display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:22px; }
+.eyebrow { color:#2563eb; font-weight:800; font-size:12px; letter-spacing:.08em; } h1 { margin:5px 0 8px; font-size:34px; } .verify-header p { color:#64748b; margin:0; }
+.secondary-link { color:#2563eb; font-weight:800; text-decoration:none; }
+.search-card,.certificate-card,.alert { background:#fff; border:1px solid #e5e7eb; border-radius:15px; padding:22px; box-shadow:0 4px 20px #0f172a0d; }
+.search-card label { display:block; font-weight:800; font-size:13px; margin-bottom:8px; } .search-row { display:flex; gap:10px; }
+.search-row input { flex:1; border:1px solid #cbd5e1; border-radius:9px; padding:12px; text-transform:uppercase; } .search-row button,.download-button { border:0; border-radius:9px; background:#2563eb; color:#fff; padding:12px 18px; font-weight:800; cursor:pointer; }
+.search-row button:disabled { opacity:.65; }
+.alert { margin-top:16px; display:flex; flex-direction:column; gap:5px; } .alert.invalid { background:#fff1f2; border-color:#fecdd3; color:#9f1239; }
+.certificate-card { margin-top:20px; text-align:center; border-top:5px solid #16a34a; padding:34px; }
+.valid-badge { display:inline-block; background:#dcfce7; color:#166534; border-radius:999px; padding:7px 12px; font-weight:800; font-size:13px; }
+.certificate-label { margin:28px 0 8px; color:#64748b; letter-spacing:.08em; font-size:12px; font-weight:800; } .certificate-card h2 { font-size:30px; margin:8px 0; } .lead { color:#64748b; margin:12px 0 5px; } .certificate-card h3 { margin:0 0 24px; font-size:22px; }
+.certificate-data { display:grid; grid-template-columns:1fr 1fr; gap:12px; text-align:left; margin:25px 0; } .certificate-data div { background:#f8fafc; border-radius:10px; padding:13px; } .certificate-data span { display:block; color:#64748b; font-size:12px; margin-bottom:4px; } .code { font-family:monospace; word-break:break-all; }
+.download-button { margin-bottom:10px; } .certificate-card small { display:block; color:#64748b; }
+@media (max-width:650px){ .verify-header{align-items:flex-start;flex-direction:column}.search-row{flex-direction:column}.certificate-data{grid-template-columns:1fr} }
 
