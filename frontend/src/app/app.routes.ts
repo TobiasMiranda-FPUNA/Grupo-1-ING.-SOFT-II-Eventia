@@ -6,6 +6,8 @@ import { Roles } from './pages/roles/roles';
 import { Eventos } from './pages/eventos/eventos';
 import { EventoForm } from './pages/evento-form/evento-form';
 import { Expositores } from './pages/expositores/expositores';
+import { Asistencias } from './pages/asistencias/asistencias';
+import { Certificados } from './pages/certificados/certificados';
 
 import { InscripcionPublica } from './pages/inscripcion-publica/inscripcion-publica';
 import { AgendaPublica } from './pages/agenda-publica/agenda-publica';
@@ -121,6 +123,31 @@ export const routes: Routes = [
             ROLES.ORGANIZADOR,
             ROLES.ADMINISTRADOR,
             ROLES.CONFERENCISTA,
+          ],
+        },
+      },
+
+      {
+        path: 'asistencias',
+        component: Asistencias,
+        canActivate: [roleGuard],
+        data: {
+          roles: [
+            ROLES.ORGANIZADOR,
+            ROLES.ADMINISTRADOR,
+            ROLES.ACREDITACION,
+          ],
+        },
+      },
+
+      {
+        path: 'certificados',
+        component: Certificados,
+        canActivate: [roleGuard],
+        data: {
+          roles: [
+            ROLES.ORGANIZADOR,
+            ROLES.ADMINISTRADOR,
           ],
         },
       },

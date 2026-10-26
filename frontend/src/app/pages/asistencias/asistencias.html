@@ -1,0 +1,111 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">HU07 · ACREDITACIÓN</span>
+      <h1>Registro de asistencia</h1>
+      <p>Seleccioná un evento y una actividad para marcar presentes y ausentes.</p>
+    </div>
+  </header>
+
+  <section class="filters-card">
+    <label>
+      Evento
+      <select [(ngModel)]="eventoId" (ngModelChange)="cambiarEvento()">
+        <option [ngValue]="null">Seleccionar evento</option>
+        @for (evento of eventos(); track evento.id_evento) {
+          <option [ngValue]="evento.id_evento">{{ evento.nombre }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Actividad
+      <select
+        [(ngModel)]="actividadId"
+        (ngModelChange)="cambiarActividad()"
+        [disabled]="!eventoId">
+        <option [ngValue]="null">Seleccionar actividad</option>
+        @for (actividad of actividades(); track actividad.id_actividad) {
+          <option [ngValue]="actividad.id_actividad">
+            {{ actividad.fecha | date:'dd/MM' }} · {{ actividad.hora_inicio.slice(0, 5) }} · {{ actividad.titulo }}
+          </option>
+        }
+      </select>
+    </label>
+  </section>
+
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+  @if (mensaje()) {
+    <div class="alert success">{{ mensaje() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="empty-card">Cargando participantes…</div>
+  } @else if (actividadId && participantes().length === 0) {
+    <div class="empty-card">No hay inscripciones confirmadas para esta actividad.</div>
+  } @else if (participantes().length > 0) {
+    <section class="attendance-card">
+      <div class="attendance-toolbar">
+        <div>
+          <strong>{{ participantes().length }} participante(s)</strong>
+          <span>{{ pendientes() }} sin marcar</span>
+        </div>
+        <div class="toolbar-actions">
+          <button type="button" class="ghost" (click)="marcarTodos('presente')">Todos presentes</button>
+          <button type="button" class="ghost" (click)="marcarTodos('ausente')">Todos ausentes</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Participante</th>
+              <th>Correo</th>
+              <th class="center">Presente</th>
+              <th class="center">Ausente</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of participantes(); track p.id_inscripcion) {
+              <tr>
+                <td>
+                  <strong>{{ p.participante }}</strong>
+                  <small>Inscripción #{{ p.id_inscripcion }}</small>
+                </td>
+                <td>{{ p.email }}</td>
+                <td class="center">
+                  <button
+                    type="button"
+                    class="state present"
+                    [class.active]="p.estado_asistencia === 'presente'"
+                    (click)="marcar(p, 'presente')">✓</button>
+                </td>
+                <td class="center">
+                  <button
+                    type="button"
+                    class="state absent"
+                    [class.active]="p.estado_asistencia === 'ausente'"
+                    (click)="marcar(p, 'ausente')">×</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="save-row">
+        <span>Los cambios pueden actualizarse volviendo a guardar la actividad.</span>
+        <button
+          type="button"
+          class="primary"
+          [disabled]="guardando() || pendientes() > 0"
+          (click)="guardar()">
+          {{ guardando() ? 'Guardando…' : 'Guardar asistencia' }}
+        </button>
+      </div>
+    </section>
+  }
+</section>

@@ -34,9 +34,20 @@ CREATE TABLE IF NOT EXISTS asistencia (
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
 
-    CONSTRAINT ck_asistencia_estado_no_vacio
-        CHECK (BTRIM(estado) <> '')
+    CONSTRAINT ck_asistencia_estado_valido
+        CHECK (estado IN ('presente', 'ausente'))
 );
+
+-- Compatibilidad con bases creadas con una versión anterior del script.
+ALTER TABLE asistencia
+    DROP CONSTRAINT IF EXISTS ck_asistencia_estado_no_vacio;
+
+ALTER TABLE asistencia
+    DROP CONSTRAINT IF EXISTS ck_asistencia_estado_valido;
+
+ALTER TABLE asistencia
+    ADD CONSTRAINT ck_asistencia_estado_valido
+    CHECK (estado IN ('presente', 'ausente'));
 
 COMMENT ON TABLE asistencia IS
 'Registra la asistencia de una inscripción a una actividad del evento.';

@@ -35,3 +35,14 @@ El código retornado puede verificarse desde la ruta pública del frontend `/cer
 ## Compatibilidad con instalaciones anteriores
 
 `ajustar_compatibilidad_backend.sql` normaliza los estados de `evento` e `inscripcion` a los valores en minúsculas que usa el backend actual, permite participante sin documento y agrega `especialidad` a `conferencista` si todavía no existe.
+
+
+## Reglas incorporadas en Sprint 4
+
+- `asistencia.estado` admite `presente` o `ausente`.
+- La combinación `(id_inscripcion, id_actividad)` continúa siendo única.
+- La elegibilidad del certificado se calcula en backend como:
+  `asistencias presentes / total de actividades del evento * 100`.
+- El porcentaje se compara con `politica_inscripcion.min_asistencia_certificado`.
+- Solo una inscripción confirmada que alcance el mínimo puede generar un certificado.
+- `certificado.codigo_validacion` es único y se utiliza para la verificación pública.

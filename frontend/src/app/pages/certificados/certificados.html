@@ -1,0 +1,98 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">HU08 · CERTIFICACIÓN</span>
+      <h1>Certificados</h1>
+      <p>La elegibilidad se calcula con las asistencias registradas y el mínimo configurado en cada evento.</p>
+    </div>
+    <a routerLink="/certificados/verificar" class="public-link">Verificación pública</a>
+  </header>
+
+  <section class="filters-card">
+    <label>
+      Evento
+      <select [(ngModel)]="eventoId" (ngModelChange)="cargar()">
+        <option [ngValue]="null">Seleccionar evento</option>
+        @for (evento of eventos(); track evento.id_evento) {
+          <option [ngValue]="evento.id_evento">{{ evento.nombre }}</option>
+        }
+      </select>
+    </label>
+  </section>
+
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+  @if (mensaje()) {
+    <div class="alert success">{{ mensaje() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="empty-card">Calculando asistencias…</div>
+  } @else if (eventoId && participantes().length === 0) {
+    <div class="empty-card">Este evento todavía no tiene inscripciones.</div>
+  } @else if (participantes().length > 0) {
+    <section class="list-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Participante</th>
+              <th>Asistencia</th>
+              <th>Mínimo</th>
+              <th>Estado</th>
+              <th>Certificado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of participantes(); track item.id_inscripcion) {
+              <tr>
+                <td>
+                  <strong>{{ item.participante }}</strong>
+                  <small>{{ item.email }} · Inscripción #{{ item.id_inscripcion }}</small>
+                </td>
+                <td>
+                  <strong>{{ item.porcentaje_asistencia | number:'1.0-2' }}%</strong>
+                  <small>{{ item.asistencias_presentes }}/{{ item.actividades_evento }} actividades</small>
+                </td>
+                <td>{{ item.minimo_requerido }}%</td>
+                <td>
+                  <span class="badge" [class.ok]="item.elegible" [class.wait]="!item.elegible">
+                    {{ item.elegible ? 'Elegible' : 'No elegible' }}
+                  </span>
+                </td>
+                <td>
+                  @if (item.certificado_emitido) {
+                    <span class="badge issued">Emitido</span>
+                    <small class="code">{{ item.codigo_validacion }}</small>
+                  } @else {
+                    <span class="muted">Pendiente</span>
+                  }
+                </td>
+                <td class="actions">
+                  @if (!item.certificado_emitido) {
+                    <button
+                      type="button"
+                      class="primary"
+                      [disabled]="!item.elegible || procesando() === item.id_inscripcion"
+                      (click)="emitir(item)">
+                      {{ procesando() === item.id_inscripcion ? 'Generando…' : 'Generar' }}
+                    </button>
+                  } @else {
+                    <button type="button" class="secondary" (click)="descargar(item)">Descargar</button>
+                    <a
+                      class="verify"
+                      [routerLink]="['/certificados/verificar', item.codigo_validacion]">
+                      Verificar
+                    </a>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>
