@@ -446,3 +446,54 @@ class CertificadoVerificacionResponse(BaseModel):
     evento: str
     fecha_inicio_evento: date
     fecha_fin_evento: date
+
+
+
+# ============================================================
+# ASISTENCIA - GESTIÓN
+# ============================================================
+
+EstadoAsistencia = Literal["presente", "ausente"]
+
+
+class AsistenciaRegistroItem(BaseModel):
+    id_inscripcion: int
+    estado: EstadoAsistencia
+
+
+class AsistenciaRegistroMasivo(BaseModel):
+    registros: list[AsistenciaRegistroItem] = Field(min_length=1)
+
+
+class AsistenciaParticipanteResponse(BaseModel):
+    id_inscripcion: int
+    id_participante: int
+    participante: str
+    email: Email
+    estado_inscripcion: str
+    estado_asistencia: EstadoAsistencia | None = None
+
+
+class AsistenciaGuardadoResponse(BaseModel):
+    id_actividad: int
+    registros_guardados: int
+
+
+# ============================================================
+# CERTIFICADOS - GESTIÓN Y EMISIÓN
+# ============================================================
+
+class CertificadoGestionResponse(BaseModel):
+    id_inscripcion: int
+    id_participante: int
+    participante: str
+    email: Email
+    estado_inscripcion: str
+    actividades_evento: int
+    asistencias_presentes: int
+    porcentaje_asistencia: float
+    minimo_requerido: int
+    elegible: bool
+    certificado_emitido: bool
+    codigo_validacion: str | None = None
+    fecha_emision: datetime | None = None

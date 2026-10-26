@@ -10,6 +10,7 @@ from pathlib import Path
 
 from app.api.actividades import evento_actividades_router
 from app.api.actividades import router as actividades_router
+from app.api.asistencias import router as asistencias_router
 from app.api.auth import router as auth_router
 from app.api.categorias_actividad import router as categorias_actividad_router
 from app.api.certificados import router as certificados_router
@@ -54,7 +55,8 @@ OPENAPI_TAGS = [
     {"name": "Conferencistas", "description": "ABM de conferencistas. Crear/editar/eliminar requiere rol **organizador**."},
     {"name": "Categorías de actividad", "description": "Consulta de las categorías de actividad."},
     {"name": "Inscripciones", "description": "Inscripción pública de participantes a un evento."},
-    {"name": "Certificados", "description": "Verificación pública de certificados mediante código único."},
+    {"name": "Asistencias", "description": "Registro de presencia o ausencia por actividad. Requiere rol de organización, administración o acreditación."},
+    {"name": "Certificados", "description": "Emisión según porcentaje de asistencia y verificación pública mediante código único."},
     {"name": "Sistema", "description": "Health check de la API."},
 ]
 
@@ -87,6 +89,7 @@ app.include_router(roles_router)
 app.include_router(users_router)
 app.include_router(eventos_router)
 app.include_router(inscripciones_router)
+app.include_router(asistencias_router)
 app.include_router(conferencistas_router)
 app.include_router(categorias_actividad_router)
 app.include_router(actividades_router)
