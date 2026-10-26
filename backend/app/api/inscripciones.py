@@ -15,7 +15,11 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Evento, Inscripcion, Participante, RolParticipante
-from app.schemas import InscripcionCreate, InscripcionResponse
+from app.schemas import (
+    InscripcionCreate,
+    InscripcionResponse,
+    RolParticipantePublicResponse,
+)
 
 # Router con el prefijo "/api/v1/inscripciones", agrupado bajo el tag
 # "Inscripciones". No exige autenticación: la inscripción a un evento es un
@@ -53,6 +57,26 @@ def _duplicate_error() -> HTTPException:
         status_code=status.HTTP_409_CONFLICT,
         detail="El participante ya está inscripto en este evento",
     )
+
+
+# Catálogo público de roles activos para alimentar el formulario de
+# inscripción sin exigir una cuenta administrativa.
+@router.get(
+    "/roles-participante",
+    response_model=list[RolParticipantePublicResponse],
+)
+def list_public_participant_roles(
+    db: Session = Depends(get_db),
+) -> list[RolParticipantePublicResponse]:
+    roles = db.scalars(
+        select(RolParticipante)
+        .where(RolParticipante.activo.is_(True))
+        .order_by(RolParticipante.nombre)
+    ).all()
+    return [
+        RolParticipantePublicResponse.model_validate(rol)
+        for rol in roles
+    ]
 
 
 # Crea la inscripción de un participante a un evento con lógica
