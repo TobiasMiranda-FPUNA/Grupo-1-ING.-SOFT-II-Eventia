@@ -68,18 +68,21 @@ La documentación interactiva queda disponible en `/docs`. El endpoint de autent
 La base de datos es en PostgresSQL
 ## Estructura general
 La base inicial está compuesta por las siguientes tablas:
-## Tabla	Finalidad
-- usuario	Almacena las cuentas que pueden autenticarse en la aplicación.
-- rol_sistema	Catálogo de roles utilizados para controlar permisos y acceso al sistema.
-- usuario_rol	Tabla intermedia que relaciona usuarios con roles del sistema.
-- rol_participante	Catálogo de funciones que una persona puede cumplir dentro de un evento.
-- tipo_evento: almacena los diferentes tipos de eventos, como congresos, seminarios, talleres o jornadas.
-- evento: almacena la información principal de cada evento, como nombre, fechas, lugar, cupo y estado.
-- politica_inscripcion: almacena las reglas de inscripción de cada evento, como fecha límite, aprobación, lista de espera y asistencia mínima para certificado.
-- participante: almacena los datos de las personas que pueden participar o inscribirse en los eventos.
-- inscripcion: almacena la relación entre un participante y un evento, incluyendo su rol, fecha de inscripción y estado.
-- categoria_actividad: almacena las categorías utilizadas para clasificar las actividades de un evento, como conferencia, taller, charla o panel.
-- actividad: almacena las actividades programadas dentro de un evento, incluyendo título, fecha, horario, lugar, modalidad, cupo y categoría.
-- conferencista: almacena los datos de los expositores, moderadores, instructores u otros especialistas que participan en las actividades.
-- actividad_conferencista: tabla intermedia que relaciona las actividades con uno o varios conferencistas e indica el rol que cumple cada uno dentro de la actividad.
+## Tabla finalidad
+
+- `usuario`: cuentas que pueden autenticarse en la aplicación.
+- `rol_sistema`: catálogo de roles para permisos del sistema.
+- `usuario_rol`: relaciona usuarios con roles del sistema.
+- `rol_participante`: funciones que una persona puede cumplir dentro de un evento.
+- `tipo_evento`: tipos de eventos, como congresos, seminarios, talleres o jornadas.
+- `evento`: información principal de cada evento.
+- `politica_inscripcion`: reglas de inscripción y certificación de un evento.
+- `participante`: datos de las personas que participan o se inscriben.
+- `inscripcion`: relaciona un participante con un evento y su estado.
+- `categoria_actividad`: categorías de las actividades del evento.
+- `actividad`: sesiones o actividades que conforman la agenda.
+- `conferencista`: datos de expositores o especialistas.
+- `actividad_conferencista`: relaciona actividades con conferencistas.
+- `asistencia`: registra la presencia de una inscripción en una actividad e impide duplicados mediante `UNIQUE (id_inscripcion, id_actividad)`.
+- `certificado`: registra certificados emitidos y genera un código único para su verificación pública.
 
