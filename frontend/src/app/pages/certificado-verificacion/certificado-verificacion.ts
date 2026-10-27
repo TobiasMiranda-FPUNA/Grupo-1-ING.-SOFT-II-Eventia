@@ -7,6 +7,7 @@ import {
   CertificadoVerificado,
   CertificadosService,
 } from '../../services/certificados';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-certificado-verificacion',
@@ -17,6 +18,11 @@ import {
 export class CertificadoVerificacion implements OnInit {
   private route = inject(ActivatedRoute);
   private certificadosService = inject(CertificadosService);
+  private auth = inject(AuthService);
+
+  // Con sesión vuelve a la pantalla principal; sin sesión, al login.
+  rutaInicio = this.auth.isLoggedIn() ? '/inicio' : '/login';
+  textoInicio = this.auth.isLoggedIn() ? 'Volver al inicio' : 'Iniciar sesión';
 
   codigo = '';
   buscando = signal(false);

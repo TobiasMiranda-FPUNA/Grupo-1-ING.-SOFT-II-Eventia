@@ -5,7 +5,7 @@
       <h1>Inscripción a eventos</h1>
       <p>Completá tus datos y el sistema te informará el estado de tu inscripción.</p>
     </div>
-    <div class="public-links"><a routerLink="/agenda" class="secondary-link">Ver agenda</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
+    <div class="public-links"><a [routerLink]="rutaInicio" class="secondary-link">← {{ textoInicio }}</a><a routerLink="/agenda" class="secondary-link">Ver agenda</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
   </header>
 
   @if (cargando()) {

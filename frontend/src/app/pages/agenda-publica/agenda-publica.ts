@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Actividad, ActividadesService } from '../../services/actividades';
 import { Evento, EventosService } from '../../services/eventos';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-agenda-publica',
@@ -16,6 +17,11 @@ export class AgendaPublica implements OnInit {
   private route = inject(ActivatedRoute);
   private eventosService = inject(EventosService);
   private actividadesService = inject(ActividadesService);
+  private auth = inject(AuthService);
+
+  // Con sesión vuelve a la pantalla principal; sin sesión, al login.
+  rutaInicio = this.auth.isLoggedIn() ? '/inicio' : '/login';
+  textoInicio = this.auth.isLoggedIn() ? 'Volver al inicio' : 'Iniciar sesión';
 
   eventos = signal<Evento[]>([]);
   actividades = signal<Actividad[]>([]);

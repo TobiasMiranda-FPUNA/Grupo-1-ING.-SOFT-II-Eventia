@@ -5,7 +5,7 @@
       <h1>Verificación de certificados</h1>
       <p>Ingresá el código que aparece en el certificado para comprobar su autenticidad.</p>
     </div>
-    <a routerLink="/agenda" class="secondary-link">Ver agenda</a>
+    <div class="public-links"><a [routerLink]="rutaInicio" class="secondary-link">← {{ textoInicio }}</a><a routerLink="/agenda" class="secondary-link">Ver agenda</a></div>
   </header>
 
   <section class="search-card">

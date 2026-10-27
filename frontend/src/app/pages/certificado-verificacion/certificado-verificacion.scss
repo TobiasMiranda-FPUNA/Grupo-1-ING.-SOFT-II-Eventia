@@ -15,3 +15,5 @@
 .download-button { margin-bottom:10px; } .certificate-card small { display:block; color:#64748b; }
 @media (max-width:650px){ .verify-header{align-items:flex-start;flex-direction:column}.search-row{flex-direction:column}.certificate-data{grid-template-columns:1fr} }
 
+
+.public-links { display:flex; gap:14px; flex-wrap:wrap; align-items:center; }

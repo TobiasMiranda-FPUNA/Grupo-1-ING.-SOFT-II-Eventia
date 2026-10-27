@@ -13,6 +13,7 @@ import {
   InscripcionesService,
   RolParticipantePublico,
 } from '../../services/inscripciones';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-inscripcion-publica',
@@ -25,6 +26,11 @@ export class InscripcionPublica implements OnInit {
   private route = inject(ActivatedRoute);
   private eventosService = inject(EventosService);
   private inscripcionesService = inject(InscripcionesService);
+  private auth = inject(AuthService);
+
+  // Con sesión vuelve a la pantalla principal; sin sesión, al login.
+  rutaInicio = this.auth.isLoggedIn() ? '/inicio' : '/login';
+  textoInicio = this.auth.isLoggedIn() ? 'Volver al inicio' : 'Iniciar sesión';
 
   eventos = signal<Evento[]>([]);
   roles = signal<RolParticipantePublico[]>([]);

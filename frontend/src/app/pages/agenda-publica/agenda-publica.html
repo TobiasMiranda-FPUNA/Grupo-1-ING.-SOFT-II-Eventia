@@ -5,7 +5,7 @@
       <h1>Agenda del evento</h1>
       <p>Consultá el cronograma por día y sala.</p>
     </div>
-    <div class="public-links"><a routerLink="/inscripciones" class="secondary-link">Inscribirme</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
+    <div class="public-links"><a [routerLink]="rutaInicio" class="secondary-link">← {{ textoInicio }}</a><a routerLink="/inscripciones" class="secondary-link">Inscribirme</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
   </header>
 
   <section class="selector-card">
