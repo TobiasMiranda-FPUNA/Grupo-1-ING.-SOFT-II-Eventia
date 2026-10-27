@@ -1,0 +1,168 @@
+// Misma línea visual que la planilla de asistencias (asistencias.scss), con
+// controles más grandes: se usa de pie, en tablet o celular, en la puerta.
+
+:host { display: block; font-family: Arial, sans-serif; }
+
+.page { max-width: 1180px; margin: 0 auto; padding: 34px 24px 60px; color: #172033; }
+
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 22px;
+  h1 { margin: 6px 0; font-size: 2rem; }
+  p { margin: 0; color: #667085; }
+}
+.eyebrow { font-size: .76rem; font-weight: 800; letter-spacing: .11em; color: #2463eb; }
+
+%card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 8px 30px rgba(15, 23, 42, .05); }
+
+.selector-card {
+  @extend %card;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 20px; margin-bottom: 18px;
+  label { font-weight: 700; font-size: .9rem; }
+  select { width: 100%; margin-top: 8px; padding: 11px 12px; border: 1px solid #d0d5dd; border-radius: 9px; background: #fff; font-size: 1rem; }
+}
+
+.empty-card { @extend %card; padding: 34px; text-align: center; color: #667085; }
+
+.alert { padding: 12px 16px; border-radius: 10px; margin: 0; font-weight: 600; }
+.alert.error { background: #fef2f2; color: #b42318; }
+.alert.success { background: #ecfdf3; color: #067647; }
+.alert.info { background: #eff4ff; color: #1d4ed8; }
+.page > .alert { margin: 14px 0; }
+
+// --- Progreso ---
+.stats-card {
+  @extend %card;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 22px;
+  padding: 18px 22px; margin-bottom: 16px;
+}
+.stat-main { display: flex; flex-direction: column; }
+.stat-number { font-size: 2.2rem; font-weight: 800; line-height: 1; small { font-size: 1.1rem; color: #98a2b3; font-weight: 700; } }
+.stat-label { font-size: .86rem; color: #667085; margin-top: 4px; }
+.progress { height: 12px; background: #eef2f6; border-radius: 999px; overflow: hidden; }
+.progress-bar { height: 100%; background: #12b76a; border-radius: 999px; transition: width .3s ease; }
+.stat-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-weight: 800; }
+
+// --- Búsqueda ---
+.search-card { @extend %card; padding: 18px 20px; margin-bottom: 12px; }
+.search-box {
+  position: relative; display: flex; align-items: center;
+  input {
+    width: 100%; padding: 16px 48px 16px 46px; font-size: 1.2rem;
+    border: 2px solid #d0d5dd; border-radius: 12px; outline: none;
+    &:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, .15); }
+    &::-webkit-search-cancel-button { display: none; }
+  }
+}
+.search-icon { position: absolute; left: 16px; font-size: 1.4rem; color: #98a2b3; }
+.clear {
+  position: absolute; right: 10px; width: 32px; height: 32px; border: 0; border-radius: 50%;
+  background: #f2f4f7; color: #475467; font-size: 1.2rem; cursor: pointer;
+}
+.hint { margin: 8px 2px 14px; font-size: .82rem; color: #667085; }
+kbd { padding: 1px 6px; border: 1px solid #d0d5dd; border-bottom-width: 2px; border-radius: 5px; background: #f8fafc; font-size: .78rem; }
+
+.chips {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  button {
+    border: 1px solid #d0d5dd; background: #fff; color: #344054; border-radius: 999px;
+    padding: 8px 14px; font-weight: 700; cursor: pointer;
+    span { margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #f2f4f7; font-size: .78rem; }
+    &.active { background: #2563eb; border-color: #2563eb; color: #fff; span { background: rgba(255, 255, 255, .2); } }
+  }
+}
+
+// Espacio reservado para que el aviso no desplace la lista al aparecer.
+.aviso-slot { min-height: 48px; margin-bottom: 8px; }
+
+// --- Lista + recientes ---
+.layout { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
+.results { display: flex; flex-direction: column; gap: 10px; }
+
+.persona {
+  @extend %card;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 14px;
+  &.presente { background: #f6fef9; border-color: #abefc6; }
+}
+.avatar {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: #eff4ff; color: #1d4ed8; font-weight: 800;
+  .presente & { background: #dcfae6; color: #067647; }
+}
+.info {
+  min-width: 0;
+  strong, span, small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  strong { font-size: 1.05rem; }
+  span { color: #475467; font-size: .9rem; }
+  small { color: #98a2b3; margin-top: 2px; }
+}
+.acciones { display: flex; align-items: center; gap: 10px; }
+
+.acreditar {
+  min-width: 132px; min-height: 48px; padding: 0 20px; border: 0; border-radius: 12px;
+  background: #2563eb; color: #fff; font-size: 1rem; font-weight: 800; cursor: pointer;
+  &:hover:not(:disabled) { background: #1d4ed8; }
+  &:disabled { opacity: .6; cursor: progress; }
+}
+
+.badge { padding: 6px 10px; border-radius: 999px; font-size: .82rem; font-weight: 800; white-space: nowrap; }
+.badge.ok { background: #dcfae6; color: #067647; }
+.badge.warn { background: #fef0c7; color: #b54708; }
+
+.link {
+  border: 0; background: none; padding: 6px 4px; color: #2563eb; font-weight: 700; cursor: pointer;
+  small { color: #98a2b3; font-weight: 600; }
+  &.danger { color: #b42318; }
+  &:disabled { opacity: .5; cursor: progress; }
+}
+.ghost {
+  padding: 9px 12px; border-radius: 8px; background: #f2f4f7; color: #344054;
+  font-weight: 700; text-decoration: none; white-space: nowrap;
+}
+
+.recientes {
+  @extend %card;
+  padding: 18px; position: sticky; top: 16px;
+  h2 { margin: 0 0 10px; font-size: 1rem; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li {
+    display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid #eef2f6;
+    span { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    small { color: #98a2b3; }
+  }
+}
+.muted { color: #667085; font-size: .86rem; margin: 0; }
+.muted.actividad { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #e5e7eb; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .recientes { position: static; }
+}
+
+// En el celular la lista de personas tiene que quedar a la vista: se
+// achican encabezado, selectores y progreso, y se oculta la ayuda de teclado.
+@media (max-width: 640px) {
+  .page { padding: 14px 12px 50px; }
+  .page-header {
+    align-items: center; margin-bottom: 12px;
+    h1 { font-size: 1.35rem; margin: 2px 0 0; }
+    p { display: none; }
+  }
+  .ghost { padding: 7px 10px; font-size: .82rem; }
+  .selector-card {
+    grid-template-columns: 1fr; gap: 8px; padding: 12px; margin-bottom: 10px;
+    label { font-size: .78rem; }
+    select { margin-top: 4px; padding: 9px 10px; font-size: .95rem; }
+  }
+  .stats-card { padding: 12px 14px; margin-bottom: 10px; }
+  .stat-number { font-size: 1.7rem; }
+  .search-card { padding: 12px; }
+  .search-box input { padding: 13px 44px 13px 42px; font-size: 1.05rem; }
+  .hint { display: none; }
+  .chips { margin-top: 10px; gap: 6px; flex-wrap: nowrap; button { padding: 7px 10px; font-size: .85rem; } }
+  .aviso-slot { min-height: 0; }
+  .stats-card { grid-template-columns: 1fr auto; gap: 10px 16px; .progress { grid-column: 1 / -1; grid-row: 2; } }
+  .persona { grid-template-columns: auto 1fr; }
+  .acciones { grid-column: 1 / -1; justify-content: space-between; }
+  .acreditar { flex: 1; }
+}

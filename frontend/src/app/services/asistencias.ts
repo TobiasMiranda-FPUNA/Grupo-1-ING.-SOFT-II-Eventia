@@ -24,6 +24,21 @@ export interface AsistenciaGuardado {
   registros_guardados: number;
 }
 
+export interface AsistenciaCreate {
+  id_evento: number;
+  id_actividad: number;
+  id_inscripcion: number;
+  estado: EstadoAsistencia;
+}
+
+export interface Asistencia {
+  id_asistencia: number;
+  id_inscripcion: number;
+  id_actividad: number;
+  estado: EstadoAsistencia;
+  fecha_hora_registro: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AsistenciasService {
   private http = inject(HttpClient);
@@ -36,6 +51,12 @@ export class AsistenciasService {
     return this.http.get<AsistenciaParticipante[]>(
       `${this.apiUrl}/eventos/${eventoId}/actividades/${actividadId}`
     );
+  }
+
+  // Registra una asistencia individual. El backend valida que la actividad
+  // y la inscripción pertenezcan al evento, y devuelve 409 si ya existe.
+  registrar(data: AsistenciaCreate): Observable<Asistencia> {
+    return this.http.post<Asistencia>(this.apiUrl, data);
   }
 
   guardar(

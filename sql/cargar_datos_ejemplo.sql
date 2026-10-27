@@ -26,6 +26,9 @@
 -- únicamente para pruebas locales/desarrollo. No usar en producción.
 --   admin@eventia.test        / Admin123!
 --   organizador@eventia.test  / Organizador123!
+--   participante@eventia.test / Participante123!
+--   conferencista@eventia.test / Conferencista123!
+--   acreditacion@eventia.test / Acreditacion123!
 -- Los hashes fueron generados con Argon2 (misma librería que usa
 -- el backend en app/core/security.py) para que el login funcione
 -- de verdad contra estos datos de ejemplo.
@@ -43,7 +46,13 @@ VALUES
     ('Ana', 'Duarte', 'admin@eventia.test',
      '$argon2id$v=19$m=65536,t=3,p=4$rtUP+TyGwUvWG48J0oml2Q$HqQIuYYQCC+SFTPfCx6MFjtzG4hi612MLp3wiPPdvIA'),
     ('Carlos', 'Benítez', 'organizador@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$GTaSo+LO8hgmOMufEKVP1g$AdoLESyVY4iOsMCZV5Rl9oKKtTx+d2iesc/Lo56a9E4')
+     '$argon2id$v=19$m=65536,t=3,p=4$GTaSo+LO8hgmOMufEKVP1g$AdoLESyVY4iOsMCZV5Rl9oKKtTx+d2iesc/Lo56a9E4'),
+    ('Lucía', 'Giménez', 'participante@eventia.test',
+     '$argon2id$v=19$m=65536,t=3,p=4$4cDLmlvnQJAf1ZQys34ajQ$mUvsEGSp0jAknBUWNqXSpH/MTIerVyvPUxWdNwOAQOg'),
+    ('Laura', 'Méndez', 'conferencista@eventia.test',
+     '$argon2id$v=19$m=65536,t=3,p=4$AtqWe2SK8OLT/Vs+7BxFsA$LErA8RHaiW5O08jm53wAg/aWCUM4PoTXGsQ4G78eTx4'),
+    ('Pedro', 'Ayala', 'acreditacion@eventia.test',
+     '$argon2id$v=19$m=65536,t=3,p=4$sLW+4Z9n/76w6Fo2VPjefQ$QJdIf8MUbAAdfJ7zvyFOOtpLzKcUnUC0lz9vKqrToQ8')
 ON CONFLICT (correo) DO NOTHING;
 
 -- USUARIO_ROL: asigna el rol de sistema correspondiente a cada
@@ -60,6 +69,17 @@ SELECT u.id_usuario, rs.id_rol_sistema
 FROM usuario u
 JOIN rol_sistema rs ON rs.codigo = 'ORGANIZADOR'
 WHERE u.correo = 'organizador@eventia.test'
+ON CONFLICT (id_usuario, id_rol_sistema) DO NOTHING;
+
+INSERT INTO usuario_rol (id_usuario, id_rol_sistema)
+SELECT u.id_usuario, rs.id_rol_sistema
+FROM (VALUES
+    ('participante@eventia.test',  'PARTICIPANTE'),
+    ('conferencista@eventia.test', 'CONFERENCISTA'),
+    ('acreditacion@eventia.test',  'ACREDITACION')
+) AS v(correo, codigo_rol)
+JOIN usuario u ON u.correo = v.correo
+JOIN rol_sistema rs ON rs.codigo = v.codigo_rol
 ON CONFLICT (id_usuario, id_rol_sistema) DO NOTHING;
 
 -- ------------------------------------------------------------

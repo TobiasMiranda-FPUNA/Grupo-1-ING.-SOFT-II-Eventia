@@ -7,6 +7,7 @@ import { Eventos } from './pages/eventos/eventos';
 import { EventoForm } from './pages/evento-form/evento-form';
 import { Expositores } from './pages/expositores/expositores';
 import { Asistencias } from './pages/asistencias/asistencias';
+import { Acreditacion } from './pages/acreditacion/acreditacion';
 import { Certificados } from './pages/certificados/certificados';
 
 import { InscripcionPublica } from './pages/inscripcion-publica/inscripcion-publica';
@@ -136,6 +137,20 @@ export const routes: Routes = [
             ROLES.ORGANIZADOR,
             ROLES.ADMINISTRADOR,
             ROLES.ACREDITACION,
+          ],
+        },
+      },
+
+      {
+        path: 'acreditacion',
+        component: Acreditacion,
+        canActivate: [roleGuard],
+        // Mismos roles que el backend acepta para registrar asistencia.
+        data: {
+          roles: [
+            ROLES.ACREDITACION,
+            ROLES.ORGANIZADOR,
+            ROLES.ADMINISTRADOR,
           ],
         },
       },

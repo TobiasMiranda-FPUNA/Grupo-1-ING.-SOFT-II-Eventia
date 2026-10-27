@@ -100,11 +100,11 @@ Usuarios de ejemplo (cargados por `sql/cargar_datos_ejemplo.sql`):
 
 | Email | Contraseña | Rol |
 |---|---|---|
-| admin@eventia.test | Admin123! | administrador (roles) |
-| organizador@eventia.test | Organizador123! | organizador (eventos, actividades, conferencistas) |
+| admin@eventia.test | Admin123! | administrador (roles, asistencias, certificados, métricas) |
+| organizador@eventia.test | Organizador123! | organizador (eventos, actividades, conferencistas, asistencias, certificados, dashboard) |
 | participante@eventia.test | Participante123! | participante (consulta de eventos y agenda) |
 | conferencista@eventia.test | Conferencista123! | conferencista (consulta de eventos, agenda y expositores) |
-| acreditacion@eventia.test | Acreditacion123! | personal de acreditación (consulta de eventos y agenda) |
+| acreditacion@eventia.test | Acreditacion123! | personal de acreditación (consulta de eventos y agenda, registro de asistencias) |
 
 ## Endpoints disponibles
 

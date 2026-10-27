@@ -104,6 +104,9 @@ print_summary() {
     admin@eventia.test        / Admin123!        (roles, asistencias, certificados, métricas)
     organizador@eventia.test  / Organizador123!  (eventos, actividades, conferencistas,
                                                   asistencias, certificados, dashboard)
+    acreditacion@eventia.test / Acreditacion123! (registro de asistencias)
+    participante@eventia.test / Participante123! (consulta)
+    conferencista@eventia.test / Conferencista123! (consulta, expositores)
 
  Sin token: inscripciones, agenda y verificación/descarga de
  certificados por código (/api/v1/certificados/verificar/{codigo}).

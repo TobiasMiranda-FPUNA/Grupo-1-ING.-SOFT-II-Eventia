@@ -72,6 +72,15 @@ export const OPERACIONES: Operacion[] = [
     historia: 'HU04',
   },
   {
+    titulo: 'Acreditación rápida',
+    descripcion: 'Buscá a cada participante en la puerta y acreditalo con un toque.',
+    icono: '⚡',
+    ruta: '/acreditacion',
+    roles: [ACREDITACION, ORGANIZADOR, ADMINISTRADOR],
+    enMenu: true,
+    historia: 'HU07',
+  },
+  {
     titulo: 'Registro de asistencia',
     descripcion: 'Marcá presentes y ausentes por cada actividad del evento.',
     icono: '✔',
