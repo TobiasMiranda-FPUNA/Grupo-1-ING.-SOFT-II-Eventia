@@ -6,6 +6,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.api.certificados import (
+    descargar_certificado,
+    descargar_certificado_por_codigo,
     emitir_certificado,
     listar_estado_certificados_evento,
     verificar_certificado,
@@ -123,3 +125,32 @@ def test_certificado_rechaza_si_no_cumple_minimo(db):
         emitir_certificado(inscripcion.id_inscripcion, db, None)
 
     assert error.value.status_code == 409
+
+
+def test_descarga_pdf_de_certificado_emitido(db):
+    _, inscripcion = _escenario(db, minimo=50)
+    emitido = emitir_certificado(inscripcion.id_inscripcion, db, None)
+
+    response = descargar_certificado(inscripcion.id_inscripcion, db, None)
+    assert response.media_type == "application/pdf"
+    assert response.body.startswith(b"%PDF")
+    assert emitido.codigo_validacion in response.headers["content-disposition"]
+
+    # La descarga pública por código devuelve el mismo documento.
+    publico = descargar_certificado_por_codigo(emitido.codigo_validacion.lower(), db)
+    assert publico.body.startswith(b"%PDF")
+
+
+def test_descarga_pdf_sin_certificado_emitido_devuelve_404(db):
+    _, inscripcion = _escenario(db, minimo=50)
+
+    with pytest.raises(HTTPException) as error:
+        descargar_certificado(inscripcion.id_inscripcion, db, None)
+    assert error.value.status_code == 404
+
+
+@pytest.mark.parametrize("operacion", [verificar_certificado, descargar_certificado_por_codigo])
+def test_codigo_invalido_devuelve_404(db, operacion):
+    with pytest.raises(HTTPException) as error:
+        operacion("NOEXISTE", db)
+    assert error.value.status_code == 404

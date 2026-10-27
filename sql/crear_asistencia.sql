@@ -61,4 +61,8 @@ CREATE INDEX IF NOT EXISTS idx_asistencia_id_inscripcion
 CREATE INDEX IF NOT EXISTS idx_asistencia_id_actividad
     ON asistencia (id_actividad);
 
+-- Acelera los conteos de presentes/ausentes por actividad (métricas).
+CREATE INDEX IF NOT EXISTS idx_asistencia_actividad_estado
+    ON asistencia (id_actividad, estado);
+
 COMMIT;

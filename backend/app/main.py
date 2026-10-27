@@ -17,6 +17,7 @@ from app.api.certificados import router as certificados_router
 from app.api.conferencistas import router as conferencistas_router
 from app.api.eventos import router as eventos_router
 from app.api.inscripciones import router as inscripciones_router
+from app.api.metricas import router as metricas_router
 from app.api.roles import router as roles_router
 from app.api.users import router as users_router
 import app.models  # noqa: F401
@@ -57,6 +58,7 @@ OPENAPI_TAGS = [
     {"name": "Inscripciones", "description": "Inscripción pública de participantes a un evento."},
     {"name": "Asistencias", "description": "Registro de presencia o ausencia por actividad. Requiere rol de organización, administración o acreditación."},
     {"name": "Certificados", "description": "Emisión según porcentaje de asistencia y verificación pública mediante código único."},
+    {"name": "Métricas", "description": "Indicadores agregados de inscriptos, cupos y asistencia por evento. Requiere rol **organizador** o **administrador**."},
     {"name": "Sistema", "description": "Health check de la API."},
 ]
 
@@ -99,6 +101,7 @@ app.include_router(categorias_actividad_router)
 app.include_router(actividades_router)
 app.include_router(evento_actividades_router)
 app.include_router(certificados_router)
+app.include_router(metricas_router)
 
 # Publica la carpeta backend/docs en /api-docs, así la documentación
 # interactiva (docs/index.html) se sirve desde el mismo origen que la API y

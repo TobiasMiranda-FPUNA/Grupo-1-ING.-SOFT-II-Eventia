@@ -1,12 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.users import require_any_system_role
 from app.db import get_db
 from app.models import (
-    Actividad,
-    Asistencia,
     Certificado,
     Evento,
     Inscripcion,
@@ -17,6 +15,12 @@ from app.schemas import (
     CertificadoGestionResponse,
     CertificadoVerificacionResponse,
 )
+from app.services.asistencia import (
+    ResumenAsistencia,
+    calcular_porcentaje_asistencia,
+    calcular_porcentajes_evento,
+)
+from app.services.certificado_pdf import DatosCertificado, generar_certificado_pdf
 
 
 router = APIRouter(
@@ -34,25 +38,13 @@ def _calcular_estado_certificado(
     inscripcion: Inscripcion,
     participante: Participante,
     evento: Evento,
+    resumen: ResumenAsistencia | None = None,
 ) -> CertificadoGestionResponse:
-    total_actividades = db.scalar(
-        select(func.count())
-        .select_from(Actividad)
-        .where(Actividad.id_evento == evento.id_evento)
-    ) or 0
+    if resumen is None:
+        resumen = calcular_porcentaje_asistencia(db, inscripcion)
 
-    presentes = db.scalar(
-        select(func.count())
-        .select_from(Asistencia)
-        .join(Actividad, Actividad.id_actividad == Asistencia.id_actividad)
-        .where(
-            Asistencia.id_inscripcion == inscripcion.id_inscripcion,
-            Asistencia.estado == "presente",
-            Actividad.id_evento == evento.id_evento,
-        )
-    ) or 0
-
-    porcentaje = round((presentes * 100 / total_actividades), 2) if total_actividades else 0.0
+    total_actividades = resumen.total_actividades
+    porcentaje = resumen.porcentaje
     minimo = (
         evento.politica.min_asistencia_certificado
         if evento.politica is not None
@@ -77,7 +69,7 @@ def _calcular_estado_certificado(
         email=participante.email,
         estado_inscripcion=inscripcion.estado,
         actividades_evento=total_actividades,
-        asistencias_presentes=presentes,
+        asistencias_presentes=resumen.presentes,
         porcentaje_asistencia=porcentaje,
         minimo_requerido=minimo,
         elegible=elegible,
@@ -113,8 +105,16 @@ def listar_estado_certificados_evento(
         .order_by(Participante.apellidos, Participante.nombres)
     ).all()
 
+    resumenes = calcular_porcentajes_evento(db, id_evento)
+
     return [
-        _calcular_estado_certificado(db, inscripcion, participante, evento)
+        _calcular_estado_certificado(
+            db,
+            inscripcion,
+            participante,
+            evento,
+            resumenes[inscripcion.id_inscripcion],
+        )
         for inscripcion, participante in rows
     ]
 
@@ -183,17 +183,8 @@ def emitir_certificado(
     )
 
 
-@router.get(
-    "/verificar/{codigo}",
-    response_model=CertificadoVerificacionResponse,
-)
-def verificar_certificado(
-    codigo: str,
-    db: Session = Depends(get_db),
-) -> CertificadoVerificacionResponse:
-    codigo_normalizado = codigo.strip().upper()
-
-    row = db.execute(
+def _get_certificado_emitido(db: Session, *condiciones):
+    return db.execute(
         select(Certificado, Inscripcion, Participante, Evento)
         .join(
             Inscripcion,
@@ -207,18 +198,100 @@ def verificar_certificado(
             Evento,
             Evento.id_evento == Inscripcion.id_evento,
         )
-        .where(
-            func.upper(Certificado.codigo_validacion) == codigo_normalizado
-        )
+        .where(*condiciones)
     ).first()
 
+
+def _get_certificado_por_codigo_or_404(db: Session, codigo: str):
+    row = _get_certificado_emitido(
+        db,
+        func.upper(Certificado.codigo_validacion) == codigo.strip().upper(),
+    )
     if row is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Certificado no encontrado o código de validación inválido",
         )
+    return row
 
+
+def _respuesta_pdf(db: Session, row) -> Response:
     certificado, inscripcion, participante, evento = row
+    resumen = calcular_porcentaje_asistencia(db, inscripcion)
+
+    contenido = generar_certificado_pdf(
+        DatosCertificado(
+            codigo_validacion=certificado.codigo_validacion,
+            tipo=certificado.tipo,
+            fecha_emision=certificado.fecha_emision,
+            participante=f"{participante.nombres} {participante.apellidos}".strip(),
+            evento=evento.nombre,
+            fecha_inicio_evento=evento.fecha_inicio,
+            fecha_fin_evento=evento.fecha_fin,
+            porcentaje_asistencia=resumen.porcentaje,
+        )
+    )
+
+    return Response(
+        content=contenido,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="certificado-{certificado.codigo_validacion}.pdf"'
+            ),
+        },
+    )
+
+
+# Descarga el PDF de un certificado ya emitido (gestión interna).
+@router.get(
+    "/inscripcion/{id_inscripcion}/documento",
+    response_class=Response,
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+def descargar_certificado(
+    id_inscripcion: int,
+    db: Session = Depends(get_db),
+    _: Usuario = certificate_manager_required,
+) -> Response:
+    row = _get_certificado_emitido(
+        db,
+        Certificado.id_inscripcion == id_inscripcion,
+    )
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La inscripción no tiene un certificado emitido",
+        )
+    return _respuesta_pdf(db, row)
+
+
+# Descarga pública del PDF a partir del código de validación, para que el
+# participante (que no tiene cuenta en el sistema) obtenga su certificado.
+@router.get(
+    "/verificar/{codigo}/documento",
+    response_class=Response,
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+def descargar_certificado_por_codigo(
+    codigo: str,
+    db: Session = Depends(get_db),
+) -> Response:
+    return _respuesta_pdf(db, _get_certificado_por_codigo_or_404(db, codigo))
+
+
+# Verificación pública de autenticidad mediante el código de validación.
+@router.get(
+    "/verificar/{codigo}",
+    response_model=CertificadoVerificacionResponse,
+)
+def verificar_certificado(
+    codigo: str,
+    db: Session = Depends(get_db),
+) -> CertificadoVerificacionResponse:
+    certificado, inscripcion, participante, evento = (
+        _get_certificado_por_codigo_or_404(db, codigo)
+    )
 
     return CertificadoVerificacionResponse(
         codigo_validacion=certificado.codigo_validacion,

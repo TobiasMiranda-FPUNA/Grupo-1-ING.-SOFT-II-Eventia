@@ -806,6 +806,53 @@
         }
       }
     },
+    "/api/v1/eventos/{evento_id}/dashboard": {
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Get Dashboard Evento",
+        "operationId": "get_dashboard_evento_api_v1_eventos__evento_id__dashboard_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "evento_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Evento Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricasEventoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/inscripciones/roles-participante": {
       "get": {
         "tags": [
@@ -870,6 +917,52 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/asistencias": {
+      "post": {
+        "tags": [
+          "Asistencias"
+        ],
+        "summary": "Registrar Asistencia",
+        "operationId": "registrar_asistencia_api_v1_asistencias_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsistenciaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsistenciaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/asistencias/eventos/{id_evento}/actividades/{id_actividad}": {
@@ -1733,6 +1826,87 @@
         }
       }
     },
+    "/api/v1/certificados/inscripcion/{id_inscripcion}/documento": {
+      "get": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Descargar Certificado",
+        "operationId": "descargar_certificado_api_v1_certificados_inscripcion__id_inscripcion__documento_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_inscripcion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Inscripcion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/certificados/verificar/{codigo}/documento": {
+      "get": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Descargar Certificado Por Codigo",
+        "operationId": "descargar_certificado_por_codigo_api_v1_certificados_verificar__codigo__documento_get",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Codigo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/certificados/verificar/{codigo}": {
       "get": {
         "tags": [
@@ -1773,6 +1947,36 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/metricas/eventos": {
+      "get": {
+        "tags": [
+          "Métricas"
+        ],
+        "summary": "Listar Metricas Eventos",
+        "operationId": "listar_metricas_eventos_api_v1_metricas_eventos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetricasEventoResumen"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Metricas Eventos Api V1 Metricas Eventos Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/health": {
@@ -1968,6 +2172,38 @@
         ],
         "title": "ActividadResponse"
       },
+      "AsistenciaCreate": {
+        "properties": {
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "id_actividad": {
+            "type": "integer",
+            "title": "Id Actividad"
+          },
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "presente",
+              "ausente"
+            ],
+            "title": "Estado",
+            "default": "presente"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_evento",
+          "id_actividad",
+          "id_inscripcion"
+        ],
+        "title": "AsistenciaCreate"
+      },
       "AsistenciaGuardadoResponse": {
         "properties": {
           "id_actividad": {
@@ -2072,6 +2308,44 @@
           "registros"
         ],
         "title": "AsistenciaRegistroMasivo"
+      },
+      "AsistenciaResponse": {
+        "properties": {
+          "id_asistencia": {
+            "type": "integer",
+            "title": "Id Asistencia"
+          },
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "id_actividad": {
+            "type": "integer",
+            "title": "Id Actividad"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "presente",
+              "ausente"
+            ],
+            "title": "Estado"
+          },
+          "fecha_hora_registro": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora Registro"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_asistencia",
+          "id_inscripcion",
+          "id_actividad",
+          "estado",
+          "fecha_hora_registro"
+        ],
+        "title": "AsistenciaResponse"
       },
       "CategoriaActividadResponse": {
         "properties": {
@@ -2876,6 +3150,262 @@
         ],
         "title": "LoginRequest"
       },
+      "MetricasAsistencia": {
+        "properties": {
+          "total_actividades": {
+            "type": "integer",
+            "title": "Total Actividades"
+          },
+          "presentes": {
+            "type": "integer",
+            "title": "Presentes"
+          },
+          "ausentes": {
+            "type": "integer",
+            "title": "Ausentes"
+          },
+          "sin_registro": {
+            "type": "integer",
+            "title": "Sin Registro"
+          },
+          "porcentaje_asistencia": {
+            "type": "number",
+            "title": "Porcentaje Asistencia"
+          },
+          "actividades": {
+            "items": {
+              "$ref": "#/components/schemas/MetricasAsistenciaActividad"
+            },
+            "type": "array",
+            "title": "Actividades"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_actividades",
+          "presentes",
+          "ausentes",
+          "sin_registro",
+          "porcentaje_asistencia",
+          "actividades"
+        ],
+        "title": "MetricasAsistencia"
+      },
+      "MetricasAsistenciaActividad": {
+        "properties": {
+          "id_actividad": {
+            "type": "integer",
+            "title": "Id Actividad"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha"
+          },
+          "hora_inicio": {
+            "type": "string",
+            "format": "time",
+            "title": "Hora Inicio"
+          },
+          "cupo": {
+            "type": "integer",
+            "title": "Cupo"
+          },
+          "presentes": {
+            "type": "integer",
+            "title": "Presentes"
+          },
+          "ausentes": {
+            "type": "integer",
+            "title": "Ausentes"
+          },
+          "sin_registro": {
+            "type": "integer",
+            "title": "Sin Registro"
+          },
+          "porcentaje_asistencia": {
+            "type": "number",
+            "title": "Porcentaje Asistencia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_actividad",
+          "titulo",
+          "fecha",
+          "hora_inicio",
+          "cupo",
+          "presentes",
+          "ausentes",
+          "sin_registro",
+          "porcentaje_asistencia"
+        ],
+        "title": "MetricasAsistenciaActividad"
+      },
+      "MetricasCupos": {
+        "properties": {
+          "cupo_maximo": {
+            "type": "integer",
+            "title": "Cupo Maximo"
+          },
+          "ocupados": {
+            "type": "integer",
+            "title": "Ocupados"
+          },
+          "disponibles": {
+            "type": "integer",
+            "title": "Disponibles"
+          },
+          "porcentaje_ocupacion": {
+            "type": "number",
+            "title": "Porcentaje Ocupacion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cupo_maximo",
+          "ocupados",
+          "disponibles",
+          "porcentaje_ocupacion"
+        ],
+        "title": "MetricasCupos"
+      },
+      "MetricasEventoResponse": {
+        "properties": {
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "inscripciones": {
+            "$ref": "#/components/schemas/MetricasInscripciones"
+          },
+          "cupos": {
+            "$ref": "#/components/schemas/MetricasCupos"
+          },
+          "asistencia": {
+            "$ref": "#/components/schemas/MetricasAsistencia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_evento",
+          "nombre",
+          "estado",
+          "inscripciones",
+          "cupos",
+          "asistencia"
+        ],
+        "title": "MetricasEventoResponse"
+      },
+      "MetricasEventoResumen": {
+        "properties": {
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "fecha_inicio": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Inicio"
+          },
+          "cupo_maximo": {
+            "type": "integer",
+            "title": "Cupo Maximo"
+          },
+          "inscriptos_confirmados": {
+            "type": "integer",
+            "title": "Inscriptos Confirmados"
+          },
+          "lista_de_espera": {
+            "type": "integer",
+            "title": "Lista De Espera"
+          },
+          "porcentaje_ocupacion": {
+            "type": "number",
+            "title": "Porcentaje Ocupacion"
+          },
+          "total_actividades": {
+            "type": "integer",
+            "title": "Total Actividades"
+          },
+          "porcentaje_asistencia": {
+            "type": "number",
+            "title": "Porcentaje Asistencia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_evento",
+          "nombre",
+          "estado",
+          "fecha_inicio",
+          "cupo_maximo",
+          "inscriptos_confirmados",
+          "lista_de_espera",
+          "porcentaje_ocupacion",
+          "total_actividades",
+          "porcentaje_asistencia"
+        ],
+        "title": "MetricasEventoResumen"
+      },
+      "MetricasInscripciones": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "confirmadas": {
+            "type": "integer",
+            "title": "Confirmadas"
+          },
+          "lista_de_espera": {
+            "type": "integer",
+            "title": "Lista De Espera"
+          },
+          "pendientes": {
+            "type": "integer",
+            "title": "Pendientes"
+          },
+          "canceladas": {
+            "type": "integer",
+            "title": "Canceladas"
+          },
+          "rechazadas": {
+            "type": "integer",
+            "title": "Rechazadas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "confirmadas",
+          "lista_de_espera",
+          "pendientes",
+          "canceladas",
+          "rechazadas"
+        ],
+        "title": "MetricasInscripciones"
+      },
       "PoliticaInscripcionData": {
         "properties": {
           "fecha_limite": {
@@ -3233,6 +3763,10 @@
     {
       "name": "Certificados",
       "description": "Emisión según porcentaje de asistencia y verificación pública mediante código único."
+    },
+    {
+      "name": "Métricas",
+      "description": "Indicadores agregados de inscriptos, cupos y asistencia por evento. Requiere rol **organizador** o **administrador**."
     },
     {
       "name": "Sistema",

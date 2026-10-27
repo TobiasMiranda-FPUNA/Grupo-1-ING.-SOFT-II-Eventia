@@ -7,6 +7,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Table,
@@ -292,6 +293,8 @@ class Inscripcion(Base):
             "id_participante",
             name="uq_inscripcion_evento_participante"
         ),
+        # Acelera los conteos por evento y estado (cupos y métricas).
+        Index("idx_inscripcion_evento_estado", "id_evento", "estado"),
     )
 
     id_inscripcion: Mapped[int] = mapped_column(
@@ -522,6 +525,8 @@ class Asistencia(Base):
             "id_actividad",
             name="uq_asistencia_inscripcion_actividad",
         ),
+        # Acelera los conteos de presentes/ausentes por actividad.
+        Index("idx_asistencia_actividad_estado", "id_actividad", "estado"),
     )
 
     id_asistencia: Mapped[int] = mapped_column(

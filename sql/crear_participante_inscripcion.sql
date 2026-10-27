@@ -86,4 +86,8 @@ CREATE INDEX IF NOT EXISTS idx_inscripcion_id_rol_participante
 CREATE INDEX IF NOT EXISTS idx_inscripcion_estado
     ON inscripcion (estado);
 
+-- Acelera los conteos por evento y estado (cupos y métricas del dashboard).
+CREATE INDEX IF NOT EXISTS idx_inscripcion_evento_estado
+    ON inscripcion (id_evento, estado);
+
 COMMIT;

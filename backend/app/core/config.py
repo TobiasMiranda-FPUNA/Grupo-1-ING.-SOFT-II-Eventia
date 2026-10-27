@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-this-development-secret-key-32"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
+    # URL del frontend; se usa para el enlace de verificación impreso en
+    # los certificados PDF.
+    frontend_base_url: str = "http://localhost:4200"
 
     # Indica que los valores se pueden leer desde un archivo ".env" y que
     # las variables de entorno adicionales no declaradas aquí se ignoran.

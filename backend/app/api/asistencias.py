@@ -4,11 +4,13 @@ from sqlalchemy.orm import Session
 
 from app.api.users import require_any_system_role
 from app.db import get_db
-from app.models import Actividad, Asistencia, Inscripcion, Participante, Usuario
+from app.models import Actividad, Asistencia, Evento, Inscripcion, Participante, Usuario
 from app.schemas import (
+    AsistenciaCreate,
     AsistenciaGuardadoResponse,
     AsistenciaParticipanteResponse,
     AsistenciaRegistroMasivo,
+    AsistenciaResponse,
 )
 
 
@@ -34,6 +36,72 @@ def _get_actividad_or_404(db: Session, id_actividad: int) -> Actividad:
             detail="Actividad no encontrada",
         )
     return actividad
+
+
+# Registra la asistencia de una inscripción a una actividad, validando que
+# la actividad y la inscripción pertenezcan al evento indicado.
+@router.post(
+    "",
+    response_model=AsistenciaResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def registrar_asistencia(
+    data: AsistenciaCreate,
+    db: Session = Depends(get_db),
+    _: Usuario = attendance_manager_required,
+) -> AsistenciaResponse:
+    if db.get(Evento, data.id_evento) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Evento no encontrado",
+        )
+
+    actividad = _get_actividad_or_404(db, data.id_actividad)
+    if actividad.id_evento != data.id_evento:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="La actividad no pertenece al evento seleccionado",
+        )
+
+    inscripcion = db.get(Inscripcion, data.id_inscripcion)
+    if inscripcion is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Inscripción no encontrada",
+        )
+    if inscripcion.id_evento != data.id_evento:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="La inscripción no pertenece al evento seleccionado",
+        )
+    if inscripcion.estado != "confirmada":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Solo se puede registrar asistencia de inscripciones confirmadas",
+        )
+
+    existente = db.scalar(
+        select(Asistencia).where(
+            Asistencia.id_inscripcion == data.id_inscripcion,
+            Asistencia.id_actividad == data.id_actividad,
+        )
+    )
+    if existente is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="La asistencia ya fue registrada para esta actividad",
+        )
+
+    asistencia = Asistencia(
+        id_inscripcion=data.id_inscripcion,
+        id_actividad=data.id_actividad,
+        estado=data.estado,
+    )
+    db.add(asistencia)
+    db.commit()
+    db.refresh(asistencia)
+
+    return AsistenciaResponse.model_validate(asistencia)
 
 
 @router.get(
