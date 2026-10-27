@@ -11,7 +11,9 @@ export abstract class BaseHttpService<T> {
 
     protected handleError(error: HttpErrorResponse): Observable<never> {
         console.error(`Error HTTP en ${this.baseUrl}:`, error);
-        return throwError(() => new Error(error.message || 'Ocurrió un error en la comunicación con el servidor.'));
+        // Se propaga el HttpErrorResponse original para que los componentes
+        // puedan distinguir el código HTTP (401/403/409...) y el detalle.
+        return throwError(() => error);
     }
 
     // Abstracción: T representa el modelo de datos (RolParticipante, Usuario, etc.)

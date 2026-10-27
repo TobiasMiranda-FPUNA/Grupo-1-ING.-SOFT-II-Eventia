@@ -54,8 +54,17 @@ class RolSistema(Base):
         primary_key=True
     )
 
+    # Columna NOT NULL/UNIQUE en la BD (ver crear_usuario_rol_sistema_usuario_rol.sql).
+    # El default temporal se reemplaza por un código legible al crear el rol.
+    codigo: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+        default=lambda: f"TMP-{uuid.uuid4().hex.upper()}"
+    )
+
     nombre: Mapped[str] = mapped_column(
-        String(80),
+        String(100),
         unique=True,
         nullable=False
     )
@@ -81,8 +90,17 @@ class RolParticipante(Base):
         primary_key=True
     )
 
+    # Columna NOT NULL/UNIQUE en la BD (ver crear_rol_participante_y_catalogo.sql).
+    # El default temporal se reemplaza por un código legible al crear el rol.
+    codigo: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+        default=lambda: f"TMP-{uuid.uuid4().hex.upper()}"
+    )
+
     nombre: Mapped[str] = mapped_column(
-        String(80),
+        String(100),
         unique=True,
         nullable=False
     )

@@ -22,6 +22,7 @@ import {
 } from '../../services/actividades';
 
 import { EventosService } from '../../services/eventos';
+import { AuthService, ROLES } from '../../services/auth';
 
 interface ActividadConConferencistas extends Actividad {
   conferencistas?: Conferencista[];
@@ -42,6 +43,13 @@ export class Expositores implements OnInit {
   private conferencistasService = inject(ConferencistasService);
   private actividadesService = inject(ActividadesService);
   private eventosService = inject(EventosService);
+  private auth = inject(AuthService);
+
+  // Solo el organizador puede registrar o eliminar expositores (el backend
+  // responde 403 al resto); administrador y conferencista solo consultan.
+  get puedeGestionar(): boolean {
+    return this.auth.hasRole(ROLES.ORGANIZADOR);
+  }
 
   expositores = signal<ExpositorVista[]>([]);
   actividades = signal<Actividad[]>([]);

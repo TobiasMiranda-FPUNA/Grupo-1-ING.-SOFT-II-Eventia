@@ -85,9 +85,17 @@ def create_system_role(
     if db.scalar(select(RolSistema).where(func.lower(RolSistema.nombre) == name.lower())):
         raise duplicate_error()
     sync_id_sequence(db, "rol_sistema", "id_rol_sistema")
-    role = RolSistema(nombre=name, descripcion=data.descripcion)
+    role = RolSistema(
+        codigo=f"TMP-{uuid4().hex.upper()}",
+        nombre=name,
+        descripcion=data.descripcion,
+    )
     db.add(role)
     try:
+        db.flush()
+        prefix = participant_code_prefix(name)
+        suffix = f"-{role.id_rol}"
+        role.codigo = f"{prefix[:50 - len(suffix)]}{suffix}"
         db.commit()
     except IntegrityError:
         db.rollback()

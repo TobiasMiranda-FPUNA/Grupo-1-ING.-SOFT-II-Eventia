@@ -94,10 +94,10 @@ export const routes: Routes = [
         path: 'eventos/nuevo',
         component: EventoForm,
         canActivate: [roleGuard],
+        // Igual que el backend: solo el organizador crea/edita eventos.
         data: {
           roles: [
             ROLES.ORGANIZADOR,
-            ROLES.ADMINISTRADOR,
           ],
         },
       },
@@ -106,10 +106,10 @@ export const routes: Routes = [
         path: 'eventos/:id/editar',
         component: EventoForm,
         canActivate: [roleGuard],
+        // Igual que el backend: solo el organizador crea/edita eventos.
         data: {
           roles: [
             ROLES.ORGANIZADOR,
-            ROLES.ADMINISTRADOR,
           ],
         },
       },

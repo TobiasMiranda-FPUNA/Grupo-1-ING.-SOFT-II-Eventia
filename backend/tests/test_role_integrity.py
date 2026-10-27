@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.api.roles import delete_participant_role
-from app.models import Evento, Inscripcion, Participante, RolParticipante, TipoEvento
+from app.models import Evento, Inscripcion, Participante, RolParticipante, RolSistema, TipoEvento
 from app.db import Base
 
 
@@ -84,3 +84,14 @@ def test_can_delete_role_without_active_registration(db):
     delete_participant_role(role.id_rol_participante, db)
 
     assert db.get(RolParticipante, role.id_rol_participante) is None
+
+
+def test_roles_reciben_codigo_por_defecto(db):
+    # rol_sistema.codigo y rol_participante.codigo son NOT NULL en la BD.
+    sistema = RolSistema(nombre="Auditor")
+    participante = RolParticipante(nombre="Oyente")
+    db.add_all([sistema, participante])
+    db.commit()
+
+    assert sistema.codigo
+    assert participante.codigo

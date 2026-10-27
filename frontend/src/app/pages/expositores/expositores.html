@@ -19,72 +19,74 @@
     </div>
   }
 
-  <section class="form-panel">
-    <h2>Registrar expositor</h2>
+  @if (puedeGestionar) {
+    <section class="form-panel">
+      <h2>Registrar expositor</h2>
 
-    <form [formGroup]="expositoresForm" (ngSubmit)="onSubmit()" novalidate>
-      <div class="form-grid">
-        <div class="field">
-          <label for="nombres">Nombres <span>*</span></label>
-          <input id="nombres" formControlName="nombres" autocomplete="given-name">
-          @if (expositoresForm.get('nombres')?.touched && expositoresForm.get('nombres')?.invalid) {
-            <small class="field-error">Ingresá al menos 2 caracteres.</small>
-          }
-        </div>
-
-        <div class="field">
-          <label for="apellidos">Apellidos <span>*</span></label>
-          <input id="apellidos" formControlName="apellidos" autocomplete="family-name">
-          @if (expositoresForm.get('apellidos')?.touched && expositoresForm.get('apellidos')?.invalid) {
-            <small class="field-error">Ingresá al menos 2 caracteres.</small>
-          }
-        </div>
-
-        <div class="field">
-          <label for="email">Correo electrónico <span>*</span></label>
-          <input id="email" type="email" formControlName="email" autocomplete="email">
-          @if (expositoresForm.get('email')?.touched && expositoresForm.get('email')?.invalid) {
-            <small class="field-error">Ingresá un correo válido.</small>
-          }
-        </div>
-
-        <div class="field">
-          <label for="institucion">Institución</label>
-          <input id="institucion" formControlName="institucion">
-        </div>
-
-        <div class="field">
-          <label for="especialidad">Especialidad</label>
-          <input id="especialidad" formControlName="especialidad">
-        </div>
-
-        <div class="field field-full">
-          <label for="biografia">Biografía</label>
-          <textarea id="biografia" rows="3" formControlName="biografia"></textarea>
-        </div>
-
-        <div class="field field-full">
-          <label for="actividades">Actividades asociadas (opcional)</label>
-          <select
-            id="actividades"
-            multiple
-            (change)="onActividadesChange($event)"
-            [disabled]="actividades().length === 0">
-            @for (actividad of actividades(); track actividad.id_actividad) {
-              <option [value]="actividad.id_actividad">{{ actividad.titulo }}</option>
+      <form [formGroup]="expositoresForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="nombres">Nombres <span>*</span></label>
+            <input id="nombres" formControlName="nombres" autocomplete="given-name">
+            @if (expositoresForm.get('nombres')?.touched && expositoresForm.get('nombres')?.invalid) {
+              <small class="field-error">Ingresá al menos 2 caracteres.</small>
             }
-          </select>
-          <small class="field-hint">Podés seleccionar varias actividades con Ctrl (Windows) o Cmd (Mac).</small>
-        </div>
-      </div>
+          </div>
 
-      <div class="form-actions">
-        <button class="primary-button" type="submit" [disabled]="isLoading()">
-          @if (isLoading()) { Registrando… } @else { + Registrar expositor }
-        </button>
-      </div>
-    </form>
-  </section>
+          <div class="field">
+            <label for="apellidos">Apellidos <span>*</span></label>
+            <input id="apellidos" formControlName="apellidos" autocomplete="family-name">
+            @if (expositoresForm.get('apellidos')?.touched && expositoresForm.get('apellidos')?.invalid) {
+              <small class="field-error">Ingresá al menos 2 caracteres.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="email">Correo electrónico <span>*</span></label>
+            <input id="email" type="email" formControlName="email" autocomplete="email">
+            @if (expositoresForm.get('email')?.touched && expositoresForm.get('email')?.invalid) {
+              <small class="field-error">Ingresá un correo válido.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="institucion">Institución</label>
+            <input id="institucion" formControlName="institucion">
+          </div>
+
+          <div class="field">
+            <label for="especialidad">Especialidad</label>
+            <input id="especialidad" formControlName="especialidad">
+          </div>
+
+          <div class="field field-full">
+            <label for="biografia">Biografía</label>
+            <textarea id="biografia" rows="3" formControlName="biografia"></textarea>
+          </div>
+
+          <div class="field field-full">
+            <label for="actividades">Actividades asociadas (opcional)</label>
+            <select
+              id="actividades"
+              multiple
+              (change)="onActividadesChange($event)"
+              [disabled]="actividades().length === 0">
+              @for (actividad of actividades(); track actividad.id_actividad) {
+                <option [value]="actividad.id_actividad">{{ actividad.titulo }}</option>
+              }
+            </select>
+            <small class="field-hint">Podés seleccionar varias actividades con Ctrl (Windows) o Cmd (Mac).</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit" [disabled]="isLoading()">
+            @if (isLoading()) { Registrando… } @else { + Registrar expositor }
+          </button>
+        </div>
+      </form>
+    </section>
+  }
 
   <section class="list-section">
     <div class="list-heading">
@@ -152,13 +154,15 @@
               }
             </div>
 
-            <div class="card-actions">
-              <button
-                type="button"
-                class="delete-button"
-                (click)="onDelete(expositor)"
-                [disabled]="isLoading()">× Eliminar</button>
-            </div>
+            @if (puedeGestionar) {
+              <div class="card-actions">
+                <button
+                  type="button"
+                  class="delete-button"
+                  (click)="onDelete(expositor)"
+                  [disabled]="isLoading()">× Eliminar</button>
+              </div>
+            }
           </article>
         }
       </div>
