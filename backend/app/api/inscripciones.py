@@ -1,6 +1,6 @@
 # UTC/datetime: para registrar el momento exacto en que se crea la
 # inscripción (fecha_inscripcion).
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 # APIRouter/Depends/HTTPException/status: ver detalle en app/api/auth.py.
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -29,6 +29,8 @@ router = APIRouter(prefix="/api/v1/inscripciones", tags=["Inscripciones"])
 # Estados posibles del resultado de una inscripción.
 CONFIRMED_STATE = "confirmada"
 WAITLIST_STATE = "lista_de_espera"
+# Único estado de evento que admite nuevas inscripciones.
+PUBLISHED_EVENT_STATE = "publicado"
 
 
 # Busca un participante existente por email (comparación insensible a
@@ -91,9 +93,33 @@ def create_inscripcion(data: InscripcionCreate, db: Session = Depends(get_db)) -
     # dos inscripciones concurrentes no lean el mismo conteo de cupo antes
     # de que ninguna haya confirmado la suya (en SQLite, usado en los tests,
     # esta cláusula es ignorada de forma segura al no ser soportada).
-    evento = db.scalar(select(Evento).where(Evento.id_evento == data.id_evento).with_for_update())
+    # of=Evento limita el bloqueo a la tabla evento: la política se carga con
+    # un LEFT OUTER JOIN y PostgreSQL no permite FOR UPDATE sobre el lado
+    # nullable de un outer join.
+    evento = db.scalar(
+        select(Evento).where(Evento.id_evento == data.id_evento).with_for_update(of=Evento)
+    )
     if evento is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento no encontrado")
+
+    # Solo los eventos publicados aceptan inscripciones (no borradores,
+    # cancelados ni finalizados).
+    if evento.estado != PUBLISHED_EVENT_STATE:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El evento no está abierto a inscripciones",
+        )
+
+    # Respeta la fecha límite de inscripción definida en la política.
+    if (
+        evento.politica is not None
+        and evento.politica.fecha_limite is not None
+        and date.today() > evento.politica.fecha_limite
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El plazo de inscripción para este evento ya finalizó",
+        )
 
     rol = db.get(RolParticipante, data.id_rol_participante)
     if rol is None or not rol.activo:

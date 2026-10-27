@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from fastapi import HTTPException
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.eventos import create_evento
 from app.api.inscripciones import create_inscripcion
 from app.db import Base
-from app.models import RolParticipante, TipoEvento
+from app.models import Evento, RolParticipante, TipoEvento
 from app.schemas import EventoCreate, InscripcionCreate, PoliticaInscripcionData
 
 
@@ -42,6 +42,7 @@ def _crear_evento(db, cupo_maximo=1, permite_lista_espera=False, nombre="Evento 
             fecha_inicio=date(2026, 6, 1),
             fecha_fin=date(2026, 6, 2),
             cupo_maximo=cupo_maximo,
+            estado="publicado",
             politica=PoliticaInscripcionData(permite_lista_espera=permite_lista_espera),
         ),
         db,
@@ -145,3 +146,34 @@ def test_create_inscripcion_reutiliza_participante_existente_por_email(db, rol_a
     )
 
     assert primera.id_participante == segunda.id_participante
+
+
+def test_create_inscripcion_rechaza_evento_no_publicado(db, rol_asistente):
+    evento = _crear_evento(db, cupo_maximo=5)
+    evento_db = db.get(Evento, evento.id_evento)
+    evento_db.estado = "borrador"
+    db.commit()
+
+    with pytest.raises(HTTPException) as error:
+        create_inscripcion(
+            _inscripcion(evento.id_evento, rol_asistente.id_rol_participante, "ana.gomez@example.com"),
+            db,
+        )
+
+    assert error.value.status_code == 409
+
+
+def test_create_inscripcion_rechaza_fuera_de_fecha_limite(db, rol_asistente):
+    evento = _crear_evento(db, cupo_maximo=5)
+    evento_db = db.get(Evento, evento.id_evento)
+    evento_db.politica.fecha_limite = date.today() - timedelta(days=1)
+    db.commit()
+
+    with pytest.raises(HTTPException) as error:
+        create_inscripcion(
+            _inscripcion(evento.id_evento, rol_asistente.id_rol_participante, "ana.gomez@example.com"),
+            db,
+        )
+
+    assert error.value.status_code == 409
+    assert "plazo" in error.value.detail

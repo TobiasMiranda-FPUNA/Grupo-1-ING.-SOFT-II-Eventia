@@ -69,7 +69,6 @@ export const OPERACIONES: Operacion[] = [
     icono: '✎',
     ruta: '/inscripciones',
     roles: [PARTICIPANTE, ORGANIZADOR],
-    proximamente: true,
     historia: 'HU04',
   },
   {

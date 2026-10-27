@@ -1,7 +1,9 @@
-import { RolBase } from './rol-basemodel';
+import { RolBase } from './base.model';
+
+class DummyRol extends RolBase {}
 
 describe('RolBase', () => {
   it('should create an instance', () => {
-    expect(new RolBase()).toBeTruthy();
+    expect(new DummyRol()).toBeTruthy();
   });
 });

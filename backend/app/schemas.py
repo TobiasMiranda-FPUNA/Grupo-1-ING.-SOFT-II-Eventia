@@ -44,6 +44,16 @@ ModalidadActividad = Literal[
 ]
 
 
+# Estado editable de un evento. Se normaliza a minúsculas antes de validar
+# para aceptar también "PUBLICADO" o " Borrador " desde el cliente.
+EstadoEvento = Annotated[
+    Literal["borrador", "publicado"],
+    BeforeValidator(
+        lambda v: v.strip().lower() if isinstance(v, str) else v
+    ),
+]
+
+
 # ============================================================
 # AUTENTICACIÓN
 # ============================================================
@@ -162,7 +172,7 @@ class EventoBase(BaseModel):
 
     cupo_maximo: int = Field(gt=0)
 
-    estado: Literal["borrador", "publicado"] = "borrador"
+    estado: EstadoEvento = "borrador"
 
     @model_validator(mode="after")
     def check_fechas(self) -> "EventoBase":
@@ -207,7 +217,7 @@ class EventoUpdate(BaseModel):
         gt=0
     )
 
-    estado: Literal["borrador", "publicado"] | None = None
+    estado: EstadoEvento | None = None
 
     politica: PoliticaInscripcionData | None = None
 
