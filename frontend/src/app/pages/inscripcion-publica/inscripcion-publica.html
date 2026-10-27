@@ -1,0 +1,95 @@
+<div class="public-page">
+  <header class="public-header">
+    <div>
+      <span class="eyebrow">EVENTIA</span>
+      <h1>Inscripción a eventos</h1>
+      <p>Completá tus datos y el sistema te informará el estado de tu inscripción.</p>
+    </div>
+    <div class="public-links"><a routerLink="/agenda" class="secondary-link">Ver agenda</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
+  </header>
+
+  @if (cargando()) {
+    <div class="state-card">Cargando eventos disponibles…</div>
+  } @else if (resultado()) {
+    <section class="result-card" [class.waiting]="resultado()?.estado === 'lista_de_espera'">
+      <div class="result-icon">{{ resultado()?.estado === 'confirmada' ? '✓' : '⏳' }}</div>
+      <p class="eyebrow">RESULTADO DE INSCRIPCIÓN</p>
+      <h2>
+        {{ resultado()?.estado === 'confirmada' ? 'Inscripción confirmada' : 'Ingresaste a la lista de espera' }}
+      </h2>
+      <p>
+        @if (resultado()?.estado === 'confirmada') {
+          Tu lugar para <strong>{{ nombreEvento() }}</strong> quedó reservado correctamente.
+        } @else {
+          El cupo está completo. Tu inscripción quedó registrada en la lista de espera de
+          <strong>{{ nombreEvento() }}</strong>.
+        }
+      </p>
+      <div class="result-meta">N.º de inscripción: <strong>{{ resultado()?.id_inscripcion }}</strong></div>
+      <button type="button" class="primary-button" (click)="nuevaInscripcion()">Realizar otra inscripción</button>
+    </section>
+  } @else {
+    <section class="form-card">
+      @if (error()) {
+        <div class="alert" role="alert">{{ error() }}</div>
+      }
+
+      @if (eventos().length === 0) {
+        <div class="state-card">No hay eventos publicados disponibles para inscripción.</div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="evento">Evento *</label>
+              <select id="evento" formControlName="id_evento">
+                @for (evento of eventos(); track evento.id_evento) {
+                  <option [value]="evento.id_evento">
+                    {{ evento.nombre }} · {{ evento.fecha_inicio | date:'dd/MM/yyyy' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="nombres">Nombres *</label>
+              <input id="nombres" formControlName="nombres" autocomplete="given-name">
+            </div>
+
+            <div class="field">
+              <label for="apellidos">Apellidos *</label>
+              <input id="apellidos" formControlName="apellidos" autocomplete="family-name">
+            </div>
+
+            <div class="field">
+              <label for="email">Correo electrónico *</label>
+              <input id="email" type="email" formControlName="email" autocomplete="email">
+            </div>
+
+            <div class="field">
+              <label for="documento">Documento</label>
+              <input id="documento" formControlName="documento">
+            </div>
+
+            <div class="field">
+              <label for="institucion">Institución</label>
+              <input id="institucion" formControlName="institucion">
+            </div>
+
+            <div class="field">
+              <label for="rol">Rol dentro del evento *</label>
+              <select id="rol" formControlName="id_rol_participante">
+                @for (rol of roles(); track rol.id_rol_participante) {
+                  <option [value]="rol.id_rol_participante">{{ rol.nombre }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <button class="primary-button" type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Procesando…' : 'Confirmar inscripción' }}
+          </button>
+        </form>
+      }
+    </section>
+  }
+</div>

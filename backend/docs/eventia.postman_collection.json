@@ -1192,6 +1192,29 @@
       "name": "Inscripciones",
       "item": [
         {
+          "name": "GET /api/v1/inscripciones/roles-participante — List Public Participant Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inscripciones/roles-participante",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inscripciones",
+                "roles-participante"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
           "name": "POST /api/v1/inscripciones — Create Inscripcion",
           "request": {
             "method": "POST",
@@ -1224,6 +1247,182 @@
                   "language": "json"
                 }
               }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Asistencias",
+      "item": [
+        {
+          "name": "GET /api/v1/asistencias/eventos/{id_evento}/actividades/{id_actividad} — Listar Participantes Actividad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/asistencias/eventos/:id_evento/actividades/:id_actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "asistencias",
+                "eventos",
+                ":id_evento",
+                "actividades",
+                ":id_actividad"
+              ],
+              "variable": [
+                {
+                  "key": "id_evento",
+                  "value": "1",
+                  "description": ""
+                },
+                {
+                  "key": "id_actividad",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/asistencias/actividades/{id_actividad}/registrar — Registrar Asistencia Masiva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/asistencias/actividades/:id_actividad/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "asistencias",
+                "actividades",
+                ":id_actividad",
+                "registrar"
+              ],
+              "variable": [
+                {
+                  "key": "id_actividad",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registros\": [\n    {\n      \"id_inscripcion\": 1,\n      \"estado\": \"presente\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Certificados",
+      "item": [
+        {
+          "name": "GET /api/v1/certificados/evento/{id_evento}/participantes — Listar Estado Certificados Evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/evento/:id_evento/participantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "evento",
+                ":id_evento",
+                "participantes"
+              ],
+              "variable": [
+                {
+                  "key": "id_evento",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/certificados/emitir/{id_inscripcion} — Emitir Certificado",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/emitir/:id_inscripcion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "emitir",
+                ":id_inscripcion"
+              ],
+              "variable": [
+                {
+                  "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "GET /api/v1/certificados/verificar/{codigo} — Verificar Certificado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/verificar/:codigo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "verificar",
+                ":codigo"
+              ],
+              "variable": [
+                {
+                  "key": "codigo",
+                  "value": "texto de ejemplo (codigo)",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
             }
           }
         }

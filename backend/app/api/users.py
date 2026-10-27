@@ -71,6 +71,24 @@ def require_system_role(role_name: str):
     return role_dependency
 
 
+# Variante para operaciones que pueden ser realizadas por más de un rol.
+# Se utiliza, por ejemplo, en asistencia (organizador/acreditación/admin)
+# y en emisión de certificados (organizador/admin).
+def require_any_system_role(*role_names: str):
+    role_names_lower = {role_name.lower() for role_name in role_names}
+
+    def role_dependency(user: Usuario = Depends(get_current_user)) -> Usuario:
+        active_roles = {role.nombre.lower() for role in user.roles if role.activo}
+        if active_roles.isdisjoint(role_names_lower):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="El usuario no tiene permisos para esta operación",
+            )
+        return user
+
+    return role_dependency
+
+
 # Endpoint que devuelve el perfil del usuario autenticado (a partir del
 # token enviado), incluyendo sus roles activos.
 @router.get("/me", response_model=UserResponse)

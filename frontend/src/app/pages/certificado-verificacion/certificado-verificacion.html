@@ -1,0 +1,66 @@
+<div class="verify-page">
+  <header class="verify-header">
+    <div>
+      <span class="eyebrow">EVENTIA</span>
+      <h1>Verificación de certificados</h1>
+      <p>Ingresá el código que aparece en el certificado para comprobar su autenticidad.</p>
+    </div>
+    <a routerLink="/agenda" class="secondary-link">Ver agenda</a>
+  </header>
+
+  <section class="search-card">
+    <label for="codigo">Código de validación</label>
+    <div class="search-row">
+      <input
+        id="codigo"
+        [(ngModel)]="codigo"
+        (keyup.enter)="verificar()"
+        placeholder="Ej.: A12B34C56D78..."
+        autocomplete="off">
+      <button type="button" (click)="verificar()" [disabled]="buscando()">
+        {{ buscando() ? 'Verificando…' : 'Verificar' }}
+      </button>
+    </div>
+  </section>
+
+  @if (error()) {
+    <div class="alert invalid" role="alert">
+      <strong>Certificado no válido</strong>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (certificado(); as cert) {
+    <section class="certificate-card">
+      <div class="valid-badge">✓ Certificado válido</div>
+      <p class="certificate-label">CERTIFICADO DE {{ cert.tipo | uppercase }}</p>
+      <h2>{{ cert.participante }}</h2>
+      <p class="lead">participó en</p>
+      <h3>{{ cert.evento }}</h3>
+
+      <div class="certificate-data">
+        <div>
+          <span>Periodo del evento</span>
+          <strong>{{ cert.fecha_inicio_evento | date:'dd/MM/yyyy' }} - {{ cert.fecha_fin_evento | date:'dd/MM/yyyy' }}</strong>
+        </div>
+        <div>
+          <span>Fecha de emisión</span>
+          <strong>{{ cert.fecha_emision | date:'dd/MM/yyyy' }}</strong>
+        </div>
+        <div>
+          <span>N.º de inscripción</span>
+          <strong>#{{ cert.id_inscripcion }}</strong>
+        </div>
+        <div>
+          <span>Código</span>
+          <strong class="code">{{ cert.codigo_validacion }}</strong>
+        </div>
+      </div>
+
+      <button class="download-button" type="button" (click)="descargar()">
+        Descargar certificado
+      </button>
+      <small>El archivo descargado puede abrirse en el navegador e imprimirse o guardarse como PDF.</small>
+    </section>
+  }
+</div>

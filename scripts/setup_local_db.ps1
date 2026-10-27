@@ -52,6 +52,9 @@ $SqlFiles = @(
     "crear_participante_inscripcion.sql",
     "crear_categoria_actividad_actividad.sql",
     "crear_conferencista_actividad_conferencista.sql",
+    "crear_asistencia.sql",
+    "crear_certificado.sql",
+    "ajustar_compatibilidad_backend.sql",
     "cargar_catalogos_iniciales.sql",
     "cargar_datos_ejemplo.sql"
 )

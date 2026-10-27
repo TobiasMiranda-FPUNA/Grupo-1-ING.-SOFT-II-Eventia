@@ -806,6 +806,31 @@
         }
       }
     },
+    "/api/v1/inscripciones/roles-participante": {
+      "get": {
+        "tags": [
+          "Inscripciones"
+        ],
+        "summary": "List Public Participant Roles",
+        "operationId": "list_public_participant_roles_api_v1_inscripciones_roles_participante_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RolParticipantePublicResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Public Participant Roles Api V1 Inscripciones Roles Participante Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/inscripciones": {
       "post": {
         "tags": [
@@ -830,6 +855,123 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/InscripcionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/asistencias/eventos/{id_evento}/actividades/{id_actividad}": {
+      "get": {
+        "tags": [
+          "Asistencias"
+        ],
+        "summary": "Listar Participantes Actividad",
+        "operationId": "listar_participantes_actividad_api_v1_asistencias_eventos__id_evento__actividades__id_actividad__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_evento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Evento"
+            }
+          },
+          {
+            "name": "id_actividad",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Actividad"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AsistenciaParticipanteResponse"
+                  },
+                  "title": "Response Listar Participantes Actividad Api V1 Asistencias Eventos  Id Evento  Actividades  Id Actividad  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/asistencias/actividades/{id_actividad}/registrar": {
+      "post": {
+        "tags": [
+          "Asistencias"
+        ],
+        "summary": "Registrar Asistencia Masiva",
+        "operationId": "registrar_asistencia_masiva_api_v1_asistencias_actividades__id_actividad__registrar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_actividad",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Actividad"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsistenciaRegistroMasivo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsistenciaGuardadoResponse"
                 }
               }
             }
@@ -1493,6 +1635,146 @@
         }
       }
     },
+    "/api/v1/certificados/evento/{id_evento}/participantes": {
+      "get": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Listar Estado Certificados Evento",
+        "operationId": "listar_estado_certificados_evento_api_v1_certificados_evento__id_evento__participantes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_evento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Evento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CertificadoGestionResponse"
+                  },
+                  "title": "Response Listar Estado Certificados Evento Api V1 Certificados Evento  Id Evento  Participantes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/certificados/emitir/{id_inscripcion}": {
+      "post": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Emitir Certificado",
+        "operationId": "emitir_certificado_api_v1_certificados_emitir__id_inscripcion__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_inscripcion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Inscripcion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificadoGestionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/certificados/verificar/{codigo}": {
+      "get": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Verificar Certificado",
+        "operationId": "verificar_certificado_api_v1_certificados_verificar__codigo__get",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Codigo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificadoVerificacionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -1686,6 +1968,111 @@
         ],
         "title": "ActividadResponse"
       },
+      "AsistenciaGuardadoResponse": {
+        "properties": {
+          "id_actividad": {
+            "type": "integer",
+            "title": "Id Actividad"
+          },
+          "registros_guardados": {
+            "type": "integer",
+            "title": "Registros Guardados"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_actividad",
+          "registros_guardados"
+        ],
+        "title": "AsistenciaGuardadoResponse"
+      },
+      "AsistenciaParticipanteResponse": {
+        "properties": {
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "id_participante": {
+            "type": "integer",
+            "title": "Id Participante"
+          },
+          "participante": {
+            "type": "string",
+            "title": "Participante"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "estado_inscripcion": {
+            "type": "string",
+            "title": "Estado Inscripcion"
+          },
+          "estado_asistencia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "presente",
+                  "ausente"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado Asistencia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_inscripcion",
+          "id_participante",
+          "participante",
+          "email",
+          "estado_inscripcion"
+        ],
+        "title": "AsistenciaParticipanteResponse"
+      },
+      "AsistenciaRegistroItem": {
+        "properties": {
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "presente",
+              "ausente"
+            ],
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_inscripcion",
+          "estado"
+        ],
+        "title": "AsistenciaRegistroItem"
+      },
+      "AsistenciaRegistroMasivo": {
+        "properties": {
+          "registros": {
+            "items": {
+              "$ref": "#/components/schemas/AsistenciaRegistroItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Registros"
+          }
+        },
+        "type": "object",
+        "required": [
+          "registros"
+        ],
+        "title": "AsistenciaRegistroMasivo"
+      },
       "CategoriaActividadResponse": {
         "properties": {
           "id_categoria": {
@@ -1720,6 +2107,148 @@
           "activo"
         ],
         "title": "CategoriaActividadResponse"
+      },
+      "CertificadoGestionResponse": {
+        "properties": {
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "id_participante": {
+            "type": "integer",
+            "title": "Id Participante"
+          },
+          "participante": {
+            "type": "string",
+            "title": "Participante"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "estado_inscripcion": {
+            "type": "string",
+            "title": "Estado Inscripcion"
+          },
+          "actividades_evento": {
+            "type": "integer",
+            "title": "Actividades Evento"
+          },
+          "asistencias_presentes": {
+            "type": "integer",
+            "title": "Asistencias Presentes"
+          },
+          "porcentaje_asistencia": {
+            "type": "number",
+            "title": "Porcentaje Asistencia"
+          },
+          "minimo_requerido": {
+            "type": "integer",
+            "title": "Minimo Requerido"
+          },
+          "elegible": {
+            "type": "boolean",
+            "title": "Elegible"
+          },
+          "certificado_emitido": {
+            "type": "boolean",
+            "title": "Certificado Emitido"
+          },
+          "codigo_validacion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codigo Validacion"
+          },
+          "fecha_emision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Emision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_inscripcion",
+          "id_participante",
+          "participante",
+          "email",
+          "estado_inscripcion",
+          "actividades_evento",
+          "asistencias_presentes",
+          "porcentaje_asistencia",
+          "minimo_requerido",
+          "elegible",
+          "certificado_emitido"
+        ],
+        "title": "CertificadoGestionResponse"
+      },
+      "CertificadoVerificacionResponse": {
+        "properties": {
+          "valido": {
+            "type": "boolean",
+            "title": "Valido",
+            "default": true
+          },
+          "codigo_validacion": {
+            "type": "string",
+            "title": "Codigo Validacion"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "fecha_emision": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Emision"
+          },
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "participante": {
+            "type": "string",
+            "title": "Participante"
+          },
+          "evento": {
+            "type": "string",
+            "title": "Evento"
+          },
+          "fecha_inicio_evento": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Inicio Evento"
+          },
+          "fecha_fin_evento": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Fin Evento"
+          }
+        },
+        "type": "object",
+        "required": [
+          "codigo_validacion",
+          "tipo",
+          "fecha_emision",
+          "id_inscripcion",
+          "participante",
+          "evento",
+          "fecha_inicio_evento",
+          "fecha_fin_evento"
+        ],
+        "title": "CertificadoVerificacionResponse"
       },
       "ConferencistaCreate": {
         "properties": {
@@ -2382,6 +2911,36 @@
         "type": "object",
         "title": "PoliticaInscripcionData"
       },
+      "RolParticipantePublicResponse": {
+        "properties": {
+          "id_rol_participante": {
+            "type": "integer",
+            "title": "Id Rol Participante"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_rol_participante",
+          "nombre",
+          "descripcion"
+        ],
+        "title": "RolParticipantePublicResponse"
+      },
       "RoleCreate": {
         "properties": {
           "nombre": {
@@ -2666,6 +3225,14 @@
     {
       "name": "Inscripciones",
       "description": "Inscripción pública de participantes a un evento."
+    },
+    {
+      "name": "Asistencias",
+      "description": "Registro de presencia o ausencia por actividad. Requiere rol de organización, administración o acreditación."
+    },
+    {
+      "name": "Certificados",
+      "description": "Emisión según porcentaje de asistencia y verificación pública mediante código único."
     },
     {
       "name": "Sistema",

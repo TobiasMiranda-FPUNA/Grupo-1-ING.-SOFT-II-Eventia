@@ -18,13 +18,15 @@ organizer_required = Depends(require_system_role("organizador"))
 
 
 # Estados permitidos por la restricción de PostgreSQL.
-ESTADOS_EVENTO = {"BORRADOR", "PUBLICADO", "FINALIZADO", "CANCELADO"}
+# Se mantienen en minúsculas para coincidir con Angular y con
+# ajustar_compatibilidad_backend.sql.
+ESTADOS_EVENTO = {"borrador", "publicado", "finalizado", "cancelado"}
 
 
 # Normaliza el estado recibido desde Angular.
-# Por ejemplo: "borrador" -> "BORRADOR".
+# Por ejemplo: "PUBLICADO" -> "publicado".
 def _normalizar_estado(estado: str) -> str:
-    estado_normalizado = estado.strip().upper()
+    estado_normalizado = estado.strip().lower()
 
     if estado_normalizado not in ESTADOS_EVENTO:
         raise HTTPException(
