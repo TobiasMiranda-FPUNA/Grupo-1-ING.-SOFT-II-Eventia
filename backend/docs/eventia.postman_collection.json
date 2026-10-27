@@ -731,6 +731,34 @@
               }
             }
           }
+        },
+        {
+          "name": "GET /api/v1/eventos/{evento_id}/dashboard — Get Dashboard Evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/eventos/:evento_id/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eventos",
+                ":evento_id",
+                "dashboard"
+              ],
+              "variable": [
+                {
+                  "key": "evento_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     },
@@ -1256,6 +1284,39 @@
       "name": "Asistencias",
       "item": [
         {
+          "name": "POST /api/v1/asistencias — Registrar Asistencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/asistencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "asistencias"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_evento\": 1,\n  \"id_actividad\": 1,\n  \"id_inscripcion\": 1,\n  \"estado\": \"presente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
           "name": "GET /api/v1/asistencias/eventos/{id_evento}/actividades/{id_actividad} — Listar Participantes Actividad",
           "request": {
             "method": "GET",
@@ -1396,6 +1457,67 @@
           }
         },
         {
+          "name": "GET /api/v1/certificados/inscripcion/{id_inscripcion}/documento — Descargar Certificado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/inscripcion/:id_inscripcion/documento",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "inscripcion",
+                ":id_inscripcion",
+                "documento"
+              ],
+              "variable": [
+                {
+                  "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "GET /api/v1/certificados/verificar/{codigo}/documento — Descargar Certificado Por Codigo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/verificar/:codigo/documento",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "verificar",
+                ":codigo",
+                "documento"
+              ],
+              "variable": [
+                {
+                  "key": "codigo",
+                  "value": "texto de ejemplo (codigo)",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
           "name": "GET /api/v1/certificados/verificar/{codigo} — Verificar Certificado",
           "request": {
             "method": "GET",
@@ -1424,6 +1546,31 @@
             "auth": {
               "type": "noauth"
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Métricas",
+      "item": [
+        {
+          "name": "GET /api/v1/metricas/eventos — Listar Metricas Eventos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/metricas/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "metricas",
+                "eventos"
+              ]
+            },
+            "description": ""
           }
         }
       ]

@@ -36,6 +36,11 @@
 #                                     vscode = no abre túnel, se reenvía el puerto
 #                                     desde la pestaña "Puertos" de VS Code)
 #   NO_BROWSER=1               (no abrir el navegador automáticamente)
+#   FRONTEND_BASE_URL=...      (link de verificación impreso en los
+#                              certificados PDF; por defecto la URL del
+#                              frontend local, o la del túnel en remote.
+#                              Con TUNNEL=vscode, poné acá la URL pública
+#                              que te da VS Code)
 # ============================================================
 
 set -euo pipefail
@@ -142,10 +147,19 @@ for port in "$BACKEND_PORT" "$FRONTEND_PORT"; do
 done
 
 # --- Preparar backend ---
-if [[ ! -x "$BACKEND_DIR/.venv/bin/uvicorn" ]]; then
-  echo "==> No se encontró backend/.venv, creándolo e instalando dependencias..."
+if [[ ! -x "$BACKEND_DIR/.venv/bin/python" ]]; then
+  echo "==> No se encontró backend/.venv, creándolo..."
   python3 -m venv "$BACKEND_DIR/.venv"
+fi
+
+# Reinstala las dependencias cuando requirements.txt cambió desde la última
+# instalación (por ejemplo, al traer cambios que agregan una librería).
+REQUIREMENTS_STAMP="$BACKEND_DIR/.venv/.requirements.cksum"
+REQUIREMENTS_SUM="$(cksum < "$BACKEND_DIR/requirements.txt")"
+if [[ "$(cat "$REQUIREMENTS_STAMP" 2>/dev/null || true)" != "$REQUIREMENTS_SUM" ]]; then
+  echo "==> Instalando/actualizando dependencias del backend (requirements.txt)..."
   "$BACKEND_DIR/.venv/bin/pip" install -q -r "$BACKEND_DIR/requirements.txt"
+  echo "$REQUIREMENTS_SUM" > "$REQUIREMENTS_STAMP"
 fi
 
 if [[ ! -f "$BACKEND_DIR/.env" ]]; then
@@ -154,45 +168,21 @@ if [[ ! -f "$BACKEND_DIR/.env" ]]; then
 fi
 
 # --- Preparar frontend ---
-if [[ ! -d "$FRONTEND_DIR/node_modules" ]]; then
-  echo "==> No se encontró frontend/node_modules, instalando dependencias (npm install)..."
+# npm deja node_modules/.package-lock.json en cada instalación: si
+# package-lock.json es más nuevo, hay dependencias nuevas sin instalar.
+if [[ ! -d "$FRONTEND_DIR/node_modules" \
+   || "$FRONTEND_DIR/package-lock.json" -nt "$FRONTEND_DIR/node_modules/.package-lock.json" ]]; then
+  echo "==> Instalando/actualizando dependencias del frontend (npm install)..."
   (cd "$FRONTEND_DIR" && npm install)
+  touch "$FRONTEND_DIR/node_modules/.package-lock.json"
 fi
-
-# --- Levantar backend ---
-echo "==> Iniciando backend en http://localhost:$BACKEND_PORT ..."
-(
-  cd "$BACKEND_DIR"
-  exec .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port "$BACKEND_PORT"
-) > >(sed -u 's/^/[backend] /') 2>&1 &
-BACKEND_PID=$!
-
-if ! wait_for_url "http://localhost:$BACKEND_PORT/health" 30; then
-  echo "El backend no respondió en 30s. Revisá el log [backend] arriba (¿Postgres está corriendo?)."
-  exit 1
-fi
-echo "==> Backend listo."
-
-# --- Levantar frontend ---
-NG_CONFIG="development"
-[[ "$MODE" == "remote" ]] && NG_CONFIG="remote"
-
-echo "==> Iniciando frontend ($NG_CONFIG) en http://localhost:$FRONTEND_PORT ..."
-(
-  cd "$FRONTEND_DIR"
-  exec node_modules/.bin/ng serve --configuration "$NG_CONFIG" --port "$FRONTEND_PORT"
-) > >(sed -u 's/^/[frontend] /') 2>&1 &
-FRONTEND_PID=$!
-
-if ! wait_for_url "http://localhost:$FRONTEND_PORT" 120; then
-  echo "El frontend no respondió en 120s. Revisá el log [frontend] arriba."
-  exit 1
-fi
-echo "==> Frontend listo."
 
 PUBLIC_URL=""
 
 # --- Abrir túnel (solo modo remote) ---
+# Se abre antes de levantar el backend para conocer la URL pública: el
+# backend la usa en el link de verificación de los certificados PDF. El
+# túnel no necesita que el frontend esté corriendo todavía.
 if [[ "$MODE" == "remote" && "$TUNNEL" != "vscode" ]]; then
   TUNNEL_LOG="$(mktemp -t eventia-tunnel.XXXXXX)"
   echo "==> Abriendo túnel con $TUNNEL ..."
@@ -235,6 +225,44 @@ if [[ "$MODE" == "remote" && "$TUNNEL" != "vscode" ]]; then
   fi
   echo "==> Túnel listo."
 fi
+
+# URL del frontend que el backend imprime en los certificados PDF.
+if [[ -n "$PUBLIC_URL" ]]; then
+  export FRONTEND_BASE_URL="$PUBLIC_URL"
+else
+  export FRONTEND_BASE_URL="${FRONTEND_BASE_URL:-http://localhost:$FRONTEND_PORT}"
+fi
+
+# --- Levantar backend ---
+echo "==> Iniciando backend en http://localhost:$BACKEND_PORT ..."
+(
+  cd "$BACKEND_DIR"
+  exec .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port "$BACKEND_PORT"
+) > >(sed -u 's/^/[backend] /') 2>&1 &
+BACKEND_PID=$!
+
+if ! wait_for_url "http://localhost:$BACKEND_PORT/health" 30; then
+  echo "El backend no respondió en 30s. Revisá el log [backend] arriba (¿Postgres está corriendo?)."
+  exit 1
+fi
+echo "==> Backend listo."
+
+# --- Levantar frontend ---
+NG_CONFIG="development"
+[[ "$MODE" == "remote" ]] && NG_CONFIG="remote"
+
+echo "==> Iniciando frontend ($NG_CONFIG) en http://localhost:$FRONTEND_PORT ..."
+(
+  cd "$FRONTEND_DIR"
+  exec node_modules/.bin/ng serve --configuration "$NG_CONFIG" --port "$FRONTEND_PORT"
+) > >(sed -u 's/^/[frontend] /') 2>&1 &
+FRONTEND_PID=$!
+
+if ! wait_for_url "http://localhost:$FRONTEND_PORT" 120; then
+  echo "El frontend no respondió en 120s. Revisá el log [frontend] arriba."
+  exit 1
+fi
+echo "==> Frontend listo."
 
 if [[ "$MODE" == "remote" && "$TUNNEL" == "vscode" ]]; then
   echo

@@ -489,6 +489,23 @@ class AsistenciaGuardadoResponse(BaseModel):
     registros_guardados: int
 
 
+class AsistenciaCreate(BaseModel):
+    id_evento: int
+    id_actividad: int
+    id_inscripcion: int
+    estado: EstadoAsistencia = "presente"
+
+
+class AsistenciaResponse(BaseModel):
+    id_asistencia: int
+    id_inscripcion: int
+    id_actividad: int
+    estado: EstadoAsistencia
+    fecha_hora_registro: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 # ============================================================
 # CERTIFICADOS - GESTIÓN Y EMISIÓN
 # ============================================================
@@ -507,3 +524,66 @@ class CertificadoGestionResponse(BaseModel):
     certificado_emitido: bool
     codigo_validacion: str | None = None
     fecha_emision: datetime | None = None
+
+
+# ============================================================
+# MÉTRICAS - DASHBOARD DE EVENTOS
+# ============================================================
+
+class MetricasInscripciones(BaseModel):
+    total: int
+    confirmadas: int
+    lista_de_espera: int
+    pendientes: int
+    canceladas: int
+    rechazadas: int
+
+
+class MetricasCupos(BaseModel):
+    cupo_maximo: int
+    ocupados: int
+    disponibles: int
+    porcentaje_ocupacion: float
+
+
+class MetricasAsistenciaActividad(BaseModel):
+    id_actividad: int
+    titulo: str
+    fecha: date
+    hora_inicio: time
+    cupo: int
+    presentes: int
+    ausentes: int
+    sin_registro: int
+    porcentaje_asistencia: float
+
+
+class MetricasAsistencia(BaseModel):
+    total_actividades: int
+    presentes: int
+    ausentes: int
+    sin_registro: int
+    porcentaje_asistencia: float
+    actividades: list[MetricasAsistenciaActividad]
+
+
+class MetricasEventoResponse(BaseModel):
+    id_evento: int
+    nombre: str
+    estado: str
+    inscripciones: MetricasInscripciones
+    cupos: MetricasCupos
+    asistencia: MetricasAsistencia
+
+
+class MetricasEventoResumen(BaseModel):
+    id_evento: int
+    nombre: str
+    estado: str
+    fecha_inicio: date
+    cupo_maximo: int
+    inscriptos_confirmados: int
+    lista_de_espera: int
+    porcentaje_ocupacion: float
+    total_actividades: int
+    porcentaje_asistencia: float

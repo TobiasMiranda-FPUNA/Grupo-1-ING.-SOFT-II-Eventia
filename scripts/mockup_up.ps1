@@ -16,7 +16,7 @@ Uso:
   .\scripts\mockup_up.ps1 -List        # lista las pantallas
 
 Pantallas: todas, login, roles, eventos, evento-nuevo, evento-editar,
-           expositores
+           expositores, agenda
 
 Si PowerShell bloquea la ejecución de scripts, corré antes
 (una sola vez, por usuario):
@@ -49,6 +49,7 @@ $Pantallas = [ordered]@{
   "evento-nuevo"  = @{ Pagina = "evento-form.html";      Desc = "Crear evento (/eventos/nuevo)" }
   "evento-editar" = @{ Pagina = "evento-form.html?id=1"; Desc = "Editar evento (/eventos/:id/editar)" }
   "expositores"   = @{ Pagina = "expositores.html";      Desc = "Gestión de expositores (/expositores)" }
+  "agenda"        = @{ Pagina = "agenda_eventia.html";   Desc = "Agenda pública del evento (/agenda)" }
 }
 $Nombres = @($Pantallas.Keys)
 

@@ -6,15 +6,25 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.users import require_system_role
+from app.api.users import require_any_system_role, require_system_role
 from app.db import get_db
 from app.models import Evento, PoliticaInscripcion, TipoEvento, Usuario
-from app.schemas import EventoCreate, EventoResponse, EventoUpdate, TipoEventoResponse
+from app.schemas import (
+    EventoCreate,
+    EventoResponse,
+    EventoUpdate,
+    MetricasEventoResponse,
+    TipoEventoResponse,
+)
+from app.services.metricas import metricas_evento
 
 
 router = APIRouter(prefix="/api/v1/eventos", tags=["Eventos"])
 
 organizer_required = Depends(require_system_role("organizador"))
+dashboard_viewer_required = Depends(
+    require_any_system_role("organizador", "administrador")
+)
 
 
 # Estados permitidos por la restricción de PostgreSQL.
@@ -134,6 +144,26 @@ def get_evento(
         )
 
     return EventoResponse.model_validate(evento)
+
+
+# Dashboard del evento: inscriptos por estado, ocupación de cupos y
+# asistencia general y por actividad (ver app/services/metricas.py).
+@router.get("/{evento_id}/dashboard", response_model=MetricasEventoResponse)
+def get_dashboard_evento(
+    evento_id: int,
+    db: Session = Depends(get_db),
+    _: Usuario = dashboard_viewer_required,
+) -> MetricasEventoResponse:
+
+    evento = db.get(Evento, evento_id)
+
+    if evento is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Evento no encontrado",
+        )
+
+    return metricas_evento(db, evento)
 
 
 # Lista eventos con filtros opcionales.

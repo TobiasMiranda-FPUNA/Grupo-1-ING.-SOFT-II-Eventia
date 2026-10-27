@@ -101,8 +101,12 @@ print_summary() {
   Swagger en el navegador: $BASE_URL/docs
 
  Usuarios de ejemplo:
-    admin@eventia.test        / Admin123!        (roles)
-    organizador@eventia.test  / Organizador123!  (eventos, actividades, conferencistas)
+    admin@eventia.test        / Admin123!        (roles, asistencias, certificados, métricas)
+    organizador@eventia.test  / Organizador123!  (eventos, actividades, conferencistas,
+                                                  asistencias, certificados, dashboard)
+
+ Sin token: inscripciones, agenda y verificación/descarga de
+ certificados por código (/api/v1/certificados/verificar/{codigo}).
 
  Requests en la colección: $total
 ============================================================
@@ -110,10 +114,19 @@ EOF
 }
 
 # --- Preparar backend ---
-if [[ ! -x "$BACKEND_DIR/.venv/bin/uvicorn" ]]; then
-  echo "==> No se encontró backend/.venv, creándolo e instalando dependencias..."
+if [[ ! -x "$BACKEND_DIR/.venv/bin/python" ]]; then
+  echo "==> No se encontró backend/.venv, creándolo..."
   python3 -m venv "$BACKEND_DIR/.venv"
+fi
+
+# Reinstala las dependencias cuando requirements.txt cambió desde la última
+# instalación (por ejemplo, al traer cambios que agregan una librería).
+REQUIREMENTS_STAMP="$BACKEND_DIR/.venv/.requirements.cksum"
+REQUIREMENTS_SUM="$(cksum < "$BACKEND_DIR/requirements.txt")"
+if [[ "$(cat "$REQUIREMENTS_STAMP" 2>/dev/null || true)" != "$REQUIREMENTS_SUM" ]]; then
+  echo "==> Instalando/actualizando dependencias del backend (requirements.txt)..."
   "$BACKEND_DIR/.venv/bin/pip" install -q -r "$BACKEND_DIR/requirements.txt"
+  echo "$REQUIREMENTS_SUM" > "$REQUIREMENTS_STAMP"
 fi
 
 if [[ ! -f "$BACKEND_DIR/.env" ]]; then

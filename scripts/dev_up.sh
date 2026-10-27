@@ -72,10 +72,19 @@ open_browser() {
 }
 
 # --- Preparar backend ---
-if [[ ! -x "$BACKEND_DIR/.venv/bin/uvicorn" ]]; then
-  echo "==> No se encontró backend/.venv, creándolo e instalando dependencias..."
+if [[ ! -x "$BACKEND_DIR/.venv/bin/python" ]]; then
+  echo "==> No se encontró backend/.venv, creándolo..."
   python3 -m venv "$BACKEND_DIR/.venv"
+fi
+
+# Reinstala las dependencias cuando requirements.txt cambió desde la última
+# instalación (por ejemplo, al traer cambios que agregan una librería).
+REQUIREMENTS_STAMP="$BACKEND_DIR/.venv/.requirements.cksum"
+REQUIREMENTS_SUM="$(cksum < "$BACKEND_DIR/requirements.txt")"
+if [[ "$(cat "$REQUIREMENTS_STAMP" 2>/dev/null || true)" != "$REQUIREMENTS_SUM" ]]; then
+  echo "==> Instalando/actualizando dependencias del backend (requirements.txt)..."
   "$BACKEND_DIR/.venv/bin/pip" install -q -r "$BACKEND_DIR/requirements.txt"
+  echo "$REQUIREMENTS_SUM" > "$REQUIREMENTS_STAMP"
 fi
 
 if [[ ! -f "$BACKEND_DIR/.env" ]]; then
@@ -84,12 +93,19 @@ if [[ ! -f "$BACKEND_DIR/.env" ]]; then
 fi
 
 # --- Preparar frontend ---
-if [[ ! -d "$FRONTEND_DIR/node_modules" ]]; then
-  echo "==> No se encontró frontend/node_modules, instalando dependencias (npm install)..."
+# npm deja node_modules/.package-lock.json en cada instalación: si
+# package-lock.json es más nuevo, hay dependencias nuevas sin instalar.
+if [[ ! -d "$FRONTEND_DIR/node_modules" \
+   || "$FRONTEND_DIR/package-lock.json" -nt "$FRONTEND_DIR/node_modules/.package-lock.json" ]]; then
+  echo "==> Instalando/actualizando dependencias del frontend (npm install)..."
   (cd "$FRONTEND_DIR" && npm install)
+  touch "$FRONTEND_DIR/node_modules/.package-lock.json"
 fi
 
 # --- Levantar backend ---
+# URL del frontend que el backend imprime en los certificados PDF.
+export FRONTEND_BASE_URL="${FRONTEND_BASE_URL:-http://localhost:$FRONTEND_PORT}"
+
 echo "==> Iniciando backend en http://localhost:$BACKEND_PORT ..."
 (
   cd "$BACKEND_DIR"

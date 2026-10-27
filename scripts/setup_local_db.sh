@@ -54,8 +54,8 @@ SQL_FILES=(
 )
 
 # ------------------------------------------------------------
-# Ubicar psql. El instalador de EDB no lo agrega al PATH por
-# defecto, así que se busca en las rutas típicas de macOS.
+# Ubicar psql. El instalador de EDB y Postgres.app no lo agregan
+# al PATH por defecto, así que se busca en las rutas típicas de macOS.
 # ------------------------------------------------------------
 find_psql() {
     if command -v psql >/dev/null 2>&1; then
@@ -63,7 +63,7 @@ find_psql() {
         return
     fi
     local candidate
-    for candidate in /Library/PostgreSQL/*/bin/psql /opt/homebrew/opt/postgresql*/bin/psql /usr/local/opt/postgresql*/bin/psql; do
+    for candidate in /Applications/Postgres.app/Contents/Versions/latest/bin/psql /Library/PostgreSQL/*/bin/psql /opt/homebrew/opt/postgresql*/bin/psql /usr/local/opt/postgresql*/bin/psql; do
         if [ -x "$candidate" ]; then
             echo "$candidate"
             return

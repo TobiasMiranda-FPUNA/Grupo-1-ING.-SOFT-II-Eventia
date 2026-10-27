@@ -44,6 +44,11 @@ Variables de entorno opcionales:
                                     vscode = no abre túnel, se reenvía el puerto
                                     desde la pestaña "Puertos" de VS Code)
   NO_BROWSER=1               (no abrir el navegador automáticamente)
+  FRONTEND_BASE_URL=...      (link de verificación impreso en los
+                             certificados PDF; por defecto la URL del
+                             frontend local, o la del túnel en remote.
+                             Con TUNNEL=vscode, poné acá la URL pública
+                             que te da VS Code)
 ============================================================
 #>
 
@@ -128,7 +133,7 @@ try {
             if (Get-Command cloudflared -ErrorAction SilentlyContinue) { $Tunnel = "cloudflared" }
             elseif (Get-Command ngrok -ErrorAction SilentlyContinue)   { $Tunnel = "ngrok" }
         }
-        if ($Tunnel -ne "vscode" -and (-not $Tunnel -or -not (Get-Command $Tunnel -ErrorAction SilentlyContinue)))) {
+        if ($Tunnel -ne "vscode" -and (-not $Tunnel -or -not (Get-Command $Tunnel -ErrorAction SilentlyContinue))) {
             throw "Modo remote: no se encontró cloudflared ni ngrok. Instalá uno, por ejemplo: winget install --id Cloudflare.cloudflared"
         }
     }
@@ -141,13 +146,24 @@ try {
 
     # --- Preparar backend ---
     $uvicornExe = Join-Path $BackendDir ".venv\Scripts\uvicorn.exe"
-    if (-not (Test-Path $uvicornExe)) {
-        Write-Host "==> No se encontró backend\.venv, creándolo e instalando dependencias..."
+    if (-not (Test-Path (Join-Path $BackendDir ".venv\Scripts\python.exe"))) {
+        Write-Host "==> No se encontró backend\.venv, creándolo..."
         $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
         if (-not $pythonCmd) { $pythonCmd = Get-Command py -ErrorAction SilentlyContinue }
         if (-not $pythonCmd) { throw "No se encontró Python. Instalalo y agregalo al PATH." }
         & $pythonCmd.Source -m venv (Join-Path $BackendDir ".venv")
-        & (Join-Path $BackendDir ".venv\Scripts\pip.exe") install -q -r (Join-Path $BackendDir "requirements.txt")
+    }
+
+    # Reinstala las dependencias cuando requirements.txt cambió desde la
+    # última instalación (por ejemplo, al traer cambios que agregan una librería).
+    $requirements      = Join-Path $BackendDir "requirements.txt"
+    $requirementsStamp = Join-Path $BackendDir ".venv\.requirements.sha256"
+    $requirementsHash  = (Get-FileHash $requirements -Algorithm SHA256).Hash
+    if (-not (Test-Path $requirementsStamp) -or (Get-Content $requirementsStamp -Raw).Trim() -ne $requirementsHash) {
+        Write-Host "==> Instalando/actualizando dependencias del backend (requirements.txt)..."
+        & (Join-Path $BackendDir ".venv\Scripts\pip.exe") install -q -r $requirements
+        if ($LASTEXITCODE -ne 0) { throw "Falló la instalación de dependencias del backend." }
+        Set-Content -Path $requirementsStamp -Value $requirementsHash
     }
 
     $envFile = Join-Path $BackendDir ".env"
@@ -157,38 +173,24 @@ try {
     }
 
     # --- Preparar frontend ---
-    $nodeModules = Join-Path $FrontendDir "node_modules"
-    if (-not (Test-Path $nodeModules)) {
-        Write-Host "==> No se encontró frontend\node_modules, instalando dependencias (npm install)..."
+    # npm deja node_modules\.package-lock.json en cada instalación: si
+    # package-lock.json es más nuevo, hay dependencias nuevas sin instalar.
+    $lockFile      = Join-Path $FrontendDir "package-lock.json"
+    $installedLock = Join-Path $FrontendDir "node_modules\.package-lock.json"
+    if (-not (Test-Path $installedLock) -or (Get-Item $lockFile).LastWriteTime -gt (Get-Item $installedLock).LastWriteTime) {
+        Write-Host "==> Instalando/actualizando dependencias del frontend (npm install)..."
         Push-Location $FrontendDir
         try { npm install } finally { Pop-Location }
+        if ($LASTEXITCODE -ne 0) { throw "Falló npm install." }
+        if (Test-Path $installedLock) { (Get-Item $installedLock).LastWriteTime = Get-Date }
     }
-
-    # --- Levantar backend (en su propia ventana) ---
-    Write-Host "==> Iniciando backend en http://localhost:$BackendPort ..."
-    $backendCmd = "-NoExit -Command `"Set-Location '$BackendDir'; & '$uvicornExe' app.main:app --reload --host 127.0.0.1 --port $BackendPort`""
-    $BackendProcess = Start-Process -FilePath "powershell.exe" -ArgumentList $backendCmd -WindowStyle Normal -PassThru
-
-    if (-not (Wait-ForUrl -Url "http://localhost:$BackendPort/health" -TimeoutSeconds 30)) {
-        throw "El backend no respondió en 30s. Revisá la ventana del backend (¿Postgres está corriendo?)."
-    }
-    Write-Host "==> Backend listo."
-
-    # --- Levantar frontend (en su propia ventana) ---
-    $ngConfig = if ($Mode -eq "remote") { "remote" } else { "development" }
-    Write-Host "==> Iniciando frontend ($ngConfig) en http://localhost:$FrontendPort ..."
-    $ngCmd = Join-Path $FrontendDir "node_modules\.bin\ng.cmd"
-    $frontendCmd = "-NoExit -Command `"`$env:BACKEND_PORT='$BackendPort'; Set-Location '$FrontendDir'; & '$ngCmd' serve --configuration $ngConfig --port $FrontendPort`""
-    $FrontendProcess = Start-Process -FilePath "powershell.exe" -ArgumentList $frontendCmd -WindowStyle Normal -PassThru
-
-    if (-not (Wait-ForUrl -Url "http://localhost:$FrontendPort" -TimeoutSeconds 120)) {
-        throw "El frontend no respondió en 120s. Revisá la ventana del frontend."
-    }
-    Write-Host "==> Frontend listo."
 
     $PublicUrl = $null
 
     # --- Abrir túnel (solo modo remote) ---
+    # Se abre antes de levantar el backend para conocer la URL pública: el
+    # backend la usa en el link de verificación de los certificados PDF. El
+    # túnel no necesita que el frontend esté corriendo todavía.
     if ($Mode -eq "remote" -and $Tunnel -ne "vscode") {
         Write-Host "==> Abriendo túnel con $Tunnel ..."
         $TunnelLog = [System.IO.Path]::GetTempFileName()
@@ -232,6 +234,33 @@ try {
         }
         Write-Host "==> Túnel listo."
     }
+
+    # URL del frontend que el backend imprime en los certificados PDF.
+    $FrontendBaseUrl = if ($PublicUrl) { $PublicUrl }
+                       elseif ($env:FRONTEND_BASE_URL) { $env:FRONTEND_BASE_URL }
+                       else { "http://localhost:$FrontendPort" }
+
+    # --- Levantar backend (en su propia ventana) ---
+    Write-Host "==> Iniciando backend en http://localhost:$BackendPort ..."
+    $backendCmd = "-NoExit -Command `"`$env:FRONTEND_BASE_URL='$FrontendBaseUrl'; Set-Location '$BackendDir'; & '$uvicornExe' app.main:app --reload --host 127.0.0.1 --port $BackendPort`""
+    $BackendProcess = Start-Process -FilePath "powershell.exe" -ArgumentList $backendCmd -WindowStyle Normal -PassThru
+
+    if (-not (Wait-ForUrl -Url "http://localhost:$BackendPort/health" -TimeoutSeconds 30)) {
+        throw "El backend no respondió en 30s. Revisá la ventana del backend (¿Postgres está corriendo?)."
+    }
+    Write-Host "==> Backend listo."
+
+    # --- Levantar frontend (en su propia ventana) ---
+    $ngConfig = if ($Mode -eq "remote") { "remote" } else { "development" }
+    Write-Host "==> Iniciando frontend ($ngConfig) en http://localhost:$FrontendPort ..."
+    $ngCmd = Join-Path $FrontendDir "node_modules\.bin\ng.cmd"
+    $frontendCmd = "-NoExit -Command `"`$env:BACKEND_PORT='$BackendPort'; Set-Location '$FrontendDir'; & '$ngCmd' serve --configuration $ngConfig --port $FrontendPort`""
+    $FrontendProcess = Start-Process -FilePath "powershell.exe" -ArgumentList $frontendCmd -WindowStyle Normal -PassThru
+
+    if (-not (Wait-ForUrl -Url "http://localhost:$FrontendPort" -TimeoutSeconds 120)) {
+        throw "El frontend no respondió en 120s. Revisá la ventana del frontend."
+    }
+    Write-Host "==> Frontend listo."
 
     Write-Host ""
     if ($Mode -eq "remote" -and $Tunnel -eq "vscode") {

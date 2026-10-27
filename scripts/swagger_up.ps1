@@ -80,13 +80,24 @@ try {
     # --- Preparar backend ---
     $uvicornExe = Join-Path $BackendDir ".venv\Scripts\uvicorn.exe"
     $pythonExe  = Join-Path $BackendDir ".venv\Scripts\python.exe"
-    if (-not (Test-Path $uvicornExe)) {
-        Write-Host "==> No se encontró backend\.venv, creándolo e instalando dependencias..."
+    if (-not (Test-Path (Join-Path $BackendDir ".venv\Scripts\python.exe"))) {
+        Write-Host "==> No se encontró backend\.venv, creándolo..."
         $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
         if (-not $pythonCmd) { $pythonCmd = Get-Command py -ErrorAction SilentlyContinue }
         if (-not $pythonCmd) { throw "No se encontró Python. Instalalo y agregalo al PATH." }
         & $pythonCmd.Source -m venv (Join-Path $BackendDir ".venv")
-        & (Join-Path $BackendDir ".venv\Scripts\pip.exe") install -q -r (Join-Path $BackendDir "requirements.txt")
+    }
+
+    # Reinstala las dependencias cuando requirements.txt cambió desde la
+    # última instalación (por ejemplo, al traer cambios que agregan una librería).
+    $requirements      = Join-Path $BackendDir "requirements.txt"
+    $requirementsStamp = Join-Path $BackendDir ".venv\.requirements.sha256"
+    $requirementsHash  = (Get-FileHash $requirements -Algorithm SHA256).Hash
+    if (-not (Test-Path $requirementsStamp) -or (Get-Content $requirementsStamp -Raw).Trim() -ne $requirementsHash) {
+        Write-Host "==> Instalando/actualizando dependencias del backend (requirements.txt)..."
+        & (Join-Path $BackendDir ".venv\Scripts\pip.exe") install -q -r $requirements
+        if ($LASTEXITCODE -ne 0) { throw "Falló la instalación de dependencias del backend." }
+        Set-Content -Path $requirementsStamp -Value $requirementsHash
     }
 
     $envFile = Join-Path $BackendDir ".env"
