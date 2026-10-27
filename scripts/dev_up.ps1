@@ -85,13 +85,24 @@ function Wait-ForUrl {
 try {
     # --- Preparar backend ---
     $uvicornExe = Join-Path $BackendDir ".venv\Scripts\uvicorn.exe"
-    if (-not (Test-Path $uvicornExe)) {
-        Write-Host "==> No se encontró backend\.venv, creándolo e instalando dependencias..."
+    if (-not (Test-Path (Join-Path $BackendDir ".venv\Scripts\python.exe"))) {
+        Write-Host "==> No se encontró backend\.venv, creándolo..."
         $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
         if (-not $pythonCmd) { $pythonCmd = Get-Command py -ErrorAction SilentlyContinue }
         if (-not $pythonCmd) { throw "No se encontró Python. Instalalo y agregalo al PATH." }
         & $pythonCmd.Source -m venv (Join-Path $BackendDir ".venv")
-        & (Join-Path $BackendDir ".venv\Scripts\pip.exe") install -q -r (Join-Path $BackendDir "requirements.txt")
+    }
+
+    # Reinstala las dependencias cuando requirements.txt cambió desde la
+    # última instalación (por ejemplo, al traer cambios que agregan una librería).
+    $requirements      = Join-Path $BackendDir "requirements.txt"
+    $requirementsStamp = Join-Path $BackendDir ".venv\.requirements.sha256"
+    $requirementsHash  = (Get-FileHash $requirements -Algorithm SHA256).Hash
+    if (-not (Test-Path $requirementsStamp) -or (Get-Content $requirementsStamp -Raw).Trim() -ne $requirementsHash) {
+        Write-Host "==> Instalando/actualizando dependencias del backend (requirements.txt)..."
+        & (Join-Path $BackendDir ".venv\Scripts\pip.exe") install -q -r $requirements
+        if ($LASTEXITCODE -ne 0) { throw "Falló la instalación de dependencias del backend." }
+        Set-Content -Path $requirementsStamp -Value $requirementsHash
     }
 
     $envFile = Join-Path $BackendDir ".env"
@@ -101,16 +112,23 @@ try {
     }
 
     # --- Preparar frontend ---
-    $nodeModules = Join-Path $FrontendDir "node_modules"
-    if (-not (Test-Path $nodeModules)) {
-        Write-Host "==> No se encontró frontend\node_modules, instalando dependencias (npm install)..."
+    # npm deja node_modules\.package-lock.json en cada instalación: si
+    # package-lock.json es más nuevo, hay dependencias nuevas sin instalar.
+    $lockFile      = Join-Path $FrontendDir "package-lock.json"
+    $installedLock = Join-Path $FrontendDir "node_modules\.package-lock.json"
+    if (-not (Test-Path $installedLock) -or (Get-Item $lockFile).LastWriteTime -gt (Get-Item $installedLock).LastWriteTime) {
+        Write-Host "==> Instalando/actualizando dependencias del frontend (npm install)..."
         Push-Location $FrontendDir
         try { npm install } finally { Pop-Location }
+        if ($LASTEXITCODE -ne 0) { throw "Falló npm install." }
+        if (Test-Path $installedLock) { (Get-Item $installedLock).LastWriteTime = Get-Date }
     }
 
     # --- Levantar backend (en su propia ventana) ---
+    # URL del frontend que el backend imprime en los certificados PDF.
+    $FrontendBaseUrl = if ($env:FRONTEND_BASE_URL) { $env:FRONTEND_BASE_URL } else { "http://localhost:$FrontendPort" }
     Write-Host "==> Iniciando backend en http://localhost:$BackendPort ..."
-    $backendCmd = "-NoExit -Command `"Set-Location '$BackendDir'; & '$uvicornExe' app.main:app --reload --port $BackendPort`""
+    $backendCmd = "-NoExit -Command `"`$env:FRONTEND_BASE_URL='$FrontendBaseUrl'; Set-Location '$BackendDir'; & '$uvicornExe' app.main:app --reload --port $BackendPort`""
     $BackendProcess = Start-Process -FilePath "powershell.exe" -ArgumentList $backendCmd -WindowStyle Normal -PassThru
 
     if (-not (Wait-ForUrl -Url "http://localhost:$BackendPort/health" -TimeoutSeconds 30)) {
