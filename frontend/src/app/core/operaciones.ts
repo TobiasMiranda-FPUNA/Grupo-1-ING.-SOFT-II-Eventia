@@ -99,12 +99,12 @@ export const OPERACIONES: Operacion[] = [
     historia: 'HU08',
   },
   {
-    titulo: 'Dashboard del evento',
+    titulo: 'Panel de control',
     descripcion: 'Indicadores de inscriptos, cupos y asistencia en tiempo real.',
     icono: '📊',
     ruta: '/dashboard',
-    roles: [ORGANIZADOR],
-    proximamente: true,
+    roles: [ORGANIZADOR, ADMINISTRADOR],
+    enMenu: true,
     historia: 'HU09',
   },
 ];

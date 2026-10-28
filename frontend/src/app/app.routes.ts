@@ -9,6 +9,7 @@ import { Expositores } from './pages/expositores/expositores';
 import { Asistencias } from './pages/asistencias/asistencias';
 import { Acreditacion } from './pages/acreditacion/acreditacion';
 import { Certificados } from './pages/certificados/certificados';
+import { Dashboard } from './pages/dashboard/dashboard';
 
 import { InscripcionPublica } from './pages/inscripcion-publica/inscripcion-publica';
 import { AgendaPublica } from './pages/agenda-publica/agenda-publica';
@@ -159,6 +160,19 @@ export const routes: Routes = [
         path: 'certificados',
         component: Certificados,
         canActivate: [roleGuard],
+        data: {
+          roles: [
+            ROLES.ORGANIZADOR,
+            ROLES.ADMINISTRADOR,
+          ],
+        },
+      },
+
+      {
+        path: 'dashboard',
+        component: Dashboard,
+        canActivate: [roleGuard],
+        // Mismos roles que el backend acepta para consultar métricas.
         data: {
           roles: [
             ROLES.ORGANIZADOR,
