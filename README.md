@@ -124,3 +124,15 @@ DATABASE_URL=sqlite:///:memory: python -m pytest -q
 
 La suite incluye pruebas específicas de asistencia, elegibilidad/emisión de
 certificados y un flujo integrado de Sprint 4.
+
+Para correr los tests del backend y del frontend juntos y ver los resultados
+en un reporte visual (con el historial de todas las ejecuciones), desde la
+raíz del repositorio:
+
+```bash
+python3 scripts/test_report.py           # Windows: py scripts\test_report.py
+```
+
+El reporte queda en `test-reports/index.html` y se abre en el navegador.
+Opciones: `--solo backend|frontend`, `--sin-ejecutar` (solo reabre el
+reporte) y `--no-abrir`.

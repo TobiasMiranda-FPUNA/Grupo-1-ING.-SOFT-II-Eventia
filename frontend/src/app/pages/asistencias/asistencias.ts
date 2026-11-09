@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { Actividad, ActividadesService } from '../../services/actividades';
@@ -13,7 +14,7 @@ import { Evento, EventosService } from '../../services/eventos';
 
 @Component({
   selector: 'app-asistencias',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './asistencias.html',
   styleUrl: './asistencias.scss',
 })

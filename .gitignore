@@ -5,3 +5,5 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 backend/venv/
+# Reportes de tests (scripts/test_report.py)
+test-reports/

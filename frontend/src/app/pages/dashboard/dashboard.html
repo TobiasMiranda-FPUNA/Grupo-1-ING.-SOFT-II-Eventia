@@ -1,0 +1,260 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">HU09 · MÉTRICAS</span>
+      <h1>Panel de control</h1>
+      <p>Indicadores de inscriptos, ocupación de cupos y asistencia de los eventos.</p>
+    </div>
+    <button type="button" class="secondary" [disabled]="cargandoResumen()" (click)="cargarResumen()">
+      {{ cargandoResumen() ? 'Actualizando…' : '↻ Actualizar' }}
+    </button>
+  </header>
+
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+
+  <!-- Indicadores generales -->
+  <section class="kpis" aria-label="Indicadores generales">
+    <article class="kpi">
+      <span class="kpi-label">Eventos</span>
+      <strong class="kpi-value">{{ totales().eventos }}</strong>
+      <small>{{ totales().publicados }} publicados · {{ totales().borradores }} borradores</small>
+    </article>
+    <article class="kpi">
+      <span class="kpi-label">Inscriptos confirmados</span>
+      <strong class="kpi-value">{{ totales().confirmados }}</strong>
+      <small>de {{ totales().cupos }} cupos ofrecidos</small>
+    </article>
+    <article class="kpi">
+      <span class="kpi-label">Lista de espera</span>
+      <strong class="kpi-value">{{ totales().listaEspera }}</strong>
+      <small>personas esperando un cupo</small>
+    </article>
+    <article class="kpi">
+      <span class="kpi-label">Ocupación global</span>
+      <strong class="kpi-value">{{ totales().ocupacion | number:'1.0-1' }}%</strong>
+      <div class="meter" [attr.data-nivel]="nivel(totales().ocupacion)">
+        <span [style.width.%]="ancho(totales().ocupacion)"></span>
+      </div>
+    </article>
+    <article class="kpi">
+      <span class="kpi-label">Asistencia promedio</span>
+      <strong class="kpi-value">{{ totales().asistencia | number:'1.0-1' }}%</strong>
+      <small>en {{ totales().actividades }} actividades</small>
+    </article>
+  </section>
+
+  <!-- Ocupación y asistencia por evento -->
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2>Ocupación y asistencia por evento</h2>
+        <p>Seleccioná un evento para ver su detalle.</p>
+      </div>
+      <div class="legend">
+        <span><i class="swatch ocupacion"></i>Ocupación de cupos</span>
+        <span><i class="swatch asistencia"></i>Asistencia</span>
+      </div>
+    </div>
+
+    @if (cargandoResumen() && !resumen().length) {
+      <div class="empty">Cargando métricas…</div>
+    } @else if (!resumen().length) {
+      <div class="empty">Todavía no hay eventos registrados.</div>
+    } @else {
+      <ul class="event-bars">
+        @for (e of resumen(); track e.id_evento) {
+          <li>
+            <button
+              type="button"
+              class="event-row"
+              [class.active]="eventoId === e.id_evento"
+              (click)="seleccionar(e.id_evento)">
+              <span class="event-name">
+                <strong>{{ e.nombre }}</strong>
+                <small>
+                  {{ e.fecha_inicio | date:'dd/MM/yyyy' }} ·
+                  <span class="estado" [class.publicado]="e.estado === 'publicado'">{{ e.estado }}</span>
+                </small>
+              </span>
+              <span class="bars">
+                <span class="bar-line" [title]="'Ocupación: ' + e.inscriptos_confirmados + ' de ' + e.cupo_maximo + ' cupos'">
+                  <span class="track"><span class="fill ocupacion" [style.width.%]="ancho(e.porcentaje_ocupacion)"></span></span>
+                  <span class="value">{{ e.porcentaje_ocupacion | number:'1.0-1' }}%</span>
+                </span>
+                <span class="bar-line" [title]="'Asistencia en ' + e.total_actividades + ' actividades'">
+                  <span class="track"><span class="fill asistencia" [style.width.%]="ancho(e.porcentaje_asistencia)"></span></span>
+                  <span class="value">{{ e.porcentaje_asistencia | number:'1.0-1' }}%</span>
+                </span>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <!-- Detalle del evento -->
+  @if (resumen().length) {
+    <section class="detail-header">
+      <h2>Detalle del evento</h2>
+      <select [(ngModel)]="eventoId" (ngModelChange)="cargarDetalle()" aria-label="Evento">
+        @for (e of resumen(); track e.id_evento) {
+          <option [ngValue]="e.id_evento">{{ e.nombre }}</option>
+        }
+      </select>
+    </section>
+  }
+
+  @if (cargandoDetalle()) {
+    <div class="card empty">Calculando métricas del evento…</div>
+  } @else if (detalle(); as d) {
+    <section class="kpis" aria-label="Indicadores del evento">
+      <article class="kpi">
+        <span class="kpi-label">Inscripciones</span>
+        <strong class="kpi-value">{{ d.inscripciones.total }}</strong>
+        <small>{{ d.inscripciones.confirmadas }} confirmadas</small>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Cupos ocupados</span>
+        <strong class="kpi-value">{{ d.cupos.ocupados }}<span class="kpi-of">/{{ d.cupos.cupo_maximo }}</span></strong>
+        <div class="meter" [attr.data-nivel]="nivel(d.cupos.porcentaje_ocupacion)">
+          <span [style.width.%]="ancho(d.cupos.porcentaje_ocupacion)"></span>
+        </div>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Cupos disponibles</span>
+        <strong class="kpi-value">{{ d.cupos.disponibles }}</strong>
+        <small>{{ d.inscripciones.lista_de_espera }} en lista de espera</small>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Asistencia general</span>
+        <strong class="kpi-value">{{ d.asistencia.porcentaje_asistencia | number:'1.0-1' }}%</strong>
+        <small>{{ d.asistencia.presentes }} presencias registradas</small>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Actividades</span>
+        <strong class="kpi-value">{{ d.asistencia.total_actividades }}</strong>
+        <small>en la agenda del evento</small>
+      </article>
+    </section>
+
+    <div class="charts">
+      <!-- Inscripciones por estado -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Inscripciones por estado</h2>
+        </div>
+        @if (d.inscripciones.total === 0) {
+          <div class="empty">El evento todavía no tiene inscripciones.</div>
+        } @else {
+          <div class="donut-wrap">
+            <svg viewBox="0 0 42 42" class="donut" role="img"
+                 [attr.aria-label]="'Inscripciones por estado, total ' + d.inscripciones.total">
+              <circle cx="21" cy="21" r="15.915" class="donut-track"></circle>
+              @for (s of segmentosInscripciones(); track s.etiqueta) {
+                @if (s.valor > 0) {
+                  <circle cx="21" cy="21" r="15.915" class="donut-seg"
+                          [attr.stroke]="s.color"
+                          [attr.stroke-dasharray]="s.largo + ' ' + (100 - s.largo)"
+                          [attr.stroke-dashoffset]="25 - s.inicio">
+                    <title>{{ s.etiqueta }}: {{ s.valor }} ({{ s.porcentaje | number:'1.0-1' }}%)</title>
+                  </circle>
+                }
+              }
+              <text x="21" y="21" class="donut-total">{{ d.inscripciones.total }}</text>
+              <text x="21" y="26" class="donut-caption">inscriptos</text>
+            </svg>
+            <ul class="legend-list">
+              @for (s of segmentosInscripciones(); track s.etiqueta) {
+                <li [class.zero]="s.valor === 0">
+                  <i class="swatch" [style.background]="s.color"></i>
+                  <span>{{ s.etiqueta }}</span>
+                  <strong>{{ s.valor }}</strong>
+                  <small>{{ s.porcentaje | number:'1.0-0' }}%</small>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+
+      <!-- Registro de asistencia -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Registro de asistencia</h2>
+        </div>
+        @if (d.asistencia.total_actividades === 0) {
+          <div class="empty">El evento no tiene actividades cargadas.</div>
+        } @else {
+          <div class="stack" role="img" aria-label="Distribución de registros de asistencia">
+            @for (s of segmentosAsistencia(); track s.etiqueta) {
+              @if (s.valor > 0) {
+                <span [style.flex-grow]="s.valor" [style.background]="s.color"
+                      [title]="s.etiqueta + ': ' + s.valor"></span>
+              }
+            }
+          </div>
+          <ul class="legend-list inline">
+            @for (s of segmentosAsistencia(); track s.etiqueta) {
+              <li>
+                <i class="swatch" [style.background]="s.color"></i>
+                <span>{{ s.etiqueta }}</span>
+                <strong>{{ s.valor }}</strong>
+                <small>{{ s.porcentaje | number:'1.0-0' }}%</small>
+              </li>
+            }
+          </ul>
+          <p class="note">
+            Esperados: {{ d.inscripciones.confirmadas }} confirmados × {{ d.asistencia.total_actividades }} actividades.
+          </p>
+        }
+      </section>
+    </div>
+
+    <!-- Asistencia por actividad -->
+    @if (d.asistencia.actividades.length) {
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Asistencia por actividad</h2>
+            <p>Porcentaje de confirmados presentes en cada actividad.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Actividad</th>
+                <th class="col-bar">Asistencia</th>
+                <th class="num">Presentes</th>
+                <th class="num">Ausentes</th>
+                <th class="num">Sin registro</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of d.asistencia.actividades; track a.id_actividad) {
+                <tr>
+                  <td>
+                    <strong>{{ a.titulo }}</strong>
+                    <small>{{ a.fecha | date:'dd/MM/yyyy' }} · {{ a.hora_inicio.slice(0, 5) }} · cupo {{ a.cupo }}</small>
+                  </td>
+                  <td class="col-bar">
+                    <span class="bar-line">
+                      <span class="track"><span class="fill asistencia" [style.width.%]="ancho(a.porcentaje_asistencia)"></span></span>
+                      <span class="value">{{ a.porcentaje_asistencia | number:'1.0-1' }}%</span>
+                    </span>
+                  </td>
+                  <td class="num">{{ a.presentes }}</td>
+                  <td class="num">{{ a.ausentes }}</td>
+                  <td class="num">{{ a.sin_registro }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
+</section>

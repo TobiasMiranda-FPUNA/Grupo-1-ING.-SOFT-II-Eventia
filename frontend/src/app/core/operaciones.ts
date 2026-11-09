@@ -72,6 +72,15 @@ export const OPERACIONES: Operacion[] = [
     historia: 'HU04',
   },
   {
+    titulo: 'Acreditación rápida',
+    descripcion: 'Buscá a cada participante en la puerta y acreditalo con un toque.',
+    icono: '⚡',
+    ruta: '/acreditacion',
+    roles: [ACREDITACION, ORGANIZADOR, ADMINISTRADOR],
+    enMenu: true,
+    historia: 'HU07',
+  },
+  {
     titulo: 'Registro de asistencia',
     descripcion: 'Marcá presentes y ausentes por cada actividad del evento.',
     icono: '✔',
@@ -90,12 +99,12 @@ export const OPERACIONES: Operacion[] = [
     historia: 'HU08',
   },
   {
-    titulo: 'Dashboard del evento',
+    titulo: 'Panel de control',
     descripcion: 'Indicadores de inscriptos, cupos y asistencia en tiempo real.',
     icono: '📊',
     ruta: '/dashboard',
-    roles: [ORGANIZADOR],
-    proximamente: true,
+    roles: [ORGANIZADOR, ADMINISTRADOR],
+    enMenu: true,
     historia: 'HU09',
   },
 ];
