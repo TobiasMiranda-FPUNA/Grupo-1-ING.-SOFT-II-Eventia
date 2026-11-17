@@ -1,11 +1,11 @@
-<div class="agenda-page">
-  <header class="agenda-header">
+<div class="page agenda-page">
+  <header class="page-header">
     <div>
-      <span class="eyebrow">EVENTIA</span>
+      <span class="eyebrow">HU06 · AGENDA</span>
       <h1>Agenda del evento</h1>
       <p>Consultá el cronograma por día y sala.</p>
     </div>
-    <div class="public-links"><a [routerLink]="rutaInicio" class="secondary-link">← {{ textoInicio }}</a><a routerLink="/inscripciones" class="secondary-link">Inscribirme</a><a routerLink="/certificados/verificar" class="secondary-link">Verificar certificado</a></div>
+    <div class="public-links"><a [routerLink]="rutaInicio" class="btn-ghost">← {{ textoInicio }}</a><a routerLink="/inscripciones" class="btn-ghost">Inscribirme</a><a routerLink="/certificados/verificar" class="btn-ghost">Verificar certificado</a></div>
   </header>
 
   <section class="selector-card">
@@ -31,13 +31,13 @@
   }
 
   @if (error()) {
-    <div class="alert">{{ error() }}</div>
+    <div class="alert error">{{ error() }}</div>
   }
 
   @if (cargando()) {
-    <div class="empty">Cargando agenda…</div>
+    <div class="empty-card">Cargando agenda…</div>
   } @else if (!actividades().length) {
-    <div class="empty">Este evento todavía no tiene actividades publicadas.</div>
+    <div class="empty-card">Este evento todavía no tiene actividades publicadas.</div>
   } @else {
     <nav class="days" aria-label="Días del evento">
       @for (dia of dias(); track dia) {

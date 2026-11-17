@@ -1,1 +1,275 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos compartidos por todas las pantallas de Eventia.
+   Cada página solo define lo propio de su contenido; el contenedor, el
+   encabezado, las tarjetas, los botones, los formularios, las tablas y los
+   mensajes se toman de aquí para que todas tengan el mismo diseño. */
+
+:root {
+  --color-fondo: #f5f7fb;
+  --color-superficie: #fff;
+  --color-texto: #172033;
+  --color-secundario: #667085;
+  --color-tenue: #98a2b3;
+  --color-borde: #e5e7eb;
+  --color-borde-control: #d0d5dd;
+  --color-separador: #eef2f6;
+  --color-primario: #2563eb;
+  --color-primario-hover: #1d4ed8;
+  --color-primario-suave: #eff6ff;
+  --color-exito: #067647;
+  --color-exito-suave: #ecfdf3;
+  --color-error: #b42318;
+  --color-error-suave: #fef2f2;
+  --color-aviso: #b54708;
+  --color-aviso-suave: #fffaeb;
+  --radio-tarjeta: 16px;
+  --radio-control: 9px;
+  --sombra-tarjeta: 0 8px 30px rgba(15, 23, 42, .05);
+  --fuente: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font: inherit; }
+
+/* ---------- Contenedor y encabezado de página ---------- */
+
+.page {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 34px 24px 60px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  margin-bottom: 22px;
+
+  h1 { margin: 6px 0; font-size: 2rem; line-height: 1.15; }
+  p { margin: 0; color: var(--color-secundario); }
+}
+
+.page-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.eyebrow {
+  display: inline-block;
+  margin: 0;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+/* ---------- Tarjetas ---------- */
+
+.card,
+.filters-card,
+.list-card,
+.empty-card,
+.selector-card {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.card, .filters-card, .selector-card { padding: 20px; margin-bottom: 18px; }
+
+.list-card { overflow: hidden; margin-bottom: 18px; }
+
+.empty-card { padding: 34px; text-align: center; color: var(--color-secundario); }
+
+/* ---------- Botones y enlaces de acción ---------- */
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radio-control);
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: .92rem;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+.btn-primary {
+  background: var(--color-primario);
+  color: #fff;
+
+  &:not(:disabled):hover { background: var(--color-primario-hover); }
+}
+
+.btn-secondary {
+  background: var(--color-superficie);
+  border-color: var(--color-borde-control);
+  color: #344054;
+
+  &:not(:disabled):hover { background: #f8fafc; }
+}
+
+.btn-ghost {
+  background: var(--color-primario-suave);
+  border-color: #bfdbfe;
+  color: var(--color-primario);
+
+  &:not(:disabled):hover { background: #dbeafe; }
+}
+
+.btn-link {
+  background: transparent;
+  color: var(--color-primario);
+  padding-left: 6px;
+  padding-right: 6px;
+
+  &:not(:disabled):hover { text-decoration: underline; }
+}
+
+.btn-danger {
+  @extend .btn-secondary;
+  color: var(--color-error);
+  border-color: #fecdca;
+
+  &:not(:disabled):hover { background: var(--color-error-suave); }
+}
+
+/* ---------- Formularios ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  > label, > span:first-child { font-weight: 700; font-size: .88rem; }
+}
+
+.form-control,
+.field input,
+.field select,
+.field textarea,
+.filters-card input,
+.filters-card select,
+.selector-card input,
+.selector-card select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-control);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font-weight: 400;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+  }
+}
+
+.filters-card label, .selector-card label { font-weight: 700; font-size: .88rem; }
+
+.field-error { color: var(--color-error); font-size: .8rem; }
+
+/* ---------- Mensajes ---------- */
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin: 14px 0;
+  font-weight: 600;
+  border: 1px solid transparent;
+
+  &.error, &.alert-error, &.alert-danger {
+    background: var(--color-error-suave);
+    border-color: #fecdca;
+    color: var(--color-error);
+  }
+
+  &.success, &.alert-success {
+    background: var(--color-exito-suave);
+    border-color: #abefc6;
+    color: var(--color-exito);
+  }
+
+  &.warning, &.alert-warning, &.info {
+    background: var(--color-aviso-suave);
+    border-color: #fedf89;
+    color: var(--color-aviso);
+  }
+}
+
+/* ---------- Tablas ---------- */
+
+.table-wrap { overflow: auto; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-separador);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    font-size: .76rem;
+    color: var(--color-secundario);
+    background: #f8fafc;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  td small { display: block; margin-top: 4px; color: var(--color-tenue); }
+}
+
+/* ---------- Etiquetas de estado ---------- */
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: capitalize;
+  background: #f2f4f7;
+  color: #475467;
+
+  &.ok, &.published { background: #dcfae6; color: var(--color-exito); }
+  &.wait, &.draft { background: #fff7ed; color: #c2410c; }
+  &.info { background: #eef4ff; color: #3538cd; }
+}
+
+@media (max-width: 760px) {
+  .page { padding: 24px 14px 50px; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .data-table th, .data-table td { padding: 12px; }
+}

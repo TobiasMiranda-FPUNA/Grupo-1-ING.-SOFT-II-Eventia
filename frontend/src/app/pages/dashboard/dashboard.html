@@ -5,7 +5,7 @@
       <h1>Panel de control</h1>
       <p>Indicadores de inscriptos, ocupación de cupos y asistencia de los eventos.</p>
     </div>
-    <button type="button" class="secondary" [disabled]="cargandoResumen()" (click)="cargarResumen()">
+    <button type="button" class="btn-secondary" [disabled]="cargandoResumen()" (click)="cargarResumen()">
       {{ cargandoResumen() ? 'Actualizando…' : '↻ Actualizar' }}
     </button>
   </header>
