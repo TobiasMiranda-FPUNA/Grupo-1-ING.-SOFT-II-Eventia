@@ -26,6 +26,17 @@
         }
       </p>
       <div class="result-meta">N.º de inscripción: <strong>{{ resultado()?.id_inscripcion }}</strong></div>
+      @if (resultado()?.envio_correo === 'enviado') {
+        <p class="card-note ok">
+          ✉ Te enviamos tu <strong>tarjeta de inscripción</strong> por correo. Imprimila y llevala a todas
+          las actividades: el personal la usa para identificarte.
+        </p>
+      } @else if (resultado()?.estado === 'confirmada') {
+        <p class="card-note">
+          No pudimos enviarte la tarjeta de inscripción por correo. Presentate con tu documento y tu
+          N.º de inscripción, o pedí al organizador que te la reenvíe.
+        </p>
+      }
       <button type="button" class="primary-button" (click)="nuevaInscripcion()">Realizar otra inscripción</button>
     </section>
   } @else {

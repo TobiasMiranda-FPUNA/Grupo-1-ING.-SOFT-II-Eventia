@@ -26,6 +26,8 @@ export interface InscripcionResultado {
   id_rol_participante: number;
   fecha_inscripcion: string;
   estado: 'confirmada' | 'lista_de_espera' | string;
+  // Envío de la tarjeta de inscripción por correo (solo confirmadas).
+  envio_correo?: 'enviado' | 'error' | 'no_configurado' | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,6 +39,15 @@ export class InscripcionesService {
     return this.http.get<RolParticipantePublico[]>(
       `${this.apiUrl}/roles-participante`
     );
+  }
+
+  // Tarjeta de inscripción en PDF (requiere sesión de personal del evento).
+  descargarTarjeta(idInscripcion: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${idInscripcion}/tarjeta`, { responseType: 'blob' });
+  }
+
+  reenviarTarjeta(idInscripcion: number): Observable<InscripcionResultado> {
+    return this.http.post<InscripcionResultado>(`${this.apiUrl}/${idInscripcion}/tarjeta/enviar`, {});
   }
 
   inscribir(data: InscripcionPayload): Observable<InscripcionResultado> {

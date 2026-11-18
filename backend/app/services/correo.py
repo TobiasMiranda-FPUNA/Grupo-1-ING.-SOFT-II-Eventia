@@ -1,4 +1,4 @@
-# Servicio de envío de correos (certificados por email).
+# Servicio de envío de correos (certificados y tarjetas de inscripción).
 #
 # Usa SMTP con la configuración de app/core/config.py. Si no hay servidor
 # configurado, correo_configurado() devuelve False y quien llama decide qué
@@ -10,7 +10,8 @@ from email.message import EmailMessage
 from html import escape
 
 from app.core.config import settings
-from app.services.certificado_pdf import DatosCertificado, url_verificacion
+from app.services.certificado_pdf import DatosCertificado, _rango_fechas, url_verificacion
+from app.services.tarjeta_inscripcion_pdf import DatosTarjeta, codigo_inscripcion
 
 
 class CorreoError(Exception):
@@ -98,3 +99,56 @@ def _enviar(mensaje: EmailMessage) -> None:
 
 def enviar_certificado(destinatario: str, datos: DatosCertificado, pdf: bytes) -> None:
     _enviar(_armar_mensaje_certificado(destinatario, datos, pdf))
+
+
+def _armar_mensaje_tarjeta(
+    destinatario: str,
+    datos: DatosTarjeta,
+    pdf: bytes,
+) -> EmailMessage:
+    codigo = codigo_inscripcion(datos.id_inscripcion)
+    fechas = _rango_fechas(datos.fecha_inicio_evento, datos.fecha_fin_evento)
+
+    mensaje = EmailMessage()
+    mensaje["Subject"] = f"Tu tarjeta de inscripción - {datos.evento}"
+    mensaje["From"] = _remitente()
+    mensaje["To"] = destinatario
+
+    mensaje.set_content(
+        f"Hola {datos.participante}:\n\n"
+        f"Tu inscripción al evento \"{datos.evento}\" ({fechas}) está confirmada.\n"
+        "Adjuntamos tu tarjeta de inscripción en PDF: imprimila y llevala a "
+        "todas las actividades para que el personal te identifique.\n\n"
+        f"N° de inscripción: {codigo}\n\n"
+        "Equipo Eventia"
+    )
+    mensaje.add_alternative(
+        f"""\
+<!doctype html>
+<html lang="es">
+  <body style="margin:0;background:#f5f7fb;font-family:Arial,sans-serif;color:#172033">
+    <div style="max-width:560px;margin:24px auto;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px">
+      <p style="margin:0 0 6px;color:#2563eb;font-size:12px;font-weight:800;letter-spacing:.11em">EVENTIA · INSCRIPCIÓN</p>
+      <h1 style="margin:0 0 16px;font-size:22px">¡Tu inscripción está confirmada, {escape(datos.participante)}!</h1>
+      <p>Te esperamos en <strong>{escape(datos.evento)}</strong>, {escape(fechas)}.</p>
+      <p>Adjuntamos tu <strong>tarjeta de inscripción</strong> en PDF. Imprimila y llevala a todas las actividades: el personal la usa para identificarte y registrar tu asistencia.</p>
+      <p style="margin:20px 0 6px;color:#667085;font-size:13px">N° de inscripción</p>
+      <p style="margin:0;font-family:monospace;font-size:18px;font-weight:700">{escape(codigo)}</p>
+      <p style="margin:24px 0 0;color:#98a2b3;font-size:12px">Este correo fue enviado automáticamente por Eventia.</p>
+    </div>
+  </body>
+</html>
+""",
+        subtype="html",
+    )
+    mensaje.add_attachment(
+        pdf,
+        maintype="application",
+        subtype="pdf",
+        filename=f"tarjeta-{codigo}.pdf",
+    )
+    return mensaje
+
+
+def enviar_tarjeta_inscripcion(destinatario: str, datos: DatosTarjeta, pdf: bytes) -> None:
+    _enviar(_armar_mensaje_tarjeta(destinatario, datos, pdf))

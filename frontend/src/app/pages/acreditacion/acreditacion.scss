@@ -148,3 +148,4 @@ kbd { padding: 1px 6px; border: 1px solid #d0d5dd; border-bottom-width: 2px; bor
   .acciones { grid-column: 1 / -1; justify-content: space-between; }
   .acreditar { flex: 1; }
 }
+.info small .link { padding: 0; font-size: inherit; }

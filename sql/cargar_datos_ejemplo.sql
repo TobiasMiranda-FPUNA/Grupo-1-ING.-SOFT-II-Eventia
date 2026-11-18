@@ -29,6 +29,8 @@
 --   participante@eventia.test / Participante123!
 --   conferencista@eventia.test / Conferencista123!
 --   acreditacion@eventia.test / Acreditacion123!
+--   hasvbogarin92@fpuna.edu.py / Hugo123!  (Hugo Villagra, participante
+--   real para probar los correos de tarjeta y certificado)
 -- Los hashes fueron generados con Argon2 (misma librería que usa
 -- el backend en app/core/security.py) para que el login funcione
 -- de verdad contra estos datos de ejemplo.
@@ -52,7 +54,9 @@ VALUES
     ('Laura', 'Méndez', 'conferencista@eventia.test',
      '$argon2id$v=19$m=65536,t=3,p=4$AtqWe2SK8OLT/Vs+7BxFsA$LErA8RHaiW5O08jm53wAg/aWCUM4PoTXGsQ4G78eTx4'),
     ('Pedro', 'Ayala', 'acreditacion@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$sLW+4Z9n/76w6Fo2VPjefQ$QJdIf8MUbAAdfJ7zvyFOOtpLzKcUnUC0lz9vKqrToQ8')
+     '$argon2id$v=19$m=65536,t=3,p=4$sLW+4Z9n/76w6Fo2VPjefQ$QJdIf8MUbAAdfJ7zvyFOOtpLzKcUnUC0lz9vKqrToQ8'),
+    ('Hugo', 'Villagra', 'hasvbogarin92@fpuna.edu.py',
+     '$argon2id$v=19$m=65536,t=3,p=4$322uzZz8kDwNsLgBwMPIfA$uB6eA0fnvJI0gTLN5LUIKpxChCSXAIPO6eur9vvBN18')
 ON CONFLICT (correo) DO NOTHING;
 
 -- USUARIO_ROL: asigna el rol de sistema correspondiente a cada
@@ -75,6 +79,7 @@ INSERT INTO usuario_rol (id_usuario, id_rol_sistema)
 SELECT u.id_usuario, rs.id_rol_sistema
 FROM (VALUES
     ('participante@eventia.test',  'PARTICIPANTE'),
+    ('hasvbogarin92@fpuna.edu.py', 'PARTICIPANTE'),
     ('conferencista@eventia.test', 'CONFERENCISTA'),
     ('acreditacion@eventia.test',  'ACREDITACION')
 ) AS v(correo, codigo_rol)

@@ -429,6 +429,9 @@ class InscripcionResponse(BaseModel):
     id_rol_participante: int
     fecha_inscripcion: datetime
     estado: str
+    # Resultado del envío de la tarjeta de inscripción por correo. Solo se
+    # envía a las inscripciones confirmadas: None si no correspondía enviarla.
+    envio_correo: Literal["enviado", "error", "no_configurado"] | None = None
 
 # ============================================================
 # ROLES PÚBLICOS PARA INSCRIPCIÓN
