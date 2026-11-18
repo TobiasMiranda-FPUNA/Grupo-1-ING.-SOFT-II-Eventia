@@ -135,7 +135,9 @@ FROM (VALUES
     ('4123456', 'Lucía', 'Fernández', 'lucia.fernandez@example.com', 'Universidad Nacional de Asunción'),
     ('4234567', 'Marcos', 'Ortiz', 'marcos.ortiz@example.com', 'Facultad Politécnica'),
     ('4345678', 'Valeria', 'Gómez', 'valeria.gomez@example.com', NULL),
-    ('4456789', 'Diego', 'Cáceres', 'diego.caceres@example.com', 'Instituto Superior de Informática')
+    ('4456789', 'Diego', 'Cáceres', 'diego.caceres@example.com', 'Instituto Superior de Informática'),
+    -- Participante real para probar el envío de certificados por correo.
+    (NULL, 'Hugo', 'Villagra', 'hasvbogarin92@fpuna.edu.py', 'Facultad Politécnica')
 ) AS v(documento, nombres, apellidos, email, institucion)
 WHERE NOT EXISTS (
     SELECT 1 FROM participante p WHERE p.email = v.email
@@ -152,6 +154,7 @@ FROM (VALUES
     ('Congreso Nacional de Tecnología 2026', 'lucia.fernandez@example.com', 'ASISTENTE', 'confirmada'),
     ('Congreso Nacional de Tecnología 2026', 'marcos.ortiz@example.com', 'ASISTENTE', 'confirmada'),
     ('Congreso Nacional de Tecnología 2026', 'diego.caceres@example.com', 'MODERADOR', 'confirmada'),
+    ('Congreso Nacional de Tecnología 2026', 'hasvbogarin92@fpuna.edu.py', 'ASISTENTE', 'confirmada'),
     ('Taller de Testing Ágil', 'valeria.gomez@example.com', 'ASISTENTE', 'pendiente'),
     ('Taller de Testing Ágil', 'marcos.ortiz@example.com', 'ASISTENTE', 'lista_de_espera')
 ) AS v(nombre_evento, email_participante, codigo_rol, estado)
@@ -258,5 +261,20 @@ FROM (VALUES
 JOIN actividad a ON a.titulo = v.titulo_actividad
 JOIN conferencista c ON c.email = v.email_conferencista
 ON CONFLICT (id_actividad, id_conferencista) DO NOTHING;
+
+-- ------------------------------------------------------------
+-- ASISTENCIA: Hugo Villagra asistió a todas las actividades del
+-- Congreso (ya finalizado), así que culmina el evento y queda
+-- elegible para recibir el certificado por correo (HU08).
+-- ------------------------------------------------------------
+INSERT INTO asistencia (id_inscripcion, id_actividad, estado)
+SELECT i.id_inscripcion, a.id_actividad, 'presente'
+FROM inscripcion i
+JOIN participante p ON p.id_participante = i.id_participante
+JOIN evento e ON e.id_evento = i.id_evento
+JOIN actividad a ON a.id_evento = e.id_evento
+WHERE p.email = 'hasvbogarin92@fpuna.edu.py'
+  AND e.nombre = 'Congreso Nacional de Tecnología 2026'
+ON CONFLICT (id_inscripcion, id_actividad) DO NOTHING;
 
 COMMIT;

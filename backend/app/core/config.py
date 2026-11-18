@@ -18,6 +18,19 @@ class Settings(BaseSettings):
     # los certificados PDF.
     frontend_base_url: str = "http://localhost:4200"
 
+    # Servidor SMTP para enviar los certificados por correo. Si smtp_host
+    # queda vacío el envío se desactiva y los certificados se emiten igual.
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    # Remitente que verá el participante; por defecto, smtp_user.
+    smtp_from: str | None = None
+    # STARTTLS (puerto 587) o SSL directo (puerto 465).
+    smtp_use_tls: bool = True
+    smtp_use_ssl: bool = False
+    smtp_timeout_seconds: int = 20
+
     # Indica que los valores se pueden leer desde un archivo ".env" y que
     # las variables de entorno adicionales no declaradas aquí se ignoran.
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

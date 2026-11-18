@@ -8,6 +8,7 @@ import {
   CertificadoGestion,
   CertificadoVerificado,
   CertificadosService,
+  EnvioCorreo,
 } from '../../services/certificados';
 import { Evento, EventosService } from '../../services/eventos';
 
@@ -27,6 +28,7 @@ export class Certificados implements OnInit {
   eventoId: number | null = null;
   cargando = signal(false);
   procesando = signal<number | null>(null);
+  enviandoTodos = signal(false);
   mensaje = signal<string | null>(null);
   error = signal<string | null>(null);
 
@@ -37,10 +39,13 @@ export class Certificados implements OnInit {
     });
   }
 
-  cargar(): void {
+  // conservarMensajes: recarga la lista sin borrar el resultado de la última acción.
+  cargar(conservarMensajes = false): void {
     this.participantes.set([]);
-    this.mensaje.set(null);
-    this.error.set(null);
+    if (!conservarMensajes) {
+      this.mensaje.set(null);
+      this.error.set(null);
+    }
 
     if (!this.eventoId) return;
 
@@ -66,13 +71,82 @@ export class Certificados implements OnInit {
       .pipe(finalize(() => this.procesando.set(null)))
       .subscribe({
         next: certificado => {
-          this.mensaje.set(`Certificado generado para ${certificado.participante}.`);
-          this.cargar();
+          this.informarEnvio(
+            `Certificado generado para ${certificado.participante}`,
+            certificado.envio_correo,
+            certificado.email,
+          );
+          this.cargar(true);
         },
         error: err => this.error.set(
           err?.error?.detail || 'No se pudo generar el certificado.'
         ),
       });
+  }
+
+  reenviar(item: CertificadoGestion): void {
+    this.procesando.set(item.id_inscripcion);
+    this.error.set(null);
+    this.mensaje.set(null);
+
+    this.certificadosService
+      .reenviar(item.id_inscripcion)
+      .pipe(finalize(() => this.procesando.set(null)))
+      .subscribe({
+        next: certificado => this.mensaje.set(`Certificado reenviado a ${certificado.email}.`),
+        error: err => this.error.set(
+          err?.error?.detail || 'No se pudo reenviar el certificado.'
+        ),
+      });
+  }
+
+  // Emite y envía por correo los certificados de todos los que culminaron el evento.
+  emitirYEnviarTodos(): void {
+    if (!this.eventoId) return;
+
+    this.enviandoTodos.set(true);
+    this.error.set(null);
+    this.mensaje.set(null);
+
+    this.certificadosService
+      .emitirYEnviarEvento(this.eventoId)
+      .pipe(finalize(() => this.enviandoTodos.set(false)))
+      .subscribe({
+        next: r => {
+          if (r.emitidos === 0) {
+            this.mensaje.set('No hay participantes elegibles con certificado pendiente.');
+          } else {
+            const partes = [`${r.emitidos} certificado(s) emitido(s)`, `${r.enviados} enviado(s) por correo`];
+            if (r.con_error) partes.push(`${r.con_error} con error de envío`);
+            this.mensaje.set(partes.join(' · ') + '.');
+            if (r.sin_configurar) {
+              this.error.set('El envío de correos no está configurado en el servidor: los certificados se emitieron pero no se enviaron.');
+            }
+          }
+          this.cargar(true);
+        },
+        error: err => this.error.set(
+          err?.error?.detail || 'No se pudieron emitir y enviar los certificados.'
+        ),
+      });
+  }
+
+  hayPendientes(): boolean {
+    return this.participantes().some(p => p.elegible && !p.certificado_emitido);
+  }
+
+  private informarEnvio(prefijo: string, envio: EnvioCorreo | null | undefined, email: string): void {
+    if (envio === 'enviado') {
+      this.mensaje.set(`${prefijo} y enviado a ${email}.`);
+    } else if (envio === 'error') {
+      this.mensaje.set(`${prefijo}.`);
+      this.error.set(`No se pudo enviar el correo a ${email}. Podés reintentar con "Reenviar".`);
+    } else {
+      this.mensaje.set(`${prefijo}.`);
+      if (envio === 'no_configurado') {
+        this.error.set('El envío de correos no está configurado en el servidor (SMTP).');
+      }
+    }
   }
 
   descargar(item: CertificadoGestion): void {

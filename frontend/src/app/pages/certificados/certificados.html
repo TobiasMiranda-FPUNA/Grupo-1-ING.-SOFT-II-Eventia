@@ -18,6 +18,16 @@
         }
       </select>
     </label>
+    @if (eventoId && hayPendientes()) {
+      <button
+        type="button"
+        class="btn-primary send-all"
+        [disabled]="enviandoTodos()"
+        (click)="emitirYEnviarTodos()">
+        {{ enviandoTodos() ? 'Enviando…' : '✉ Emitir y enviar a quienes culminaron' }}
+      </button>
+      <small class="hint">Solo para eventos finalizados: emite el certificado de cada participante elegible y se lo envía por correo.</small>
+    }
   </section>
 
   @if (error()) {
@@ -81,6 +91,13 @@
                     </button>
                   } @else {
                     <button type="button" class="btn-secondary" (click)="descargar(item)">Descargar</button>
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      [disabled]="procesando() === item.id_inscripcion"
+                      (click)="reenviar(item)">
+                      {{ procesando() === item.id_inscripcion ? 'Enviando…' : '✉ Reenviar' }}
+                    </button>
                     <a
                       class="verify"
                       [routerLink]="['/certificados/verificar', item.codigo_validacion]">

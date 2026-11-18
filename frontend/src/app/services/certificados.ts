@@ -29,6 +29,18 @@ export interface CertificadoGestion {
   certificado_emitido: boolean;
   codigo_validacion: string | null;
   fecha_emision: string | null;
+  // Solo viene en las respuestas que intentan enviar el certificado por correo.
+  envio_correo?: EnvioCorreo | null;
+}
+
+export type EnvioCorreo = 'enviado' | 'error' | 'no_configurado';
+
+export interface EnvioCertificadosEvento {
+  emitidos: number;
+  enviados: number;
+  con_error: number;
+  sin_configurar: number;
+  certificados: CertificadoGestion[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,6 +57,21 @@ export class CertificadosService {
   emitir(idInscripcion: number): Observable<CertificadoGestion> {
     return this.http.post<CertificadoGestion>(
       `${this.apiUrl}/emitir/${idInscripcion}`,
+      {}
+    );
+  }
+
+  reenviar(idInscripcion: number): Observable<CertificadoGestion> {
+    return this.http.post<CertificadoGestion>(
+      `${this.apiUrl}/inscripcion/${idInscripcion}/enviar`,
+      {}
+    );
+  }
+
+  // Emite y envía por correo los certificados de quienes culminaron el evento.
+  emitirYEnviarEvento(eventoId: number): Observable<EnvioCertificadosEvento> {
+    return this.http.post<EnvioCertificadosEvento>(
+      `${this.apiUrl}/evento/${eventoId}/emitir-y-enviar`,
       {}
     );
   }
