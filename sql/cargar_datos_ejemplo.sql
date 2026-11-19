@@ -106,7 +106,12 @@ FROM (VALUES
      DATE '2026-10-05', DATE '2026-10-05', 'Laboratorio de Informática 3', 30, 'publicado'),
     ('SEMINARIO', 'Seminario de Arquitectura de Software',
      'Seminario introductorio a arquitecturas monolíticas y de microservicios.',
-     DATE '2026-09-25', DATE '2026-09-25', 'Auditorio Central', 80, 'borrador')
+     DATE '2026-09-25', DATE '2026-09-25', 'Auditorio Central', 80, 'borrador'),
+    -- Evento abierto (fechas futuras) para probar la inscripción pública y
+    -- el envío de la tarjeta de inscripción por correo.
+    ('TALLER', 'Taller de Desarrollo Web con Angular y FastAPI',
+     'Taller práctico para construir una aplicación web completa con Angular en el frontend y FastAPI en el backend.',
+     DATE '2026-12-10', DATE '2026-12-11', 'Facultad Politécnica - Laboratorio 2', 40, 'publicado')
 ) AS v(codigo_tipo, nombre, descripcion, fecha_inicio, fecha_fin, lugar, cupo_maximo, estado)
 JOIN tipo_evento te ON te.codigo = v.codigo_tipo
 WHERE NOT EXISTS (
@@ -125,7 +130,8 @@ SELECT e.id_evento, v.fecha_limite, v.requiere_aprobacion,
 FROM (VALUES
     ('Congreso Nacional de Tecnología 2026', DATE '2026-11-05', FALSE, TRUE, 75),
     ('Taller de Testing Ágil', DATE '2026-10-01', TRUE, FALSE, 100),
-    ('Seminario de Arquitectura de Software', DATE '2026-09-20', FALSE, TRUE, 60)
+    ('Seminario de Arquitectura de Software', DATE '2026-09-20', FALSE, TRUE, 60),
+    ('Taller de Desarrollo Web con Angular y FastAPI', DATE '2026-12-05', FALSE, TRUE, 75)
 ) AS v(nombre_evento, fecha_limite, requiere_aprobacion, permite_lista_espera, min_asistencia_certificado)
 JOIN evento e ON e.nombre = v.nombre_evento
 ON CONFLICT (id_evento) DO NOTHING;
@@ -231,7 +237,19 @@ FROM (VALUES
     ('Seminario de Arquitectura de Software', 'Conferencia',
      'Del monolito a los microservicios',
      'Criterios para decidir cuándo y cómo descomponer un sistema monolítico.',
-     DATE '2026-09-25', TIME '18:00', TIME '20:00', 'Auditorio Central', 'PRESENCIAL', 80)
+     DATE '2026-09-25', TIME '18:00', TIME '20:00', 'Auditorio Central', 'PRESENCIAL', 80),
+    ('Taller de Desarrollo Web con Angular y FastAPI', 'Taller',
+     'Frontend con Angular: componentes y signals',
+     'Creación de componentes, rutas y manejo de estado con signals.',
+     DATE '2026-12-10', TIME '08:30', TIME '11:30', 'Laboratorio 2', 'PRESENCIAL', 40),
+    ('Taller de Desarrollo Web con Angular y FastAPI', 'Taller',
+     'Backend con FastAPI y PostgreSQL',
+     'Endpoints REST, validación con Pydantic y persistencia con SQLAlchemy.',
+     DATE '2026-12-10', TIME '14:00', TIME '17:00', 'Laboratorio 2', 'PRESENCIAL', 40),
+    ('Taller de Desarrollo Web con Angular y FastAPI', 'Charla',
+     'Integración y despliegue de la aplicación',
+     'Conexión del frontend con la API, autenticación JWT y puesta en producción.',
+     DATE '2026-12-11', TIME '09:00', TIME '11:00', 'Laboratorio 2', 'PRESENCIAL', 40)
 ) AS v(nombre_evento, nombre_categoria, titulo, descripcion,
        fecha, hora_inicio, hora_fin, lugar, modalidad, cupo)
 JOIN evento e ON e.nombre = v.nombre_evento
