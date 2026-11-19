@@ -10,7 +10,7 @@ from app.api.eventos import create_evento
 from app.api.inscripciones import create_inscripcion, descargar_tarjeta, reenviar_tarjeta
 from app.core.config import settings
 from app.db import Base
-from app.models import Actividad, CategoriaActividad, RolParticipante, TipoEvento
+from app.models import Actividad, CategoriaActividad, Participante, RolParticipante, TipoEvento
 from app.schemas import EventoCreate, InscripcionCreate, PoliticaInscripcionData
 from app.services.correo import _armar_mensaje_tarjeta
 from app.services.tarjeta_inscripcion_pdf import (
@@ -192,3 +192,48 @@ def test_codigo_y_mensaje_de_la_tarjeta():
     adjuntos = list(mensaje.iter_attachments())
     assert adjuntos[0].get_filename() == "tarjeta-INS-000042.pdf"
     assert adjuntos[0].get_content().startswith(b"%PDF")
+
+
+def test_inscripcion_completa_el_documento_faltante_del_participante(db, correos):
+    evento, rol = _evento(db)
+    # Participante ya registrado sin documento (p. ej. cargado por otro medio).
+    db.add(Participante(nombres="Hugo", apellidos="Villagra", email="hugo@example.com"))
+    db.commit()
+
+    create_inscripcion(
+        InscripcionCreate(
+            id_evento=evento.id_evento,
+            id_rol_participante=rol.id_rol_participante,
+            documento="4567890",
+            nombres="Hugo",
+            apellidos="Villagra",
+            email="HUGO@example.com",
+            institucion="FPUNA",
+        ),
+        db,
+    )
+
+    _, datos, _ = correos[0]
+    assert datos.documento == "4567890"
+    assert datos.institucion == "FPUNA"
+
+
+def test_inscripcion_no_sobrescribe_el_documento_existente(db, correos):
+    evento, rol = _evento(db)
+    db.add(Participante(nombres="Hugo", apellidos="Villagra", email="hugo@example.com", documento="111"))
+    db.commit()
+
+    create_inscripcion(
+        InscripcionCreate(
+            id_evento=evento.id_evento,
+            id_rol_participante=rol.id_rol_participante,
+            documento="999",
+            nombres="Hugo",
+            apellidos="Villagra",
+            email="hugo@example.com",
+        ),
+        db,
+    )
+
+    _, datos, _ = correos[0]
+    assert datos.documento == "111"

@@ -52,10 +52,19 @@ staff_required = Depends(
 # Busca un participante existente por email (comparación insensible a
 # mayúsculas) o crea uno nuevo con los datos recibidos. Evita duplicar el
 # registro de una misma persona que se inscribe a más de un evento.
+# Si ya existía, completa el documento y la institución que le faltaran (por
+# ejemplo, para que salgan en la tarjeta de inscripción); los datos ya
+# cargados no se sobrescriben, para que nadie pueda cambiarlos solo con
+# conocer el correo de otra persona.
 def _get_or_create_participante(db: Session, data: InscripcionCreate) -> Participante:
     email = data.email.strip().lower()
     participante = db.scalar(select(Participante).where(func.lower(Participante.email) == email))
-    if participante is None:
+    if participante is not None:
+        if not participante.documento and data.documento:
+            participante.documento = data.documento
+        if not participante.institucion and data.institucion:
+            participante.institucion = data.institucion
+    else:
         participante = Participante(
             documento=data.documento,
             nombres=data.nombres.strip(),
