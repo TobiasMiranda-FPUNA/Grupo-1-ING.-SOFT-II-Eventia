@@ -111,7 +111,10 @@ FROM (VALUES
     -- el envío de la tarjeta de inscripción por correo.
     ('TALLER', 'Taller de Desarrollo Web con Angular y FastAPI',
      'Taller práctico para construir una aplicación web completa con Angular en el frontend y FastAPI en el backend.',
-     DATE '2026-12-10', DATE '2026-12-11', 'Facultad Politécnica - Laboratorio 2', 40, 'publicado')
+     DATE '2026-12-10', DATE '2026-12-11', 'Facultad Politécnica - Laboratorio 2', 40, 'publicado'),
+    ('JORNADA', 'Jornada de Inteligencia Artificial Aplicada',
+     'Jornada sobre aplicaciones prácticas de la inteligencia artificial en el desarrollo de software.',
+     DATE '2026-12-15', DATE '2026-12-16', 'Facultad Politécnica - Auditorio', 50, 'publicado')
 ) AS v(codigo_tipo, nombre, descripcion, fecha_inicio, fecha_fin, lugar, cupo_maximo, estado)
 JOIN tipo_evento te ON te.codigo = v.codigo_tipo
 WHERE NOT EXISTS (
@@ -131,7 +134,8 @@ FROM (VALUES
     ('Congreso Nacional de Tecnología 2026', DATE '2026-11-05', FALSE, TRUE, 75),
     ('Taller de Testing Ágil', DATE '2026-10-01', TRUE, FALSE, 100),
     ('Seminario de Arquitectura de Software', DATE '2026-09-20', FALSE, TRUE, 60),
-    ('Taller de Desarrollo Web con Angular y FastAPI', DATE '2026-12-05', FALSE, TRUE, 75)
+    ('Taller de Desarrollo Web con Angular y FastAPI', DATE '2026-12-05', FALSE, TRUE, 75),
+    ('Jornada de Inteligencia Artificial Aplicada', DATE '2026-12-12', FALSE, TRUE, 75)
 ) AS v(nombre_evento, fecha_limite, requiere_aprobacion, permite_lista_espera, min_asistencia_certificado)
 JOIN evento e ON e.nombre = v.nombre_evento
 ON CONFLICT (id_evento) DO NOTHING;
@@ -249,7 +253,19 @@ FROM (VALUES
     ('Taller de Desarrollo Web con Angular y FastAPI', 'Charla',
      'Integración y despliegue de la aplicación',
      'Conexión del frontend con la API, autenticación JWT y puesta en producción.',
-     DATE '2026-12-11', TIME '09:00', TIME '11:00', 'Laboratorio 2', 'PRESENCIAL', 40)
+     DATE '2026-12-11', TIME '09:00', TIME '11:00', 'Laboratorio 2', 'PRESENCIAL', 40),
+    ('Jornada de Inteligencia Artificial Aplicada', 'Conferencia',
+     'Introducción a los modelos de lenguaje',
+     'Qué son los LLM, cómo funcionan y en qué casos conviene usarlos.',
+     DATE '2026-12-15', TIME '09:00', TIME '11:00', 'Auditorio', 'PRESENCIAL', 50),
+    ('Jornada de Inteligencia Artificial Aplicada', 'Taller',
+     'Asistentes de IA para programar',
+     'Uso práctico de asistentes de código en un proyecto real.',
+     DATE '2026-12-15', TIME '14:00', TIME '17:00', 'Laboratorio 1', 'PRESENCIAL', 50),
+    ('Jornada de Inteligencia Artificial Aplicada', 'Panel',
+     'Ética y buenas prácticas en IA',
+     'Panel sobre privacidad, sesgos y uso responsable de la IA.',
+     DATE '2026-12-16', TIME '10:00', TIME '12:00', 'Auditorio', 'PRESENCIAL', 50)
 ) AS v(nombre_evento, nombre_categoria, titulo, descripcion,
        fecha, hora_inicio, hora_fin, lugar, modalidad, cupo)
 JOIN evento e ON e.nombre = v.nombre_evento
