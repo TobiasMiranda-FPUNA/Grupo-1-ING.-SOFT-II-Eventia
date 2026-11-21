@@ -112,8 +112,24 @@ La base inicial está compuesta por las siguientes tablas:
 - Un certificado emitido puede descargarse y verificarse desde la interfaz
   pública `/certificados/verificar`.
 
-### Flujo integrado
-`Evento → Inscripción → Agenda/Actividad → Asistencia → Certificado → Verificación pública`
+## Funcionalidades integradas del Sprint 5
+
+Durante el Sprint 5 se consolidaron e integraron las funcionalidades principales del sistema Eventia, incorporando mejoras orientadas a completar los flujos de uso y preparar la versión final del proyecto.
+
+Las principales funcionalidades integradas son:
+
+- Acreditación rápida de participantes inscriptos.
+- Registro y consulta de asistencia por actividad.
+- Dashboard con métricas de inscripciones, cupos y asistencia.
+- Generación de certificados en formato PDF.
+- Verificación pública de certificados mediante código único.
+- Mejoras finales de navegación, interfaz y control de acceso.
+
+### Flujo principal integrado
+
+El flujo principal del sistema puede resumirse de la siguiente manera:
+
+`Evento → Inscripción → Acreditación → Asistencia → Certificado → Verificación pública`
 
 ### Pruebas
 Desde `backend/` se puede ejecutar:
