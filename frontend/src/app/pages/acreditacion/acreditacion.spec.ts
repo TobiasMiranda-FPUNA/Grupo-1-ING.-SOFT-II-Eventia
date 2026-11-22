@@ -54,6 +54,12 @@ describe('coincide', () => {
     expect(coincide(ana, '#12')).toBe(true);
     expect(coincide(ana, '1')).toBe(false);
   });
+
+  it('acepta el código de barras de la tarjeta de inscripción', () => {
+    expect(coincide(ana, 'INS-000012')).toBe(true);
+    expect(coincide(ana, 'ins000012')).toBe(true);
+    expect(coincide(ana, 'INS-000120')).toBe(false);
+  });
 });
 
 describe('actividadSugerida', () => {

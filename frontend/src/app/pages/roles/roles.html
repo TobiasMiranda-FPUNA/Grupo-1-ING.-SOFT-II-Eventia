@@ -1,9 +1,11 @@
-
-<div class="roles-container">
+<section class="page">
 
     <header class="page-header">
-        <h1>Administración de Roles</h1>
-        <p>Gestión de Roles de Participantes y Sistema</p>
+        <div>
+            <span class="eyebrow">HU02 · PARAMETRIZACIÓN</span>
+            <h1>Administración de roles</h1>
+            <p>Gestión de roles de participantes y del sistema.</p>
+        </div>
     </header>
 
     <!-- Mensajes de notificación -->
@@ -29,7 +31,7 @@
             >
 
                 <!-- Nombre -->
-                <div class="form-group">
+                <div class="field">
                     <label for="nombre">Nombre del Rol</label>
 
                     <input
@@ -41,7 +43,7 @@
                     />
 
                     <div
-                        class="error-feedback"
+                        class="field-error"
                         *ngIf="roleForm.get('nombre')?.touched && roleForm.get('nombre')?.invalid"
                     >
                         <small *ngIf="roleForm.get('nombre')?.errors?.['required']">
@@ -55,7 +57,7 @@
                 </div>
 
                 <!-- Descripción -->
-                <div class="form-group">
+                <div class="field">
                     <label for="descripcion">Descripción</label>
 
                     <textarea
@@ -67,7 +69,7 @@
                     ></textarea>
 
                     <div
-                        class="error-feedback"
+                        class="field-error"
                         *ngIf="roleForm.get('descripcion')?.touched && roleForm.get('descripcion')?.invalid"
                     >
                         <small *ngIf="roleForm.get('descripcion')?.errors?.['required']">
@@ -94,9 +96,9 @@
 
             <h3>Roles Registrados</h3>
 
-            <div class="table-responsive">
+            <div class="table-wrap">
 
-                <table>
+                <table class="data-table">
 
                     <thead>
                         <tr>
@@ -127,8 +129,8 @@
                             <td>
                                 <span
                                     class="badge"
-                                    [class.badge-inuse]="!role.activo"
-                                    [class.badge-free]="role.activo"
+                                    [class.wait]="!role.activo"
+                                    [class.ok]="role.activo"
                                 >
                                     {{ role.activo ? 'Activo' : 'Inactivo' }}
                                 </span>
@@ -163,4 +165,4 @@
 
     </div>
 
-</div>
+</section>

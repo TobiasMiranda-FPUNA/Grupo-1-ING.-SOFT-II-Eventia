@@ -429,6 +429,9 @@ class InscripcionResponse(BaseModel):
     id_rol_participante: int
     fecha_inscripcion: datetime
     estado: str
+    # Resultado del envío de la tarjeta de inscripción por correo. Solo se
+    # envía a las inscripciones confirmadas: None si no correspondía enviarla.
+    envio_correo: Literal["enviado", "error", "no_configurado"] | None = None
 
 # ============================================================
 # ROLES PÚBLICOS PARA INSCRIPCIÓN
@@ -524,6 +527,17 @@ class CertificadoGestionResponse(BaseModel):
     certificado_emitido: bool
     codigo_validacion: str | None = None
     fecha_emision: datetime | None = None
+    # Resultado del envío por correo, solo en las respuestas que lo intentan:
+    # "enviado", "error" o "no_configurado" (sin servidor SMTP).
+    envio_correo: Literal["enviado", "error", "no_configurado"] | None = None
+
+
+class EnvioCertificadosEventoResponse(BaseModel):
+    emitidos: int
+    enviados: int
+    con_error: int
+    sin_configurar: int
+    certificados: list[CertificadoGestionResponse]
 
 
 # ============================================================

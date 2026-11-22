@@ -5,13 +5,17 @@ from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from app.api import certificados as certificados_api
 from app.api.certificados import (
     descargar_certificado,
     descargar_certificado_por_codigo,
     emitir_certificado,
+    emitir_y_enviar_certificados_evento,
+    reenviar_certificado,
     listar_estado_certificados_evento,
     verificar_certificado,
 )
+from app.core.config import settings
 from app.db import Base
 from app.models import (
     Actividad,
@@ -154,3 +158,108 @@ def test_codigo_invalido_devuelve_404(db, operacion):
     with pytest.raises(HTTPException) as error:
         operacion("NOEXISTE", db)
     assert error.value.status_code == 404
+
+
+@pytest.fixture
+def correos(monkeypatch):
+    # Simula un servidor SMTP configurado y captura los envíos.
+    enviados = []
+    monkeypatch.setattr(settings, "smtp_host", "smtp.example.com")
+    monkeypatch.setattr(settings, "smtp_from", "eventia@example.com")
+    monkeypatch.setattr(
+        certificados_api,
+        "enviar_certificado",
+        lambda destinatario, datos, pdf: enviados.append((destinatario, datos, pdf)),
+    )
+    return enviados
+
+
+def test_emitir_sin_smtp_emite_igual_e_informa_no_configurado(db, monkeypatch):
+    monkeypatch.setattr(settings, "smtp_host", None)
+    _, inscripcion = _escenario(db, minimo=50)
+
+    emitido = emitir_certificado(inscripcion.id_inscripcion, db, None)
+
+    assert emitido.certificado_emitido is True
+    assert emitido.envio_correo == "no_configurado"
+
+
+def test_emitir_envia_el_pdf_al_correo_del_participante(db, correos):
+    _, inscripcion = _escenario(db, minimo=50)
+
+    emitido = emitir_certificado(inscripcion.id_inscripcion, db, None)
+
+    assert emitido.envio_correo == "enviado"
+    destinatario, datos, pdf = correos[0]
+    assert destinatario == "ana@example.com"
+    assert datos.codigo_validacion == emitido.codigo_validacion
+    assert pdf.startswith(b"%PDF")
+
+
+def test_fallo_del_correo_no_deshace_la_emision(db, monkeypatch, correos):
+    def falla(*_):
+        raise certificados_api.CorreoError("SMTP caído")
+
+    monkeypatch.setattr(certificados_api, "enviar_certificado", falla)
+    _, inscripcion = _escenario(db, minimo=50)
+
+    emitido = emitir_certificado(inscripcion.id_inscripcion, db, None)
+
+    assert emitido.certificado_emitido is True
+    assert emitido.envio_correo == "error"
+
+
+def test_reenviar_certificado(db, correos):
+    _, inscripcion = _escenario(db, minimo=50)
+    emitir_certificado(inscripcion.id_inscripcion, db, None)
+
+    reenviado = reenviar_certificado(inscripcion.id_inscripcion, db, None)
+
+    assert reenviado.envio_correo == "enviado"
+    assert len(correos) == 2
+
+
+def test_reenviar_sin_certificado_devuelve_404(db, correos):
+    _, inscripcion = _escenario(db, minimo=50)
+
+    with pytest.raises(HTTPException) as error:
+        reenviar_certificado(inscripcion.id_inscripcion, db, None)
+    assert error.value.status_code == 404
+
+
+def test_emitir_y_enviar_evento_finalizado(db, correos):
+    evento, inscripcion = _escenario(db, minimo=50)
+    evento.fecha_fin = date(2020, 1, 1)
+    db.commit()
+
+    resultado = emitir_y_enviar_certificados_evento(evento.id_evento, db, None)
+
+    assert resultado.emitidos == 1
+    assert resultado.enviados == 1
+    assert resultado.certificados[0].id_inscripcion == inscripcion.id_inscripcion
+
+    # Una segunda ejecución no vuelve a emitir ni a enviar.
+    repetido = emitir_y_enviar_certificados_evento(evento.id_evento, db, None)
+    assert repetido.emitidos == 0
+    assert len(correos) == 1
+
+
+def test_emitir_y_enviar_rechaza_evento_no_finalizado(db, correos):
+    evento, _ = _escenario(db, minimo=50)
+    evento.fecha_fin = date(2999, 1, 1)
+    db.commit()
+
+    with pytest.raises(HTTPException) as error:
+        emitir_y_enviar_certificados_evento(evento.id_evento, db, None)
+    assert error.value.status_code == 409
+
+
+def test_emitir_y_enviar_omite_no_elegibles(db, correos):
+    evento, _ = _escenario(db, minimo=100)
+    evento.fecha_fin = date(2020, 1, 1)
+    db.commit()
+
+    resultado = emitir_y_enviar_certificados_evento(evento.id_evento, db, None)
+
+    assert resultado.emitidos == 0
+    assert correos == []

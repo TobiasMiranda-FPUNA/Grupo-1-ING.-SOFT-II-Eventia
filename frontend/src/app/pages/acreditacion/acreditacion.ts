@@ -24,6 +24,7 @@ import {
   EstadoAsistencia,
 } from '../../services/asistencias';
 import { Evento, EventosService } from '../../services/eventos';
+import { InscripcionesService } from '../../services/inscripciones';
 
 export type FiltroAcreditacion = 'todos' | 'pendientes' | 'acreditados';
 
@@ -49,12 +50,18 @@ export function normalizar(texto: string): string {
   return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
+// "#123" o "INS-000123" → "123" (la búsqueda ya normalizada).
+export function numeroInscripcion(consulta: string): string {
+  return consulta.replace(/^(#|ins-?)/, '').replace(/^0+(?=\d)/, '');
+}
+
 // Coincide si cada palabra buscada aparece en el nombre o el correo, o si
-// la búsqueda es exactamente el número de inscripción (con o sin "#").
+// la búsqueda es exactamente el número de inscripción: "123", "#123" o el
+// código de barras de la tarjeta de inscripción ("INS-000123").
 export function coincide(p: AsistenciaParticipante, busqueda: string): boolean {
   const consulta = normalizar(busqueda);
   if (!consulta) return true;
-  if (consulta.replace(/^#/, '') === String(p.id_inscripcion)) return true;
+  if (numeroInscripcion(consulta) === String(p.id_inscripcion)) return true;
 
   const texto = normalizar(`${p.participante} ${p.email}`);
   return consulta.split(/\s+/).every(palabra => texto.includes(palabra));
@@ -115,6 +122,7 @@ export class Acreditacion implements OnInit {
   private eventosService = inject(EventosService);
   private actividadesService = inject(ActividadesService);
   private asistenciasService = inject(AsistenciasService);
+  private inscripcionesService = inject(InscripcionesService);
   private destroyRef = inject(DestroyRef);
   private injector = inject(Injector);
 
@@ -239,11 +247,23 @@ export class Acreditacion implements OnInit {
 
   // Enter en el buscador: acredita si el número de inscripción coincide
   // exactamente o si hay una única coincidencia. Si no, no adivina.
+  // Abre la tarjeta de inscripción en PDF para reimprimirla en la puerta.
+  imprimirTarjeta(p: AsistenciaParticipante): void {
+    this.inscripcionesService.descargarTarjeta(p.id_inscripcion).subscribe({
+      next: pdf => {
+        const url = URL.createObjectURL(pdf);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      },
+      error: () => this.mostrarAviso('error', `No se pudo obtener la tarjeta de ${p.participante}.`),
+    });
+  }
+
   acreditarDesdeBusqueda(): void {
     const busqueda = this.busqueda();
     if (!normalizar(busqueda)) return;
 
-    const numero = normalizar(busqueda).replace(/^#/, '');
+    const numero = numeroInscripcion(normalizar(busqueda));
     const porNumero = this.participantes().find(p => String(p.id_inscripcion) === numero);
     const candidatos = porNumero ? [porNumero] : this.participantes().filter(p => coincide(p, busqueda));
 

@@ -1,32 +1,18 @@
 // Misma línea visual que la planilla de asistencias (asistencias.scss), con
 // controles más grandes: se usa de pie, en tablet o celular, en la puerta.
 
-:host { display: block; font-family: Arial, sans-serif; }
+// Contenedor, encabezado, tarjetas, botones y mensajes base: ver src/styles.scss.
+:host { display: block; }
 
-.page { max-width: 1180px; margin: 0 auto; padding: 34px 24px 60px; color: #172033; }
-
-.page-header {
-  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 22px;
-  h1 { margin: 6px 0; font-size: 2rem; }
-  p { margin: 0; color: #667085; }
-}
-.eyebrow { font-size: .76rem; font-weight: 800; letter-spacing: .11em; color: #2463eb; }
-
-%card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 8px 30px rgba(15, 23, 42, .05); }
+%card { background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-tarjeta); box-shadow: var(--sombra-tarjeta); }
 
 .selector-card {
-  @extend %card;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 20px; margin-bottom: 18px;
-  label { font-weight: 700; font-size: .9rem; }
-  select { width: 100%; margin-top: 8px; padding: 11px 12px; border: 1px solid #d0d5dd; border-radius: 9px; background: #fff; font-size: 1rem; }
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  select { margin-top: 8px; font-size: 1rem; }
 }
 
-.empty-card { @extend %card; padding: 34px; text-align: center; color: #667085; }
-
-.alert { padding: 12px 16px; border-radius: 10px; margin: 0; font-weight: 600; }
-.alert.error { background: #fef2f2; color: #b42318; }
-.alert.success { background: #ecfdf3; color: #067647; }
-.alert.info { background: #eff4ff; color: #1d4ed8; }
+.alert { margin: 0; }
+.alert.info { background: var(--color-primario-suave); border-color: #bfdbfe; color: var(--color-primario-hover); }
 .page > .alert { margin: 14px 0; }
 
 // --- Progreso ---
@@ -115,10 +101,6 @@ kbd { padding: 1px 6px; border: 1px solid #d0d5dd; border-bottom-width: 2px; bor
   &.danger { color: #b42318; }
   &:disabled { opacity: .5; cursor: progress; }
 }
-.ghost {
-  padding: 9px 12px; border-radius: 8px; background: #f2f4f7; color: #344054;
-  font-weight: 700; text-decoration: none; white-space: nowrap;
-}
 
 .recientes {
   @extend %card;
@@ -148,7 +130,7 @@ kbd { padding: 1px 6px; border: 1px solid #d0d5dd; border-bottom-width: 2px; bor
     h1 { font-size: 1.35rem; margin: 2px 0 0; }
     p { display: none; }
   }
-  .ghost { padding: 7px 10px; font-size: .82rem; }
+  .btn-ghost { padding: 7px 10px; font-size: .82rem; }
   .selector-card {
     grid-template-columns: 1fr; gap: 8px; padding: 12px; margin-bottom: 10px;
     label { font-size: .78rem; }
@@ -166,3 +148,4 @@ kbd { padding: 1px 6px; border: 1px solid #d0d5dd; border-bottom-width: 2px; bor
   .acciones { grid-column: 1 / -1; justify-content: space-between; }
   .acreditar { flex: 1; }
 }
+.info small .link { padding: 0; font-size: inherit; }

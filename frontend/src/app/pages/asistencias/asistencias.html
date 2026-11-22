@@ -5,7 +5,7 @@
       <h1>Registro de asistencia</h1>
       <p>Seleccioná un evento y una actividad para marcar presentes y ausentes.</p>
     </div>
-    <a routerLink="/acreditacion" class="ghost">⚡ Acreditación rápida</a>
+    <a routerLink="/acreditacion" class="btn-ghost">⚡ Acreditación rápida</a>
   </header>
 
   <section class="filters-card">
@@ -54,13 +54,13 @@
           <span>{{ pendientes() }} sin marcar</span>
         </div>
         <div class="toolbar-actions">
-          <button type="button" class="ghost" (click)="marcarTodos('presente')">Todos presentes</button>
-          <button type="button" class="ghost" (click)="marcarTodos('ausente')">Todos ausentes</button>
+          <button type="button" class="btn-secondary" (click)="marcarTodos('presente')">Todos presentes</button>
+          <button type="button" class="btn-secondary" (click)="marcarTodos('ausente')">Todos ausentes</button>
         </div>
       </div>
 
       <div class="table-wrap">
-        <table>
+        <table class="data-table">
           <thead>
             <tr>
               <th>Participante</th>
@@ -101,7 +101,7 @@
         <span>Los cambios pueden actualizarse volviendo a guardar la actividad.</span>
         <button
           type="button"
-          class="primary"
+          class="btn-primary"
           [disabled]="guardando() || pendientes() > 0"
           (click)="guardar()">
           {{ guardando() ? 'Guardando…' : 'Guardar asistencia' }}

@@ -1,9 +1,4 @@
-.inicio-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px 60px;
-  color: #17243a;
-}
+// Contenedor de página: ver .page en src/styles.scss.
 
 .hero {
   display: flex;
@@ -39,13 +34,13 @@
 
 .rol {
   background: white;
-  color: #1264d8;
+  color: #2563eb;
   font-weight: 700;
   font-size: 13px;
   padding: 5px 11px;
   border-radius: 16px;
 
-  &.sin-rol { color: #64748b; }
+  &.sin-rol { color: #667085; }
 }
 
 h2 { font-size: 19px; margin: 0 0 14px; }
@@ -63,19 +58,20 @@ h2 { font-size: 19px; margin: 0 0 14px; }
   flex-direction: column;
   gap: 12px;
   background: white;
-  border: 1px solid #dce4ee;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 20px;
+  margin: 0;
   text-decoration: none;
   color: inherit;
   transition: transform .15s, box-shadow .15s, border-color .15s;
 
   h3 { margin: 0 0 6px; font-size: 17px; }
-  p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.45; }
+  p { margin: 0; color: #667085; font-size: 14px; line-height: 1.45; }
 
   &:not(.disabled):hover {
     transform: translateY(-2px);
-    border-color: #1264d8;
+    border-color: #2563eb;
     box-shadow: 0 8px 22px rgba(18, 100, 216, .12);
   }
 
@@ -87,7 +83,7 @@ h2 { font-size: 19px; margin: 0 0 14px; }
   height: 44px;
   border-radius: 10px;
   background: #e5f0ff;
-  color: #1264d8;
+  color: #2563eb;
   display: grid;
   place-items: center;
   font-size: 21px;
@@ -99,13 +95,13 @@ h2 { font-size: 19px; margin: 0 0 14px; }
   right: 16px;
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: #667085;
   background: #eef2f7;
   padding: 3px 8px;
   border-radius: 10px;
 }
 
-.ir { margin-top: auto; color: #1264d8; font-weight: 600; font-size: 14px; }
+.ir { margin-top: auto; color: #2563eb; font-weight: 600; font-size: 14px; }
 
 .badge {
   margin-top: auto;
@@ -119,7 +115,7 @@ h2 { font-size: 19px; margin: 0 0 14px; }
   border-radius: 12px;
 }
 
-.empty { color: #64748b; }
+.empty { color: #667085; }
 
 @media (max-width: 700px) {
   .inicio-page { padding: 20px 16px 40px; }

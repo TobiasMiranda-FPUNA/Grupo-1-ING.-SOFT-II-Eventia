@@ -1,7 +1,7 @@
-<div class="page-shell">
+<section class="page">
   <header class="page-header">
     <div>
-      <p class="eyebrow">Gestión de eventos</p>
+      <span class="eyebrow">HU03 · GESTIÓN DE EVENTOS</span>
       <h1>Catálogo de eventos</h1>
       <p>Consultá, filtrá y administrá los eventos registrados en Eventia.</p>
     </div>
@@ -28,8 +28,8 @@
         <option *ngFor="let t of tipos()" [value]="t.id_tipo_evento">{{ t.nombre }}</option>
       </select>
     </div>
-    <button class="btn-secondary" (click)="cargarEventos()">Filtrar</button>
-    <button class="btn-link" (click)="limpiarFiltros()">Limpiar</button>
+    <button type="button" class="btn-primary" (click)="cargarEventos()">Filtrar</button>
+    <button type="button" class="btn-link" (click)="limpiarFiltros()">Limpiar</button>
   </section>
 
   <div class="toolbar">
@@ -41,10 +41,10 @@
   </div>
 
   <div *ngIf="error()" class="alert error">{{ error() }}</div>
-  <div *ngIf="cargando()" class="empty">Cargando eventos...</div>
+  <div *ngIf="cargando()" class="empty-card">Cargando eventos…</div>
 
   <section *ngIf="!cargando() && eventos().length && vista === 'grilla'" class="grid">
-    <article class="event-card" *ngFor="let evento of eventos()">
+    <article class="card event-card" *ngFor="let evento of eventos()">
       <div class="card-top">
         <span class="badge" [class.published]="evento.estado === 'publicado'">{{ evento.estado }}</span>
         <span class="type">{{ nombreTipo(evento.id_tipo_evento) }}</span>
@@ -64,8 +64,8 @@
     </article>
   </section>
 
-  <section *ngIf="!cargando() && eventos().length && vista === 'lista'" class="table-wrap">
-    <table>
+  <section *ngIf="!cargando() && eventos().length && vista === 'lista'" class="list-card table-wrap">
+    <table class="data-table">
       <thead><tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Lugar</th><th>Cupo</th><th>Estado</th><th></th></tr></thead>
       <tbody>
         <tr *ngFor="let evento of eventos()">
@@ -85,9 +85,8 @@
     </table>
   </section>
 
-  <div *ngIf="!cargando() && !eventos().length" class="empty">
+  <div *ngIf="!cargando() && !eventos().length" class="empty-card">
     <h3>No hay eventos para mostrar</h3>
     <p>Probá cambiando los filtros o registrá un nuevo evento.</p>
   </div>
-</div>
-
+</section>

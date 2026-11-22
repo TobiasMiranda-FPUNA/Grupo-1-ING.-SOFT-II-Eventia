@@ -29,6 +29,8 @@
 --   participante@eventia.test / Participante123!
 --   conferencista@eventia.test / Conferencista123!
 --   acreditacion@eventia.test / Acreditacion123!
+--   hasvbogarin92@fpuna.edu.py / Hugo123!  (Hugo Villagra, participante
+--   real para probar los correos de tarjeta y certificado)
 -- Los hashes fueron generados con Argon2 (misma librería que usa
 -- el backend en app/core/security.py) para que el login funcione
 -- de verdad contra estos datos de ejemplo.
@@ -52,7 +54,9 @@ VALUES
     ('Laura', 'Méndez', 'conferencista@eventia.test',
      '$argon2id$v=19$m=65536,t=3,p=4$AtqWe2SK8OLT/Vs+7BxFsA$LErA8RHaiW5O08jm53wAg/aWCUM4PoTXGsQ4G78eTx4'),
     ('Pedro', 'Ayala', 'acreditacion@eventia.test',
-     '$argon2id$v=19$m=65536,t=3,p=4$sLW+4Z9n/76w6Fo2VPjefQ$QJdIf8MUbAAdfJ7zvyFOOtpLzKcUnUC0lz9vKqrToQ8')
+     '$argon2id$v=19$m=65536,t=3,p=4$sLW+4Z9n/76w6Fo2VPjefQ$QJdIf8MUbAAdfJ7zvyFOOtpLzKcUnUC0lz9vKqrToQ8'),
+    ('Hugo', 'Villagra', 'hasvbogarin92@fpuna.edu.py',
+     '$argon2id$v=19$m=65536,t=3,p=4$322uzZz8kDwNsLgBwMPIfA$uB6eA0fnvJI0gTLN5LUIKpxChCSXAIPO6eur9vvBN18')
 ON CONFLICT (correo) DO NOTHING;
 
 -- USUARIO_ROL: asigna el rol de sistema correspondiente a cada
@@ -75,6 +79,7 @@ INSERT INTO usuario_rol (id_usuario, id_rol_sistema)
 SELECT u.id_usuario, rs.id_rol_sistema
 FROM (VALUES
     ('participante@eventia.test',  'PARTICIPANTE'),
+    ('hasvbogarin92@fpuna.edu.py', 'PARTICIPANTE'),
     ('conferencista@eventia.test', 'CONFERENCISTA'),
     ('acreditacion@eventia.test',  'ACREDITACION')
 ) AS v(correo, codigo_rol)
@@ -101,7 +106,15 @@ FROM (VALUES
      DATE '2026-10-05', DATE '2026-10-05', 'Laboratorio de Informática 3', 30, 'publicado'),
     ('SEMINARIO', 'Seminario de Arquitectura de Software',
      'Seminario introductorio a arquitecturas monolíticas y de microservicios.',
-     DATE '2026-09-25', DATE '2026-09-25', 'Auditorio Central', 80, 'borrador')
+     DATE '2026-09-25', DATE '2026-09-25', 'Auditorio Central', 80, 'borrador'),
+    -- Evento abierto (fechas futuras) para probar la inscripción pública y
+    -- el envío de la tarjeta de inscripción por correo.
+    ('TALLER', 'Taller de Desarrollo Web con Angular y FastAPI',
+     'Taller práctico para construir una aplicación web completa con Angular en el frontend y FastAPI en el backend.',
+     DATE '2026-12-10', DATE '2026-12-11', 'Facultad Politécnica - Laboratorio 2', 40, 'publicado'),
+    ('JORNADA', 'Jornada de Inteligencia Artificial Aplicada',
+     'Jornada sobre aplicaciones prácticas de la inteligencia artificial en el desarrollo de software.',
+     DATE '2026-12-15', DATE '2026-12-16', 'Facultad Politécnica - Auditorio', 50, 'publicado')
 ) AS v(codigo_tipo, nombre, descripcion, fecha_inicio, fecha_fin, lugar, cupo_maximo, estado)
 JOIN tipo_evento te ON te.codigo = v.codigo_tipo
 WHERE NOT EXISTS (
@@ -120,7 +133,9 @@ SELECT e.id_evento, v.fecha_limite, v.requiere_aprobacion,
 FROM (VALUES
     ('Congreso Nacional de Tecnología 2026', DATE '2026-11-05', FALSE, TRUE, 75),
     ('Taller de Testing Ágil', DATE '2026-10-01', TRUE, FALSE, 100),
-    ('Seminario de Arquitectura de Software', DATE '2026-09-20', FALSE, TRUE, 60)
+    ('Seminario de Arquitectura de Software', DATE '2026-09-20', FALSE, TRUE, 60),
+    ('Taller de Desarrollo Web con Angular y FastAPI', DATE '2026-12-05', FALSE, TRUE, 75),
+    ('Jornada de Inteligencia Artificial Aplicada', DATE '2026-12-12', FALSE, TRUE, 75)
 ) AS v(nombre_evento, fecha_limite, requiere_aprobacion, permite_lista_espera, min_asistencia_certificado)
 JOIN evento e ON e.nombre = v.nombre_evento
 ON CONFLICT (id_evento) DO NOTHING;
@@ -135,7 +150,9 @@ FROM (VALUES
     ('4123456', 'Lucía', 'Fernández', 'lucia.fernandez@example.com', 'Universidad Nacional de Asunción'),
     ('4234567', 'Marcos', 'Ortiz', 'marcos.ortiz@example.com', 'Facultad Politécnica'),
     ('4345678', 'Valeria', 'Gómez', 'valeria.gomez@example.com', NULL),
-    ('4456789', 'Diego', 'Cáceres', 'diego.caceres@example.com', 'Instituto Superior de Informática')
+    ('4456789', 'Diego', 'Cáceres', 'diego.caceres@example.com', 'Instituto Superior de Informática'),
+    -- Participante real para probar el envío de certificados por correo.
+    (NULL, 'Hugo', 'Villagra', 'hasvbogarin92@fpuna.edu.py', 'Facultad Politécnica')
 ) AS v(documento, nombres, apellidos, email, institucion)
 WHERE NOT EXISTS (
     SELECT 1 FROM participante p WHERE p.email = v.email
@@ -152,6 +169,7 @@ FROM (VALUES
     ('Congreso Nacional de Tecnología 2026', 'lucia.fernandez@example.com', 'ASISTENTE', 'confirmada'),
     ('Congreso Nacional de Tecnología 2026', 'marcos.ortiz@example.com', 'ASISTENTE', 'confirmada'),
     ('Congreso Nacional de Tecnología 2026', 'diego.caceres@example.com', 'MODERADOR', 'confirmada'),
+    ('Congreso Nacional de Tecnología 2026', 'hasvbogarin92@fpuna.edu.py', 'ASISTENTE', 'confirmada'),
     ('Taller de Testing Ágil', 'valeria.gomez@example.com', 'ASISTENTE', 'pendiente'),
     ('Taller de Testing Ágil', 'marcos.ortiz@example.com', 'ASISTENTE', 'lista_de_espera')
 ) AS v(nombre_evento, email_participante, codigo_rol, estado)
@@ -223,7 +241,31 @@ FROM (VALUES
     ('Seminario de Arquitectura de Software', 'Conferencia',
      'Del monolito a los microservicios',
      'Criterios para decidir cuándo y cómo descomponer un sistema monolítico.',
-     DATE '2026-09-25', TIME '18:00', TIME '20:00', 'Auditorio Central', 'PRESENCIAL', 80)
+     DATE '2026-09-25', TIME '18:00', TIME '20:00', 'Auditorio Central', 'PRESENCIAL', 80),
+    ('Taller de Desarrollo Web con Angular y FastAPI', 'Taller',
+     'Frontend con Angular: componentes y signals',
+     'Creación de componentes, rutas y manejo de estado con signals.',
+     DATE '2026-12-10', TIME '08:30', TIME '11:30', 'Laboratorio 2', 'PRESENCIAL', 40),
+    ('Taller de Desarrollo Web con Angular y FastAPI', 'Taller',
+     'Backend con FastAPI y PostgreSQL',
+     'Endpoints REST, validación con Pydantic y persistencia con SQLAlchemy.',
+     DATE '2026-12-10', TIME '14:00', TIME '17:00', 'Laboratorio 2', 'PRESENCIAL', 40),
+    ('Taller de Desarrollo Web con Angular y FastAPI', 'Charla',
+     'Integración y despliegue de la aplicación',
+     'Conexión del frontend con la API, autenticación JWT y puesta en producción.',
+     DATE '2026-12-11', TIME '09:00', TIME '11:00', 'Laboratorio 2', 'PRESENCIAL', 40),
+    ('Jornada de Inteligencia Artificial Aplicada', 'Conferencia',
+     'Introducción a los modelos de lenguaje',
+     'Qué son los LLM, cómo funcionan y en qué casos conviene usarlos.',
+     DATE '2026-12-15', TIME '09:00', TIME '11:00', 'Auditorio', 'PRESENCIAL', 50),
+    ('Jornada de Inteligencia Artificial Aplicada', 'Taller',
+     'Asistentes de IA para programar',
+     'Uso práctico de asistentes de código en un proyecto real.',
+     DATE '2026-12-15', TIME '14:00', TIME '17:00', 'Laboratorio 1', 'PRESENCIAL', 50),
+    ('Jornada de Inteligencia Artificial Aplicada', 'Panel',
+     'Ética y buenas prácticas en IA',
+     'Panel sobre privacidad, sesgos y uso responsable de la IA.',
+     DATE '2026-12-16', TIME '10:00', TIME '12:00', 'Auditorio', 'PRESENCIAL', 50)
 ) AS v(nombre_evento, nombre_categoria, titulo, descripcion,
        fecha, hora_inicio, hora_fin, lugar, modalidad, cupo)
 JOIN evento e ON e.nombre = v.nombre_evento
@@ -258,5 +300,20 @@ FROM (VALUES
 JOIN actividad a ON a.titulo = v.titulo_actividad
 JOIN conferencista c ON c.email = v.email_conferencista
 ON CONFLICT (id_actividad, id_conferencista) DO NOTHING;
+
+-- ------------------------------------------------------------
+-- ASISTENCIA: Hugo Villagra asistió a todas las actividades del
+-- Congreso (ya finalizado), así que culmina el evento y queda
+-- elegible para recibir el certificado por correo (HU08).
+-- ------------------------------------------------------------
+INSERT INTO asistencia (id_inscripcion, id_actividad, estado)
+SELECT i.id_inscripcion, a.id_actividad, 'presente'
+FROM inscripcion i
+JOIN participante p ON p.id_participante = i.id_participante
+JOIN evento e ON e.id_evento = i.id_evento
+JOIN actividad a ON a.id_evento = e.id_evento
+WHERE p.email = 'hasvbogarin92@fpuna.edu.py'
+  AND e.nombre = 'Congreso Nacional de Tecnología 2026'
+ON CONFLICT (id_inscripcion, id_actividad) DO NOTHING;
 
 COMMIT;

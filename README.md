@@ -64,6 +64,25 @@ uvicorn app.main:app --reload
 ```
 
 La documentación interactiva queda disponible en `/docs`. El endpoint de autenticación es `POST /api/v1/auth/login`.
+
+### Usuarios de prueba
+
+El script `sql/cargar_datos_ejemplo.sql` crea estas cuentas para desarrollo
+local (no usar en producción):
+
+| Nombre | Correo | Contraseña | Rol |
+|---|---|---|---|
+| Ana Duarte | admin@eventia.test | `Admin123!` | Administrador |
+| Carlos Benítez | organizador@eventia.test | `Organizador123!` | Organizador |
+| Lucía Giménez | participante@eventia.test | `Participante123!` | Participante |
+| Laura Méndez | conferencista@eventia.test | `Conferencista123!` | Conferencista |
+| Pedro Ayala | acreditacion@eventia.test | `Acreditacion123!` | Personal de acreditación |
+| Hugo Villagra | hasvbogarin92@fpuna.edu.py | `Hugo123!` | Participante |
+
+Hugo Villagra también está inscripto (confirmado) al *Congreso Nacional de
+Tecnología 2026* con asistencia a todas las actividades, por lo que sirve
+para probar el envío por correo de la tarjeta de inscripción y del
+certificado (requiere configurar `SMTP_*` en `backend/.env`).
 # SCRIPTS SQL DE LA BASE DE DATOS DEL SISTEMA
 La base de datos es en PostgresSQL
 ## Estructura general

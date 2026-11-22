@@ -1,8 +1,10 @@
-<div class="expositores-page">
+<section class="page">
   <header class="page-header">
-    <span class="eyebrow">GESTIÓN ACADÉMICA</span>
-    <h1>Expositores</h1>
-    <p>Consultá y administrá los conferencistas registrados y sus actividades.</p>
+    <div>
+      <span class="eyebrow">HU05 · GESTIÓN ACADÉMICA</span>
+      <h1>Expositores</h1>
+      <p>Consultá y administrá los conferencistas registrados y sus actividades.</p>
+    </div>
   </header>
 
   @if (errorMessage()) {
@@ -20,7 +22,7 @@
   }
 
   @if (puedeGestionar) {
-    <section class="form-panel">
+    <section class="card form-panel">
       <h2>Registrar expositor</h2>
 
       <form [formGroup]="expositoresForm" (ngSubmit)="onSubmit()" novalidate>
@@ -80,7 +82,7 @@
         </div>
 
         <div class="form-actions">
-          <button class="primary-button" type="submit" [disabled]="isLoading()">
+          <button class="btn-primary" type="submit" [disabled]="isLoading()">
             @if (isLoading()) { Registrando… } @else { + Registrar expositor }
           </button>
         </div>
@@ -106,16 +108,16 @@
     </div>
 
     @if (isLoading() && expositores().length === 0) {
-      <div class="empty-state">Cargando expositores…</div>
+      <div class="empty-card">Cargando expositores…</div>
     } @else if (expositoresFiltrados().length === 0) {
-      <div class="empty-state">
+      <div class="empty-card">
         <strong>{{ busqueda() ? 'No se encontraron coincidencias' : 'Todavía no hay expositores registrados' }}</strong>
         <span>{{ busqueda() ? 'Probá con otro nombre o especialidad.' : 'Completá el formulario para registrar el primero.' }}</span>
       </div>
     } @else {
       <div class="expositores-grid">
         @for (expositor of expositoresFiltrados(); track expositor.id_conferencista) {
-          <article class="expositor-card">
+          <article class="card expositor-card">
             <div class="card-person">
               <div class="avatar" aria-hidden="true">{{ iniciales(expositor) }}</div>
               <div class="person-data">
@@ -158,7 +160,7 @@
               <div class="card-actions">
                 <button
                   type="button"
-                  class="delete-button"
+                  class="btn-danger"
                   (click)="onDelete(expositor)"
                   [disabled]="isLoading()">× Eliminar</button>
               </div>
@@ -168,4 +170,4 @@
       </div>
     }
   </section>
-</div>
+</section>

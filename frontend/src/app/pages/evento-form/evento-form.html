@@ -1,7 +1,7 @@
-<div class="page-shell">
+<section class="page form-page">
   <header class="page-header">
-    <div><p class="eyebrow">Gestión de eventos</p><h1>{{ esEdicion ? 'Editar evento' : 'Crear nuevo evento' }}</h1><p>Completá la información en tres pasos.</p></div>
-    <a routerLink="/eventos" class="back">← Volver al catálogo</a>
+    <div><span class="eyebrow">HU03 · GESTIÓN DE EVENTOS</span><h1>{{ esEdicion ? 'Editar evento' : 'Crear nuevo evento' }}</h1><p>Completá la información en tres pasos.</p></div>
+    <a routerLink="/eventos" class="btn-ghost">← Volver al catálogo</a>
   </header>
 
   <div class="steps">
@@ -10,7 +10,7 @@
     <div [class.active]="paso() >= 3"><span>3</span><b>Confirmación</b></div>
   </div>
 
-  <div *ngIf="error()" class="alert">{{ error() }}</div>
+  <div *ngIf="error()" class="alert error">{{ error() }}</div>
   <div *ngIf="cargando()" class="card">Cargando evento...</div>
 
   <form *ngIf="!cargando()" [formGroup]="form" class="card" (ngSubmit)="guardar()">
@@ -62,10 +62,10 @@
     </section>
 
     <footer class="actions">
-      <button type="button" class="btn-light" *ngIf="paso() > 1" (click)="anterior()">Anterior</button>
+      <button type="button" class="btn-secondary" *ngIf="paso() > 1" (click)="anterior()">Anterior</button>
       <span></span>
       <button type="button" class="btn-primary" *ngIf="paso() < 3" (click)="siguiente()">Continuar</button>
       <button type="submit" class="btn-primary" *ngIf="paso() === 3" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Crear evento') }}</button>
     </footer>
   </form>
-</div>
+</section>

@@ -5,7 +5,7 @@
       <h1>Acreditación rápida</h1>
       <p>Buscá al participante y acreditalo con un toque. Cada marca se guarda al instante.</p>
     </div>
-    <a routerLink="/asistencias" class="ghost">Ver planilla completa</a>
+    <a routerLink="/asistencias" class="btn-ghost">Ver planilla completa</a>
   </header>
 
   <section class="selector-card">
@@ -78,7 +78,7 @@
           type="search"
           autocomplete="off"
           aria-label="Buscar participante"
-          placeholder="Nombre, correo o N° de inscripción"
+          placeholder="Nombre, correo, N° de inscripción o escaneá la tarjeta"
           [ngModel]="busqueda()"
           (ngModelChange)="busqueda.set($event)"
           (keydown.enter)="acreditarDesdeBusqueda()" />
@@ -132,7 +132,10 @@
               <div class="info">
                 <strong>{{ p.participante }}</strong>
                 <span>{{ p.email }}</span>
-                <small>Inscripción #{{ p.id_inscripcion }}</small>
+                <small>
+                  Inscripción #{{ p.id_inscripcion }} ·
+                  <button type="button" class="link" (click)="imprimirTarjeta(p)">🖨 Tarjeta</button>
+                </small>
               </div>
               <div class="acciones">
                 @if (p.estado_asistencia === 'presente') {

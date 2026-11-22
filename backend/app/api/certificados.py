@@ -1,3 +1,6 @@
+import logging
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -14,6 +17,7 @@ from app.models import (
 from app.schemas import (
     CertificadoGestionResponse,
     CertificadoVerificacionResponse,
+    EnvioCertificadosEventoResponse,
 )
 from app.services.asistencia import (
     ResumenAsistencia,
@@ -21,6 +25,10 @@ from app.services.asistencia import (
     calcular_porcentajes_evento,
 )
 from app.services.certificado_pdf import DatosCertificado, generar_certificado_pdf
+from app.services.correo import CorreoError, correo_configurado, enviar_certificado
+
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
@@ -167,6 +175,20 @@ def emitir_certificado(
             ),
         )
 
+    certificado = _crear_certificado(db, inscripcion)
+    envio = _enviar_por_correo(db, (certificado, inscripcion, participante, evento))
+
+    respuesta = _calcular_estado_certificado(
+        db,
+        inscripcion,
+        participante,
+        evento,
+    )
+    respuesta.envio_correo = envio
+    return respuesta
+
+
+def _crear_certificado(db: Session, inscripcion: Inscripcion) -> Certificado:
     certificado = Certificado(
         id_inscripcion=inscripcion.id_inscripcion,
         tipo="participacion",
@@ -174,13 +196,7 @@ def emitir_certificado(
     db.add(certificado)
     db.commit()
     db.refresh(certificado)
-
-    return _calcular_estado_certificado(
-        db,
-        inscripcion,
-        participante,
-        evento,
-    )
+    return certificado
 
 
 def _get_certificado_emitido(db: Session, *condiciones):
@@ -215,22 +231,44 @@ def _get_certificado_por_codigo_or_404(db: Session, codigo: str):
     return row
 
 
-def _respuesta_pdf(db: Session, row) -> Response:
+def _datos_certificado(db: Session, row) -> DatosCertificado:
     certificado, inscripcion, participante, evento = row
     resumen = calcular_porcentaje_asistencia(db, inscripcion)
-
-    contenido = generar_certificado_pdf(
-        DatosCertificado(
-            codigo_validacion=certificado.codigo_validacion,
-            tipo=certificado.tipo,
-            fecha_emision=certificado.fecha_emision,
-            participante=f"{participante.nombres} {participante.apellidos}".strip(),
-            evento=evento.nombre,
-            fecha_inicio_evento=evento.fecha_inicio,
-            fecha_fin_evento=evento.fecha_fin,
-            porcentaje_asistencia=resumen.porcentaje,
-        )
+    return DatosCertificado(
+        codigo_validacion=certificado.codigo_validacion,
+        tipo=certificado.tipo,
+        fecha_emision=certificado.fecha_emision,
+        participante=f"{participante.nombres} {participante.apellidos}".strip(),
+        evento=evento.nombre,
+        fecha_inicio_evento=evento.fecha_inicio,
+        fecha_fin_evento=evento.fecha_fin,
+        porcentaje_asistencia=resumen.porcentaje,
     )
+
+
+# Envía el certificado en PDF al correo del participante. Nunca lanza: un
+# fallo del servidor de correo no debe deshacer la emisión del certificado.
+def _enviar_por_correo(db: Session, row) -> str:
+    if not correo_configurado():
+        return "no_configurado"
+
+    participante = row[2]
+    datos = _datos_certificado(db, row)
+    try:
+        enviar_certificado(participante.email, datos, generar_certificado_pdf(datos))
+    except CorreoError:
+        logger.exception(
+            "No se pudo enviar el certificado %s a %s",
+            datos.codigo_validacion,
+            participante.email,
+        )
+        return "error"
+    return "enviado"
+
+
+def _respuesta_pdf(db: Session, row) -> Response:
+    certificado = row[0]
+    contenido = generar_certificado_pdf(_datos_certificado(db, row))
 
     return Response(
         content=contenido,
@@ -264,6 +302,94 @@ def descargar_certificado(
             detail="La inscripción no tiene un certificado emitido",
         )
     return _respuesta_pdf(db, row)
+
+
+# Reenvía por correo un certificado ya emitido.
+@router.post(
+    "/inscripcion/{id_inscripcion}/enviar",
+    response_model=CertificadoGestionResponse,
+)
+def reenviar_certificado(
+    id_inscripcion: int,
+    db: Session = Depends(get_db),
+    _: Usuario = certificate_manager_required,
+) -> CertificadoGestionResponse:
+    row = _get_certificado_emitido(
+        db,
+        Certificado.id_inscripcion == id_inscripcion,
+    )
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La inscripción no tiene un certificado emitido",
+        )
+    if not correo_configurado():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El envío de correos no está configurado en el servidor (SMTP).",
+        )
+
+    envio = _enviar_por_correo(db, row)
+    if envio == "error":
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="El servidor de correo no pudo enviar el certificado.",
+        )
+
+    _, inscripcion, participante, evento = row
+    respuesta = _calcular_estado_certificado(db, inscripcion, participante, evento)
+    respuesta.envio_correo = envio
+    return respuesta
+
+
+# Emite y envía por correo el certificado de todos los participantes que
+# culminaron el evento: el evento ya finalizó y cumplieron la asistencia
+# mínima. Los que ya tenían certificado no se vuelven a procesar.
+@router.post(
+    "/evento/{id_evento}/emitir-y-enviar",
+    response_model=EnvioCertificadosEventoResponse,
+)
+def emitir_y_enviar_certificados_evento(
+    id_evento: int,
+    db: Session = Depends(get_db),
+    _: Usuario = certificate_manager_required,
+) -> EnvioCertificadosEventoResponse:
+    evento = db.get(Evento, id_evento)
+    if evento is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Evento no encontrado",
+        )
+    if evento.fecha_fin >= date.today():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El evento todavía no finalizó; los certificados se envían al culminar.",
+        )
+
+    pendientes = [
+        estado
+        for estado in listar_estado_certificados_evento(id_evento, db, _)
+        if estado.elegible and not estado.certificado_emitido
+    ]
+
+    procesados: list[CertificadoGestionResponse] = []
+    for estado in pendientes:
+        inscripcion = db.get(Inscripcion, estado.id_inscripcion)
+        participante = db.get(Participante, estado.id_participante)
+        certificado = _crear_certificado(db, inscripcion)
+        envio = _enviar_por_correo(db, (certificado, inscripcion, participante, evento))
+
+        respuesta = _calcular_estado_certificado(db, inscripcion, participante, evento)
+        respuesta.envio_correo = envio
+        procesados.append(respuesta)
+
+    return EnvioCertificadosEventoResponse(
+        emitidos=len(procesados),
+        enviados=sum(p.envio_correo == "enviado" for p in procesados),
+        con_error=sum(p.envio_correo == "error" for p in procesados),
+        sin_configurar=sum(p.envio_correo == "no_configurado" for p in procesados),
+        certificados=procesados,
+    )
 
 
 # Descarga pública del PDF a partir del código de validación, para que el

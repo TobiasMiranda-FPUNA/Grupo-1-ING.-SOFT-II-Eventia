@@ -1,9 +1,10 @@
+import logging
 # UTC/datetime: para registrar el momento exacto en que se crea la
 # inscripción (fecha_inscripcion).
 from datetime import UTC, date, datetime
 
 # APIRouter/Depends/HTTPException/status: ver detalle en app/api/auth.py.
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 # func: funciones SQL (COUNT, LOWER) usadas en las consultas.
 # select: construcción declarativa de consultas SQL.
 from sqlalchemy import func, select
@@ -13,13 +14,23 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.api.users import require_any_system_role
 from app.db import get_db
-from app.models import Evento, Inscripcion, Participante, RolParticipante
+from app.models import Actividad, Evento, Inscripcion, Participante, RolParticipante, Usuario
 from app.schemas import (
     InscripcionCreate,
     InscripcionResponse,
     RolParticipantePublicResponse,
 )
+from app.services.correo import CorreoError, correo_configurado, enviar_tarjeta_inscripcion
+from app.services.tarjeta_inscripcion_pdf import (
+    ActividadTarjeta,
+    DatosTarjeta,
+    codigo_inscripcion,
+    generar_tarjeta_inscripcion_pdf,
+)
+
+logger = logging.getLogger(__name__)
 
 # Router con el prefijo "/api/v1/inscripciones", agrupado bajo el tag
 # "Inscripciones". No exige autenticación: la inscripción a un evento es un
@@ -32,14 +43,28 @@ WAITLIST_STATE = "lista_de_espera"
 # Único estado de evento que admite nuevas inscripciones.
 PUBLISHED_EVENT_STATE = "publicado"
 
+# Personal que gestiona inscripciones: puede descargar y reenviar tarjetas.
+staff_required = Depends(
+    require_any_system_role("organizador", "administrador", "personal de acreditación")
+)
+
 
 # Busca un participante existente por email (comparación insensible a
 # mayúsculas) o crea uno nuevo con los datos recibidos. Evita duplicar el
 # registro de una misma persona que se inscribe a más de un evento.
+# Si ya existía, completa el documento y la institución que le faltaran (por
+# ejemplo, para que salgan en la tarjeta de inscripción); los datos ya
+# cargados no se sobrescriben, para que nadie pueda cambiarlos solo con
+# conocer el correo de otra persona.
 def _get_or_create_participante(db: Session, data: InscripcionCreate) -> Participante:
     email = data.email.strip().lower()
     participante = db.scalar(select(Participante).where(func.lower(Participante.email) == email))
-    if participante is None:
+    if participante is not None:
+        if not participante.documento and data.documento:
+            participante.documento = data.documento
+        if not participante.institucion and data.institucion:
+            participante.institucion = data.institucion
+    else:
         participante = Participante(
             documento=data.documento,
             nombres=data.nombres.strip(),
@@ -166,4 +191,125 @@ def create_inscripcion(data: InscripcionCreate, db: Session = Depends(get_db)) -
         db.rollback()
         raise _duplicate_error() from None
     db.refresh(inscripcion)
-    return InscripcionResponse.model_validate(inscripcion)
+
+    respuesta = InscripcionResponse.model_validate(inscripcion)
+    # Solo los confirmados reciben la tarjeta: los de lista de espera todavía
+    # no están habilitados a las actividades.
+    if inscripcion.estado == CONFIRMED_STATE:
+        respuesta.envio_correo = _enviar_tarjeta(db, inscripcion)
+    return respuesta
+
+
+def _datos_tarjeta(db: Session, inscripcion: Inscripcion) -> tuple[Participante, DatosTarjeta]:
+    participante = db.get(Participante, inscripcion.id_participante)
+    evento = db.get(Evento, inscripcion.id_evento)
+    rol = db.get(RolParticipante, inscripcion.id_rol_participante)
+    actividades = db.scalars(
+        select(Actividad)
+        .where(Actividad.id_evento == evento.id_evento)
+        .order_by(Actividad.fecha, Actividad.hora_inicio, Actividad.id_actividad)
+    ).all()
+
+    return participante, DatosTarjeta(
+        id_inscripcion=inscripcion.id_inscripcion,
+        participante=f"{participante.nombres} {participante.apellidos}".strip(),
+        documento=participante.documento,
+        institucion=participante.institucion,
+        rol=rol.nombre,
+        evento=evento.nombre,
+        fecha_inicio_evento=evento.fecha_inicio,
+        fecha_fin_evento=evento.fecha_fin,
+        lugar_evento=evento.lugar,
+        actividades=[
+            ActividadTarjeta(
+                titulo=a.titulo,
+                fecha=a.fecha,
+                hora_inicio=a.hora_inicio,
+                hora_fin=a.hora_fin,
+                lugar=a.lugar,
+            )
+            for a in actividades
+        ],
+    )
+
+
+# Envía la tarjeta en PDF al correo del participante. Nunca lanza: un fallo
+# del servidor de correo no debe deshacer la inscripción ya registrada.
+def _enviar_tarjeta(db: Session, inscripcion: Inscripcion) -> str:
+    if not correo_configurado():
+        return "no_configurado"
+
+    participante, datos = _datos_tarjeta(db, inscripcion)
+    try:
+        enviar_tarjeta_inscripcion(
+            participante.email,
+            datos,
+            generar_tarjeta_inscripcion_pdf(datos),
+        )
+    except CorreoError:
+        logger.exception(
+            "No se pudo enviar la tarjeta %s a %s",
+            codigo_inscripcion(inscripcion.id_inscripcion),
+            participante.email,
+        )
+        return "error"
+    return "enviado"
+
+
+def _inscripcion_confirmada_or_error(db: Session, id_inscripcion: int) -> Inscripcion:
+    inscripcion = db.get(Inscripcion, id_inscripcion)
+    if inscripcion is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inscripción no encontrada")
+    if inscripcion.estado != CONFIRMED_STATE:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Solo las inscripciones confirmadas tienen tarjeta de inscripción",
+        )
+    return inscripcion
+
+
+# Descarga la tarjeta de inscripción en PDF (para imprimirla en la puerta).
+@router.get(
+    "/{id_inscripcion}/tarjeta",
+    response_class=Response,
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+def descargar_tarjeta(
+    id_inscripcion: int,
+    db: Session = Depends(get_db),
+    _: Usuario = staff_required,
+) -> Response:
+    inscripcion = _inscripcion_confirmada_or_error(db, id_inscripcion)
+    _, datos = _datos_tarjeta(db, inscripcion)
+    codigo = codigo_inscripcion(inscripcion.id_inscripcion)
+    return Response(
+        content=generar_tarjeta_inscripcion_pdf(datos),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="tarjeta-{codigo}.pdf"'},
+    )
+
+
+# Reenvía por correo la tarjeta de una inscripción confirmada.
+@router.post("/{id_inscripcion}/tarjeta/enviar", response_model=InscripcionResponse)
+def reenviar_tarjeta(
+    id_inscripcion: int,
+    db: Session = Depends(get_db),
+    _: Usuario = staff_required,
+) -> InscripcionResponse:
+    inscripcion = _inscripcion_confirmada_or_error(db, id_inscripcion)
+    if not correo_configurado():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El envío de correos no está configurado en el servidor (SMTP).",
+        )
+
+    envio = _enviar_tarjeta(db, inscripcion)
+    if envio == "error":
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="El servidor de correo no pudo enviar la tarjeta.",
+        )
+
+    respuesta = InscripcionResponse.model_validate(inscripcion)
+    respuesta.envio_correo = envio
+    return respuesta
