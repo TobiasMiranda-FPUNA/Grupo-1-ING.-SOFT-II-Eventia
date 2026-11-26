@@ -15,7 +15,7 @@
 #   ./scripts/mockup_up.sh --list       # lista las pantallas
 #
 # Pantallas: todas, login, roles, eventos, evento-nuevo, evento-editar,
-#            expositores, agenda
+#            expositores, agenda, usuarios, mis-certificados
 #
 # Requisitos: python3 (si no está, se abre el archivo HTML
 # directamente, sin servidor).
@@ -32,7 +32,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MOCKUP_DIR="$REPO_ROOT/mockup"
 
-PANTALLAS=(todas login roles eventos evento-nuevo evento-editar expositores agenda)
+PANTALLAS=(todas login roles eventos evento-nuevo evento-editar expositores agenda usuarios mis-certificados)
 
 SERVER_PID=""
 
@@ -56,6 +56,8 @@ pagina_de() {
     evento-editar) echo "evento-form.html?id=1" ;;
     expositores)   echo "expositores.html" ;;
     agenda)        echo "agenda_eventia.html" ;;
+    usuarios)      echo "usuarios.html" ;;
+    mis-certificados) echo "mis-certificados.html" ;;
     *)             return 1 ;;
   esac
 }
@@ -70,6 +72,8 @@ descripcion_de() {
     evento-editar) echo "Editar evento (/eventos/:id/editar)" ;;
     expositores)   echo "Gestión de expositores (/expositores)" ;;
     agenda)        echo "Agenda pública del evento (/agenda)" ;;
+    usuarios)      echo "Gestión de usuarios del administrador (/usuarios)" ;;
+    mis-certificados) echo "Certificados del participante (/mis-certificados)" ;;
   esac
 }
 

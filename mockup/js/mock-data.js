@@ -16,6 +16,38 @@
 
   const DATOS_INICIALES = {
     usuarios: ['admin@eventia.test', 'organizador@eventia.test'],
+    // Gestión de usuarios (/usuarios). El id 1 es el administrador "en sesión".
+    rolesSistema: [
+      { id: 1, nombre: 'administrador', activo: true },
+      { id: 2, nombre: 'organizador', activo: true },
+      { id: 3, nombre: 'participante', activo: true },
+      { id: 4, nombre: 'conferencista', activo: true },
+      { id: 5, nombre: 'personal de acreditación', activo: true },
+    ],
+    cuentas: [
+      { id_usuario: 1, nombres: 'Ana', apellidos: 'Duarte', email: 'admin@eventia.test', activo: true, roles: ['administrador'] },
+      { id_usuario: 2, nombres: 'Carlos', apellidos: 'Benítez', email: 'organizador@eventia.test', activo: true, roles: ['organizador'] },
+      { id_usuario: 3, nombres: 'Lucía', apellidos: 'Giménez', email: 'participante@eventia.test', activo: true, roles: ['participante'] },
+      { id_usuario: 4, nombres: 'Pedro', apellidos: 'Ayala', email: 'acreditacion@eventia.test', activo: true, roles: ['personal de acreditación'] },
+    ],
+    // Mis certificados (/mis-certificados) de la participante Lucía Giménez.
+    misCertificados: [
+      { id_inscripcion: 11, evento: 'Congreso Nacional de Tecnología 2026', fecha_inicio_evento: '2026-11-10', fecha_fin_evento: '2026-11-12',
+        estado_inscripcion: 'confirmada', actividades_evento: 4, asistencias_presentes: 4, porcentaje_asistencia: 100, minimo_requerido: 75,
+        elegible: true, certificado_emitido: true, codigo_validacion: '9F2C41A7D03B4E8C9A51F6E2B7C80D13' },
+      { id_inscripcion: 12, evento: 'Taller de Testing Ágil', fecha_inicio_evento: '2026-10-05', fecha_fin_evento: '2026-10-05',
+        estado_inscripcion: 'confirmada', actividades_evento: 2, asistencias_presentes: 2, porcentaje_asistencia: 100, minimo_requerido: 100,
+        elegible: true, certificado_emitido: false, codigo_validacion: null },
+      { id_inscripcion: 13, evento: 'Seminario de Ciberseguridad para Desarrolladores', fecha_inicio_evento: '2026-12-18', fecha_fin_evento: '2026-12-18',
+        estado_inscripcion: 'confirmada', actividades_evento: 4, asistencias_presentes: 1, porcentaje_asistencia: 25, minimo_requerido: 80,
+        elegible: false, certificado_emitido: false, codigo_validacion: null },
+      { id_inscripcion: 14, evento: 'Seminario de Arquitectura de Software', fecha_inicio_evento: '2026-09-25', fecha_fin_evento: '2026-09-25',
+        estado_inscripcion: 'confirmada', actividades_evento: 2, asistencias_presentes: 0, porcentaje_asistencia: 0, minimo_requerido: 60,
+        elegible: false, certificado_emitido: false, codigo_validacion: null },
+      { id_inscripcion: 15, evento: 'Taller de Git y GitHub en Equipo', fecha_inicio_evento: '2026-12-20', fecha_fin_evento: '2026-12-20',
+        estado_inscripcion: 'lista_de_espera', actividades_evento: 0, asistencias_presentes: 0, porcentaje_asistencia: 0, minimo_requerido: 100,
+        elegible: false, certificado_emitido: false, codigo_validacion: null },
+    ],
     roles: [
       { id: 1, nombre: 'Estudiante', descripcion: 'Participante matriculado en institución', activo: true, enUso: true },
       { id: 2, nombre: 'Expositor', descripcion: 'Conferencista o ponente de actividad', activo: true, enUso: false },
@@ -79,7 +111,9 @@
   function leer() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      // Completa con los datos iniciales las claves que no existían en
+      // versiones anteriores del mockup (ej: cuentas, misCertificados).
+      if (raw) return { ...clonar(DATOS_INICIALES), ...JSON.parse(raw) };
     } catch (e) { /* sin almacenamiento: se usan los datos iniciales */ }
     return clonar(DATOS_INICIALES);
   }
@@ -169,6 +203,46 @@
       guardar();
       return demora(null, 600);
     },
+
+    // ---------- Gestión de usuarios (solo administrador) ----------
+    idUsuarioActual: 1,
+    getUsuarios() {
+      const lista = [...datos.cuentas].sort((a, b) =>
+        `${a.apellidos} ${a.nombres}`.localeCompare(`${b.apellidos} ${b.nombres}`));
+      return demora(lista, 300);
+    },
+    getRolesSistema() { return demora(datos.rolesSistema, 200); },
+    createUsuario(payload) {
+      const email = String(payload.email).trim().toLowerCase();
+      if (datos.cuentas.some(c => c.email.toLowerCase() === email)) {
+        return new Promise((_, reject) => setTimeout(() => reject({ status: 409, detail: 'Ya existe un usuario con ese correo' }), 400));
+      }
+      const rol = datos.rolesSistema.find(r => r.id === Number(payload.id_rol_sistema) && r.activo);
+      if (!rol) return Promise.reject({ status: 400, detail: 'El rol seleccionado no existe o está inactivo' });
+      const nuevo = {
+        id_usuario: siguienteId(datos.cuentas, 'id_usuario'),
+        nombres: payload.nombres.trim(), apellidos: payload.apellidos.trim(),
+        email, activo: true, roles: [rol.nombre],
+      };
+      datos.cuentas.push(nuevo);
+      // La cuenta nueva también puede usarse en el login del mockup.
+      if (!datos.usuarios.includes(email)) datos.usuarios.push(email);
+      guardar();
+      return demora(nuevo, 500);
+    },
+    deleteUsuario(id) {
+      if (id === this.idUsuarioActual) {
+        return Promise.reject({ status: 409, detail: 'No podés eliminar tu propio usuario' });
+      }
+      const cuenta = datos.cuentas.find(c => c.id_usuario === id);
+      datos.cuentas = datos.cuentas.filter(c => c.id_usuario !== id);
+      if (cuenta) datos.usuarios = datos.usuarios.filter(u => u !== cuenta.email);
+      guardar();
+      return demora(null, 300);
+    },
+
+    // ---------- Mis certificados (participante) ----------
+    getMisCertificados() { return demora(datos.misCertificados, 350); },
 
     reiniciar() {
       datos = clonar(DATOS_INICIALES);

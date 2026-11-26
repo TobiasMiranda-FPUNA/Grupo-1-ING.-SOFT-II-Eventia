@@ -37,6 +37,8 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
 | `evento-nuevo` | `evento-form.html`        | `/eventos/nuevo`        |
 | `evento-editar`| `evento-form.html?id=1`   | `/eventos/:id/editar`   |
 | `expositores`  | `expositores.html`        | `/expositores`          |
+| `usuarios`     | `usuarios.html`           | `/usuarios`             |
+| `mis-certificados` | `mis-certificados.html` | `/mis-certificados`   |
 
 ## Datos de prueba
 
@@ -48,6 +50,13 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
 - Expositores: hay 4 actividades de ejemplo para asociar al registrar. Si se
   usa un correo ya registrado (p. ej. `juan.perez@eventia.test`) se muestra el
   error de duplicado (409).
+- Usuarios: la sesión simulada es la del administrador (Ana Duarte), que no
+  puede eliminarse a sí misma. Con `organizador@eventia.test` se muestra el
+  error de correo duplicado. Las cuentas creadas también sirven para el login
+  del mockup.
+- Mis certificados: la sesión simulada es la de la participante Lucía
+  Giménez, con un ejemplo de cada estado (emitido, pendiente de emisión, en
+  curso, no alcanzó el mínimo y lista de espera). La descarga es simulada.
 - "Reiniciar datos" (barra inferior) vuelve a los datos de ejemplo.
 
 ## Estructura
@@ -56,6 +65,7 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
 mockup/
 ├── index.html            selector de pantallas
 ├── login.html  roles.html  eventos.html  expositores.html  evento-form.html
+├── usuarios.html  mis-certificados.html
 ├── css/                  estilos de cada pantalla (traducidos de los .scss)
 │   └── mockup-bar.css    barra inferior propia del mockup
 └── js/

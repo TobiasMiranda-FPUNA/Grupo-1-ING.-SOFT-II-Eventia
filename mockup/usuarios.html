@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <title>Eventia · Usuarios (mockup)</title>
+  <link rel="stylesheet" href="css/mockup-bar.css" />
+  <!-- Base compartida con la pantalla de roles (contenedor, tarjetas, tabla, botones). -->
+  <link rel="stylesheet" href="css/roles.css" />
+  <link rel="stylesheet" href="css/usuarios.css" />
+</head>
+<body>
+  <div class="roles-container">
+    <header class="page-header">
+      <span class="eyebrow">HU02 · SEGURIDAD</span>
+      <h1>Gestión de usuarios</h1>
+      <p>Creá cuentas, asignales su rol en el sistema y eliminá las que ya no se usan.</p>
+    </header>
+
+    <div class="alert alert-danger" id="errorMessage" role="alert" hidden></div>
+    <div class="alert alert-success" id="successMessage" role="status" hidden></div>
+
+    <div class="content-grid">
+      <!-- Formulario de alta -->
+      <section class="card form-card">
+        <h3>Nuevo usuario</h3>
+        <form id="usuarioForm" novalidate>
+          <div class="row-2">
+            <div class="form-group">
+              <label for="nombres">Nombres *</label>
+              <input id="nombres" type="text" autocomplete="off" />
+              <small class="field-error" data-campo="nombres" hidden>Ingresá los nombres.</small>
+            </div>
+            <div class="form-group">
+              <label for="apellidos">Apellidos *</label>
+              <input id="apellidos" type="text" autocomplete="off" />
+              <small class="field-error" data-campo="apellidos" hidden>Ingresá los apellidos.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Correo electrónico *</label>
+            <input id="email" type="email" placeholder="usuario@correo.com" autocomplete="off" />
+            <small class="field-error" data-campo="email" hidden>Ingresá un correo válido.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Contraseña *</label>
+            <input id="password" type="password" autocomplete="new-password" />
+            <small class="field-error" data-campo="password" hidden>La contraseña debe tener al menos 8 caracteres.</small>
+            <small class="hint" data-hint="password">Mínimo 8 caracteres. Se guarda cifrada.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="rol">Rol en el sistema *</label>
+            <select id="rol"><option value="0" disabled selected>Seleccionar...</option></select>
+            <small class="field-error" data-campo="rol" hidden>Elegí un rol.</small>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn-primary">Crear usuario</button>
+        </form>
+      </section>
+
+      <!-- Listado -->
+      <section class="card table-card">
+        <div class="table-head">
+          <h3>Usuarios registrados <span class="count" id="count">0</span></h3>
+          <input type="search" id="busqueda" class="search" placeholder="Buscar por nombre, correo o rol" aria-label="Buscar usuarios" />
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th><span class="sr-only">Acciones</span></th></tr>
+            </thead>
+            <tbody id="usuariosBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/usuarios.js"></script>
+  <script src="js/mockup-bar.js"></script>
+</body>
+</html>

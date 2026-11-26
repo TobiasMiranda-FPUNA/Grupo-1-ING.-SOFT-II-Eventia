@@ -1,0 +1,52 @@
+/* Estilos de "Mis certificados" (traducidos de mis-certificados.scss). */
+body { margin: 0; background: #f8fafc; color: #172033; font-family: system-ui, -apple-system, sans-serif; }
+
+.page { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
+
+.page-header { margin-bottom: 1.5rem; }
+.page-header h1 { margin: 0; color: #0f172a; }
+.page-header p { color: #64748b; margin: .25rem 0 0; }
+.eyebrow { display: block; color: #2563eb; font-size: 12px; font-weight: 700; letter-spacing: .08em; margin-bottom: 4px; }
+.mk-sesion { font-size: .85rem; margin-top: .5rem !important; }
+
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 3px 18px #0f172a0d; }
+.empty { text-align: center; color: #64748b; padding: 2rem; }
+
+.alert { padding: .75rem 1rem; border-radius: 8px; margin-bottom: 1rem; background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; }
+.resumen { margin: 0 0 14px; color: #64748b; }
+
+.lista { display: grid; gap: 16px; }
+
+.cert { display: flex; flex-direction: column; gap: 12px; }
+.cert.emitido { border-color: #86c9a1; }
+
+.cert-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.cert-head h2 { margin: 0; font-size: 1.1rem; }
+.fechas { margin: 4px 0 0; color: #64748b; font-size: .9rem; }
+
+.estado { flex: none; font-size: .8rem; font-weight: 700; padding: 4px 12px; border-radius: 999px; background: #eef0f4; color: #3b4456; }
+.estado[data-estado='emitido'] { background: #dcefe3; color: #1e6b3d; }
+.estado[data-estado='disponible'] { background: #dce3fb; color: #2440a8; }
+.estado[data-estado='en_curso'] { background: #fce7d3; color: #8a4410; }
+.estado[data-estado='no_alcanza'] { background: #fbe1dc; color: #9b2c17; }
+
+.asistencia { display: flex; flex-direction: column; gap: 6px; }
+.barra { position: relative; height: 10px; border-radius: 5px; background: #e6e8ee; }
+.relleno { height: 100%; border-radius: 5px; background: #8a90a6; max-width: 100%; }
+.relleno.ok { background: #1e8a4c; }
+.minimo { position: absolute; top: -4px; width: 2px; height: 18px; background: #172033; }
+
+.cifras, .detalle { margin: 0; font-size: .9rem; }
+.detalle { color: #64748b; }
+
+.acciones { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid #e6e8ee; padding-top: 12px; }
+.codigo { margin: 0; font-size: .85rem; color: #64748b; }
+.codigo code { font-size: .8rem; word-break: break-all; color: #172033; }
+.botones { display: flex; gap: 8px; }
+
+.btn-primary, .btn-secondary { padding: .55rem 1rem; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; font-size: .9rem; }
+.btn-primary { background: #2563eb; color: #fff; border: 1px solid #2563eb; }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+.btn-secondary { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
+
+[hidden] { display: none !important; }

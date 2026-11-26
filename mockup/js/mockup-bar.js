@@ -12,6 +12,8 @@
     { archivo: 'expositores.html', nombre: 'Expositores' },
     { archivo: 'evento-form.html', nombre: 'Nuevo evento' },
     { archivo: 'evento-form.html?id=1', nombre: 'Editar evento' },
+    { archivo: 'usuarios.html', nombre: 'Usuarios' },
+    { archivo: 'mis-certificados.html', nombre: 'Mis certificados' },
   ];
 
   const actual = location.pathname.split('/').pop() + location.search;
