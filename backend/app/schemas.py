@@ -73,6 +73,38 @@ class UserResponse(BaseModel):
     roles: list[str]
 
 
+# ============================================================
+# GESTIÓN DE USUARIOS (solo administrador)
+# ============================================================
+
+# Datos para crear una cuenta desde la pantalla de gestión de usuarios.
+# Nombres y apellidos son obligatorios porque la tabla usuario los exige.
+class UsuarioCreate(BaseModel):
+    nombres: str = Field(min_length=1, max_length=100)
+    apellidos: str = Field(min_length=1, max_length=100)
+    email: Email
+    password: str = Field(min_length=8, max_length=128)
+    id_rol_sistema: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def _sin_espacios_vacios(self):
+        self.nombres = self.nombres.strip()
+        self.apellidos = self.apellidos.strip()
+        if not self.nombres or not self.apellidos:
+            raise ValueError("Nombres y apellidos no pueden estar vacíos")
+        return self
+
+
+# Usuario tal como se muestra en el listado de gestión de usuarios.
+class UsuarioAdminResponse(BaseModel):
+    id_usuario: int
+    nombres: str
+    apellidos: str
+    email: str
+    activo: bool
+    roles: list[str]
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

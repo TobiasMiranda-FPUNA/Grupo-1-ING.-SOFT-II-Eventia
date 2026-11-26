@@ -208,6 +208,85 @@
             },
             "description": ""
           }
+        },
+        {
+          "name": "GET /api/v1/users — List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/users — Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"password\": \"Secreto123!\",\n  \"id_rol_sistema\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/v1/users/{user_id} — Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/:user_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":user_id"
+              ],
+              "variable": [
+                {
+                  "key": "user_id",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     },
@@ -1277,6 +1356,63 @@
               }
             }
           }
+        },
+        {
+          "name": "GET /api/v1/inscripciones/{id_inscripcion}/tarjeta — Descargar Tarjeta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inscripciones/:id_inscripcion/tarjeta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inscripciones",
+                ":id_inscripcion",
+                "tarjeta"
+              ],
+              "variable": [
+                {
+                  "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/inscripciones/{id_inscripcion}/tarjeta/enviar — Reenviar Tarjeta",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/inscripciones/:id_inscripcion/tarjeta/enviar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inscripciones",
+                ":id_inscripcion",
+                "tarjeta",
+                "enviar"
+              ],
+              "variable": [
+                {
+                  "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     },
@@ -1477,6 +1613,64 @@
               "variable": [
                 {
                   "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/certificados/inscripcion/{id_inscripcion}/enviar — Reenviar Certificado",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/inscripcion/:id_inscripcion/enviar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "inscripcion",
+                ":id_inscripcion",
+                "enviar"
+              ],
+              "variable": [
+                {
+                  "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "POST /api/v1/certificados/evento/{id_evento}/emitir-y-enviar — Emitir Y Enviar Certificados Evento",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/evento/:id_evento/emitir-y-enviar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "evento",
+                ":id_evento",
+                "emitir-y-enviar"
+              ],
+              "variable": [
+                {
+                  "key": "id_evento",
                   "value": "1",
                   "description": ""
                 }

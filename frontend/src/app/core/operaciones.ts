@@ -29,6 +29,15 @@ export const OPERACIONES: Operacion[] = [
     historia: 'HU02',
   },
   {
+    titulo: 'Usuarios',
+    descripcion: 'Creá cuentas, asigná su rol en el sistema y eliminá las que ya no se usan.',
+    icono: '👥',
+    ruta: '/usuarios',
+    roles: [ADMINISTRADOR],
+    enMenu: true,
+    historia: 'HU02',
+  },
+  {
     titulo: 'Nuevo evento',
     descripcion: 'Creá un evento indicando tipo, fechas, lugar, cupo y política de inscripción.',
     icono: '＋',

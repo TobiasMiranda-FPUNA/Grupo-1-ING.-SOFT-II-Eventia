@@ -1,0 +1,140 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">HU02 · SEGURIDAD</span>
+      <h1>Gestión de usuarios</h1>
+      <p>Creá cuentas, asignales su rol en el sistema y eliminá las que ya no se usan.</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="close" aria-label="Cerrar" (click)="error.set(null)">×</button>
+    </div>
+  }
+  @if (exito()) {
+    <div class="alert alert-success" role="status">
+      {{ exito() }}
+      <button type="button" class="close" aria-label="Cerrar" (click)="exito.set(null)">×</button>
+    </div>
+  }
+
+  <div class="content-grid">
+    <!-- Formulario de alta -->
+    <section class="card form-card">
+      <h3>Nuevo usuario</h3>
+
+      <form [formGroup]="form" (ngSubmit)="crear()" novalidate>
+        <div class="row-2">
+          <div class="field">
+            <label for="nombres">Nombres *</label>
+            <input id="nombres" type="text" formControlName="nombres" autocomplete="off"
+                   [class.is-invalid]="invalido('nombres')" />
+            @if (invalido('nombres')) { <small class="field-error">Ingresá los nombres.</small> }
+          </div>
+          <div class="field">
+            <label for="apellidos">Apellidos *</label>
+            <input id="apellidos" type="text" formControlName="apellidos" autocomplete="off"
+                   [class.is-invalid]="invalido('apellidos')" />
+            @if (invalido('apellidos')) { <small class="field-error">Ingresá los apellidos.</small> }
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Correo electrónico *</label>
+          <input id="email" type="email" formControlName="email" placeholder="usuario@correo.com"
+                 autocomplete="off" [class.is-invalid]="invalido('email')" />
+          @if (invalido('email')) { <small class="field-error">Ingresá un correo válido.</small> }
+        </div>
+
+        <div class="field">
+          <label for="password">Contraseña *</label>
+          <input id="password" type="password" formControlName="password" autocomplete="new-password"
+                 [class.is-invalid]="invalido('password')" />
+          @if (invalido('password')) {
+            <small class="field-error">La contraseña debe tener al menos 8 caracteres.</small>
+          } @else {
+            <small class="hint">Mínimo 8 caracteres. Se guarda cifrada.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="rol">Rol en el sistema *</label>
+          <select id="rol" formControlName="id_rol_sistema" [class.is-invalid]="invalido('id_rol_sistema')">
+            <option [value]="0" disabled>Seleccionar...</option>
+            @for (rol of roles(); track rol.id) {
+              <option [value]="rol.id">{{ rol.nombre }}</option>
+            }
+          </select>
+          @if (invalido('id_rol_sistema')) { <small class="field-error">Elegí un rol.</small> }
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="guardando()">
+          {{ guardando() ? 'Creando…' : 'Crear usuario' }}
+        </button>
+      </form>
+    </section>
+
+    <!-- Listado -->
+    <section class="card table-card">
+      <div class="table-head">
+        <h3>Usuarios registrados <span class="count">{{ usuarios().length }}</span></h3>
+        <input type="search" class="search" placeholder="Buscar por nombre, correo o rol"
+               aria-label="Buscar usuarios" [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (cargando()) {
+              <tr><td colspan="5" class="empty-state">Cargando usuarios…</td></tr>
+            } @else {
+              @for (u of usuariosFiltrados(); track u.id_usuario) {
+                <tr>
+                  <td>
+                    <strong>{{ u.nombres }} {{ u.apellidos }}</strong>
+                    @if (u.id_usuario === idUsuarioActual()) { <span class="you">(vos)</span> }
+                  </td>
+                  <td>{{ u.email }}</td>
+                  <td>{{ u.roles.join(', ') || 'Sin rol' }}</td>
+                  <td>
+                    <span class="badge" [class.ok]="u.activo" [class.wait]="!u.activo">
+                      {{ u.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    @if (u.id_usuario === idUsuarioActual()) {
+                      <span class="hint">—</span>
+                    } @else {
+                      <button type="button" class="btn-danger" (click)="eliminar(u)"
+                              [disabled]="eliminandoId() === u.id_usuario"
+                              [attr.aria-label]="'Eliminar usuario ' + u.email">
+                        {{ eliminandoId() === u.id_usuario ? 'Eliminando…' : 'Eliminar' }}
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    {{ busqueda() ? 'Ningún usuario coincide con la búsqueda.' : 'No hay usuarios registrados.' }}
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>

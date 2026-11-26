@@ -521,6 +521,120 @@
         ]
       }
     },
+    "/api/v1/users": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "List Users",
+        "operationId": "list_users_api_v1_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsuarioAdminResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Users Api V1 Users Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Create User",
+        "operationId": "create_user_api_v1_users_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{user_id}": {
+      "delete": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Delete User",
+        "operationId": "delete_user_api_v1_users__user_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/eventos": {
       "post": {
         "tags": [
@@ -897,6 +1011,96 @@
         },
         "responses": {
           "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InscripcionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inscripciones/{id_inscripcion}/tarjeta": {
+      "get": {
+        "tags": [
+          "Inscripciones"
+        ],
+        "summary": "Descargar Tarjeta",
+        "operationId": "descargar_tarjeta_api_v1_inscripciones__id_inscripcion__tarjeta_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_inscripcion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Inscripcion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inscripciones/{id_inscripcion}/tarjeta/enviar": {
+      "post": {
+        "tags": [
+          "Inscripciones"
+        ],
+        "summary": "Reenviar Tarjeta",
+        "operationId": "reenviar_tarjeta_api_v1_inscripciones__id_inscripcion__tarjeta_enviar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_inscripcion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Inscripcion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -1869,6 +2073,100 @@
         }
       }
     },
+    "/api/v1/certificados/inscripcion/{id_inscripcion}/enviar": {
+      "post": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Reenviar Certificado",
+        "operationId": "reenviar_certificado_api_v1_certificados_inscripcion__id_inscripcion__enviar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_inscripcion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Inscripcion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificadoGestionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/certificados/evento/{id_evento}/emitir-y-enviar": {
+      "post": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Emitir Y Enviar Certificados Evento",
+        "operationId": "emitir_y_enviar_certificados_evento_api_v1_certificados_evento__id_evento__emitir_y_enviar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_evento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Evento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvioCertificadosEventoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/certificados/verificar/{codigo}/documento": {
       "get": {
         "tags": [
@@ -2450,6 +2748,22 @@
               }
             ],
             "title": "Fecha Emision"
+          },
+          "envio_correo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "enviado",
+                  "error",
+                  "no_configurado"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Envio Correo"
           }
         },
         "type": "object",
@@ -2749,6 +3063,42 @@
         },
         "type": "object",
         "title": "ConferencistaUpdate"
+      },
+      "EnvioCertificadosEventoResponse": {
+        "properties": {
+          "emitidos": {
+            "type": "integer",
+            "title": "Emitidos"
+          },
+          "enviados": {
+            "type": "integer",
+            "title": "Enviados"
+          },
+          "con_error": {
+            "type": "integer",
+            "title": "Con Error"
+          },
+          "sin_configurar": {
+            "type": "integer",
+            "title": "Sin Configurar"
+          },
+          "certificados": {
+            "items": {
+              "$ref": "#/components/schemas/CertificadoGestionResponse"
+            },
+            "type": "array",
+            "title": "Certificados"
+          }
+        },
+        "type": "object",
+        "required": [
+          "emitidos",
+          "enviados",
+          "con_error",
+          "sin_configurar",
+          "certificados"
+        ],
+        "title": "EnvioCertificadosEventoResponse"
       },
       "EventoCreate": {
         "properties": {
@@ -3118,6 +3468,22 @@
           "estado": {
             "type": "string",
             "title": "Estado"
+          },
+          "envio_correo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "enviado",
+                  "error",
+                  "no_configurado"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Envio Correo"
           }
         },
         "type": "object",
@@ -3674,6 +4040,87 @@
           "roles"
         ],
         "title": "UserResponse"
+      },
+      "UsuarioAdminResponse": {
+        "properties": {
+          "id_usuario": {
+            "type": "integer",
+            "title": "Id Usuario"
+          },
+          "nombres": {
+            "type": "string",
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "type": "string",
+            "title": "Apellidos"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_usuario",
+          "nombres",
+          "apellidos",
+          "email",
+          "activo",
+          "roles"
+        ],
+        "title": "UsuarioAdminResponse"
+      },
+      "UsuarioCreate": {
+        "properties": {
+          "nombres": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nombres"
+          },
+          "apellidos": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Apellidos"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          },
+          "id_rol_sistema": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id Rol Sistema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombres",
+          "apellidos",
+          "email",
+          "password",
+          "id_rol_sistema"
+        ],
+        "title": "UsuarioCreate"
       },
       "ValidationError": {
         "properties": {

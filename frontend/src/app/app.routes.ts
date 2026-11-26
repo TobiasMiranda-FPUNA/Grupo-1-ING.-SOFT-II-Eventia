@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { Inicio } from './pages/inicio/inicio';
 import { Roles } from './pages/roles/roles';
+import { Usuarios } from './pages/usuarios/usuarios';
 import { Eventos } from './pages/eventos/eventos';
 import { EventoForm } from './pages/evento-form/evento-form';
 import { Expositores } from './pages/expositores/expositores';
@@ -81,6 +82,15 @@ export const routes: Routes = [
       {
         path: 'roles',
         component: Roles,
+        canActivate: [roleGuard],
+        data: {
+          roles: [ROLES.ADMINISTRADOR],
+        },
+      },
+
+      {
+        path: 'usuarios',
+        component: Usuarios,
         canActivate: [roleGuard],
         data: {
           roles: [ROLES.ADMINISTRADOR],
