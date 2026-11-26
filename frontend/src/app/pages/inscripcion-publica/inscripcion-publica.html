@@ -61,6 +61,12 @@
               </select>
             </div>
 
+            @if (datosDeCuenta) {
+              <p class="account-note full">
+                Te inscribís con los datos de tu cuenta. Si alguno no es correcto, pedile al administrador que lo actualice.
+              </p>
+            }
+
             <div class="field">
               <label for="nombres">Nombres *</label>
               <input id="nombres" formControlName="nombres" autocomplete="given-name">

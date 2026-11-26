@@ -13,7 +13,7 @@ import {
   InscripcionesService,
   RolParticipantePublico,
 } from '../../services/inscripciones';
-import { AuthService } from '../../services/auth';
+import { AuthService, ROLES } from '../../services/auth';
 
 @Component({
   selector: 'app-inscripcion-publica',
@@ -49,7 +49,28 @@ export class InscripcionPublica implements OnInit {
     institucion: [''],
   });
 
+  // Un participante con sesión iniciada se inscribe a sí mismo: sus datos
+  // personales salen de su cuenta y no se pueden editar. El personal
+  // (organizador, administrador, acreditación) usa este mismo formulario
+  // para inscribir a otras personas, así que para ellos queda editable.
+  datosDeCuenta =
+    this.auth.hasRole(ROLES.PARTICIPANTE) &&
+    !this.auth.hasRole(ROLES.ORGANIZADOR, ROLES.ADMINISTRADOR, ROLES.ACREDITACION);
+
+  private aplicarDatosDeCuenta(): void {
+    const usuario = this.auth.usuario();
+    if (!this.datosDeCuenta || !usuario) return;
+    const { nombres, apellidos, email } = this.form.controls;
+    nombres.setValue(usuario.nombres);
+    apellidos.setValue(usuario.apellidos);
+    email.setValue(usuario.email);
+    nombres.disable();
+    apellidos.disable();
+    email.disable();
+  }
+
   ngOnInit(): void {
+    this.aplicarDatosDeCuenta();
     const eventoRuta = Number(this.route.snapshot.paramMap.get('id')) || 0;
 
     forkJoin({
@@ -131,6 +152,7 @@ export class InscripcionPublica implements OnInit {
       email: '',
       institucion: '',
     });
+    this.aplicarDatosDeCuenta();
     this.resultado.set(null);
     this.error.set(null);
   }

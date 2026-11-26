@@ -18,3 +18,20 @@ input:focus,select:focus { outline:2px solid #bfdbfe; border-color:#2563eb; }
 
 .card-note { margin: 14px auto 18px; max-width: 520px; padding: 12px 14px; border-radius: 10px; background: var(--color-aviso-suave); color: var(--color-aviso); font-size: .9rem; }
 .card-note.ok { background: var(--color-exito-suave); color: var(--color-exito); }
+
+// Aviso para el participante con sesión: sus datos salen de la cuenta.
+.account-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: .9rem;
+}
+
+input:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  color: #334155;
+}
