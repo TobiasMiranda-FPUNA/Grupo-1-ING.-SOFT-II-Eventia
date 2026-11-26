@@ -1,6 +1,18 @@
 # Grupo-1-ING.-SOFT-II-Eventia
 
 Proyecto de gestión de eventos académicos y profesionales.
+
+## 📚 Documentación
+
+| Documento | Ubicación |
+|---|---|
+| Guía de uso para usuarios finales | [`documentation/presentacion/Guia_de_uso_Eventia.pdf`](documentation/presentacion/Guia_de_uso_Eventia.pdf) |
+| Presentación final del proyecto | [`documentation/presentacion/Eventia_Presentacion.pptx`](documentation/presentacion/Eventia_Presentacion.pptx) (también en [PDF](documentation/presentacion/Eventia_Presentacion.pdf)) |
+| Documentación de la base de datos | [`documentation/Documentacion_Base_Datos_Sistema_Eventos.pdf`](documentation/Documentacion_Base_Datos_Sistema_Eventos.pdf) |
+| Pruebas de integración | [`documentation/PRUEBAS_SPRINT4.md`](documentation/PRUEBAS_SPRINT4.md) |
+| API (Swagger y Postman) | [`backend/docs/`](backend/docs/README.md) |
+| Mockup interactivo | [`mockup/`](mockup/README.md) |
+
 # Eventia - Módulo Frontend
 
 Este proyecto contiene el Frontend de la aplicación **Eventia** (Sistema de Gestión de Eventos), desarrollado con Angular.
