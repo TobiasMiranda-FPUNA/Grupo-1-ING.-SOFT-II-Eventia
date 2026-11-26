@@ -114,7 +114,27 @@ FROM (VALUES
      DATE '2026-12-10', DATE '2026-12-11', 'Facultad Politécnica - Laboratorio 2', 40, 'publicado'),
     ('JORNADA', 'Jornada de Inteligencia Artificial Aplicada',
      'Jornada sobre aplicaciones prácticas de la inteligencia artificial en el desarrollo de software.',
-     DATE '2026-12-15', DATE '2026-12-16', 'Facultad Politécnica - Auditorio', 50, 'publicado')
+     DATE '2026-12-15', DATE '2026-12-16', 'Facultad Politécnica - Auditorio', 50, 'publicado'),
+    -- Eventos publicados para probar la inscripción en distintos escenarios.
+    -- Cupo amplio: todas las inscripciones quedan confirmadas.
+    ('CONGRESO', 'Congreso de Ingeniería de Software 2027',
+     'Congreso con conferencias y paneles sobre calidad, procesos y arquitectura de software.',
+     DATE '2027-03-15', DATE '2027-03-17', 'Facultad Politécnica - Aula Magna', 150, 'publicado'),
+    ('SEMINARIO', 'Seminario de Ciberseguridad para Desarrolladores',
+     'Seminario sobre buenas prácticas de seguridad en aplicaciones web: autenticación, OWASP y manejo de secretos.',
+     DATE '2026-12-18', DATE '2026-12-18', 'Facultad Politécnica - Auditorio Central', 60, 'publicado'),
+    -- Cupo de 2 con lista de espera: desde la 3.ª inscripción queda "lista_de_espera".
+    ('TALLER', 'Taller de Git y GitHub en Equipo',
+     'Taller práctico de ramas, pull requests y resolución de conflictos.',
+     DATE '2026-12-20', DATE '2026-12-20', 'Laboratorio de Informática 1', 2, 'publicado'),
+    -- Cupo de 1 sin lista de espera: la 2.ª inscripción se rechaza por falta de cupo.
+    ('JORNADA', 'Jornada de Bases de Datos con PostgreSQL',
+     'Jornada sobre modelado relacional, índices y optimización de consultas en PostgreSQL.',
+     DATE '2027-02-05', DATE '2027-02-06', 'Facultad Politécnica - Sala de Conferencias', 1, 'publicado'),
+    -- Inscripción abierta solo hasta el 30/11/2026: después se rechaza por plazo vencido.
+    ('OTRO', 'Hackatón Eventia 2027',
+     'Competencia de 24 horas para desarrollar soluciones a problemas de gestión de eventos.',
+     DATE '2027-04-10', DATE '2027-04-11', 'Facultad Politécnica - Hall Central', 100, 'publicado')
 ) AS v(codigo_tipo, nombre, descripcion, fecha_inicio, fecha_fin, lugar, cupo_maximo, estado)
 JOIN tipo_evento te ON te.codigo = v.codigo_tipo
 WHERE NOT EXISTS (
@@ -135,7 +155,12 @@ FROM (VALUES
     ('Taller de Testing Ágil', DATE '2026-10-01', TRUE, FALSE, 100),
     ('Seminario de Arquitectura de Software', DATE '2026-09-20', FALSE, TRUE, 60),
     ('Taller de Desarrollo Web con Angular y FastAPI', DATE '2026-12-05', FALSE, TRUE, 75),
-    ('Jornada de Inteligencia Artificial Aplicada', DATE '2026-12-12', FALSE, TRUE, 75)
+    ('Jornada de Inteligencia Artificial Aplicada', DATE '2026-12-12', FALSE, TRUE, 75),
+    ('Congreso de Ingeniería de Software 2027', DATE '2027-03-10', FALSE, TRUE, 75),
+    ('Seminario de Ciberseguridad para Desarrolladores', DATE '2026-12-16', FALSE, TRUE, 80),
+    ('Taller de Git y GitHub en Equipo', DATE '2026-12-18', FALSE, TRUE, 100),
+    ('Jornada de Bases de Datos con PostgreSQL', DATE '2027-02-01', FALSE, FALSE, 75),
+    ('Hackatón Eventia 2027', DATE '2026-11-30', FALSE, TRUE, 75)
 ) AS v(nombre_evento, fecha_limite, requiere_aprobacion, permite_lista_espera, min_asistencia_certificado)
 JOIN evento e ON e.nombre = v.nombre_evento
 ON CONFLICT (id_evento) DO NOTHING;
