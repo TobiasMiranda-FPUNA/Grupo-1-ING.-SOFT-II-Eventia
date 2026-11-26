@@ -252,7 +252,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"password\": \"Secreto123!\",\n  \"id_rol_sistema\": 1\n}",
+              "raw": "{\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"documento\": \"texto de ejemplo (documento)\",\n  \"password\": \"Secreto123!\",\n  \"id_rol_sistema\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"

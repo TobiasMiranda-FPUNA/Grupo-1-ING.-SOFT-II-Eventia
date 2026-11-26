@@ -192,10 +192,10 @@ from app.main import app  # noqa: E402
 from app.models import Inscripcion, Participante, RolSistema, Usuario  # noqa: E402
 
 
-def _usuario(db, rol_nombre, email="hugo@fpuna.edu.py"):
+def _usuario(db, rol_nombre, email="hugo@fpuna.edu.py", documento=None):
     rol = db.query(RolSistema).filter_by(nombre=rol_nombre).first() or RolSistema(nombre=rol_nombre, activo=True)
     usuario = Usuario(
-        nombres="Hugo", apellidos="Villagra", email=email,
+        nombres="Hugo", apellidos="Villagra", email=email, documento=documento,
         password_hash=hash_password("Clave1234"), roles=[rol],
     )
     db.add(usuario)
@@ -275,3 +275,38 @@ def test_endpoint_http_ignora_correo_manipulado_y_rechaza_token_invalido():
         assert anonimo.status_code == 201
     finally:
         app.dependency_overrides.clear()
+
+
+def test_participante_con_sesion_usa_la_cedula_de_su_cuenta(db, rol_asistente):
+    evento = _crear_evento(db, cupo_maximo=5)
+    usuario = _usuario(db, "participante", documento="1000006")
+    manipulado = _inscripcion(evento.id_evento, rol_asistente.id_rol_participante, "hugo@fpuna.edu.py")
+    manipulado = manipulado.model_copy(update={"documento": "9999999"})
+
+    response = create_inscripcion(manipulado, db, usuario)
+
+    assert _participante_de(db, response.id_inscripcion).documento == "1000006"
+
+
+def test_cedula_de_la_cuenta_corrige_la_del_participante_existente(db, rol_asistente):
+    db.add(Participante(nombres="Hugo", apellidos="Villagra", email="hugo@fpuna.edu.py", documento="viejo"))
+    db.commit()
+    evento = _crear_evento(db, cupo_maximo=5)
+    usuario = _usuario(db, "participante", documento="1000006")
+
+    response = create_inscripcion(
+        _inscripcion(evento.id_evento, rol_asistente.id_rol_participante, "hugo@fpuna.edu.py"), db, usuario
+    )
+
+    assert _participante_de(db, response.id_inscripcion).documento == "1000006"
+
+
+def test_cuenta_sin_cedula_conserva_el_documento_del_formulario(db, rol_asistente):
+    evento = _crear_evento(db, cupo_maximo=5)
+    usuario = _usuario(db, "participante")  # cuenta anterior al campo cédula
+    datos = _inscripcion(evento.id_evento, rol_asistente.id_rol_participante, "hugo@fpuna.edu.py")
+    datos = datos.model_copy(update={"documento": "4123456"})
+
+    response = create_inscripcion(datos, db, usuario)
+
+    assert _participante_de(db, response.id_inscripcion).documento == "4123456"

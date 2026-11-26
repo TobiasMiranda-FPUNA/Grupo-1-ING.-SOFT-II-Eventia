@@ -59,6 +59,14 @@ ALTER TABLE IF EXISTS participante
 ALTER TABLE IF EXISTS participante
     DROP CONSTRAINT IF EXISTS ck_participante_documento_no_vacio;
 
+-- Cédula de identidad del usuario (gestión de usuarios). En bases creadas
+-- antes de este campo se agrega la columna; las cuentas existentes quedan
+-- con NULL hasta que se complete (el índice único admite varios NULL).
+ALTER TABLE IF EXISTS usuario
+    ADD COLUMN IF NOT EXISTS documento VARCHAR(20);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_usuario_documento ON usuario (documento);
+
 -- El frontend/backend de expositores ya utiliza especialidad.
 ALTER TABLE IF EXISTS conferencista
     ADD COLUMN IF NOT EXISTS especialidad VARCHAR(150);

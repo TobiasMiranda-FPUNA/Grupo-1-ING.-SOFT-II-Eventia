@@ -16,6 +16,14 @@ export class Shell {
   private router = inject(Router);
 
   usuario = this.auth.usuario;
+
+  constructor() {
+    // Actualiza los datos de la sesión guardada (roles, cédula) al entrar al
+    // área privada. Un token vencido lo resuelve el interceptor (401 → login).
+    if (this.auth.isLoggedIn()) {
+      this.auth.refrescarPerfil().subscribe({ error: () => undefined });
+    }
+  }
   menuAbierto = signal(false);
 
   menu = computed(() => {

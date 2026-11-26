@@ -628,6 +628,13 @@ class Usuario(Base):
         nullable=False
     )
 
+    # Cédula de identidad (o pasaporte). Única; NULL solo en cuentas creadas
+    # antes de que existiera el campo.
+    documento: Mapped[str | None] = mapped_column(
+        String(20),
+        unique=True
+    )
+
     password_hash: Mapped[str] = mapped_column(
         "contrasena_hash",
         String(255),

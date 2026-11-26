@@ -60,17 +60,31 @@ export class InscripcionPublica implements OnInit {
   private aplicarDatosDeCuenta(): void {
     const usuario = this.auth.usuario();
     if (!this.datosDeCuenta || !usuario) return;
-    const { nombres, apellidos, email } = this.form.controls;
+    const { nombres, apellidos, email, documento } = this.form.controls;
     nombres.setValue(usuario.nombres);
     apellidos.setValue(usuario.apellidos);
     email.setValue(usuario.email);
     nombres.disable();
     apellidos.disable();
     email.disable();
+    // La cédula también sale de la cuenta, si la tiene (las cuentas
+    // anteriores a ese campo pueden cargarla en el formulario).
+    if (usuario.documento) {
+      documento.setValue(usuario.documento);
+      documento.disable();
+    }
   }
 
   ngOnInit(): void {
     this.aplicarDatosDeCuenta();
+    // La sesión guardada puede ser anterior a un cambio de la cuenta (ej: se
+    // cargó la cédula): se refresca el perfil y se vuelven a aplicar los datos.
+    if (this.datosDeCuenta && this.auth.isLoggedIn()) {
+      this.auth.refrescarPerfil().subscribe({
+        next: () => this.aplicarDatosDeCuenta(),
+        error: () => undefined,
+      });
+    }
     const eventoRuta = Number(this.route.snapshot.paramMap.get('id')) || 0;
 
     forkJoin({

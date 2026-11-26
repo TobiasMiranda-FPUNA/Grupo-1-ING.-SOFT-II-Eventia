@@ -48,6 +48,7 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)) -> TokenResp
         nombres=user.nombres,
         apellidos=user.apellidos,
         email=user.email,
+        documento=user.documento,
         roles=roles,
     )
     return TokenResponse(access_token=token, expires_in=expires_in, user=response_user)

@@ -115,6 +115,7 @@ def get_profile(user: Usuario = Depends(get_current_user)) -> UserResponse:
         nombres=user.nombres,
         apellidos=user.apellidos,
         email=user.email,
+        documento=user.documento,
         roles=roles,
     )
 
@@ -132,6 +133,7 @@ def _to_admin_response(user: Usuario) -> UsuarioAdminResponse:
         nombres=user.nombres,
         apellidos=user.apellidos,
         email=user.email,
+        documento=user.documento,
         activo=user.activo,
         roles=[role.nombre for role in user.roles],
     )
@@ -162,6 +164,9 @@ def create_user(
     if duplicado is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un usuario con ese correo")
 
+    if db.scalar(select(Usuario.id_usuario).where(Usuario.documento == payload.documento)) is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un usuario con esa cédula")
+
     role = db.get(RolSistema, payload.id_rol_sistema)
     if role is None or not role.activo:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El rol seleccionado no existe o está inactivo")
@@ -170,6 +175,7 @@ def create_user(
         nombres=payload.nombres,
         apellidos=payload.apellidos,
         email=payload.email,
+        documento=payload.documento,
         password_hash=hash_password(payload.password),
         activo=True,
         roles=[role],

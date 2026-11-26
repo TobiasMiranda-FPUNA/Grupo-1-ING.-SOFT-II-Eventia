@@ -9,6 +9,7 @@ export interface UsuarioAdmin {
   nombres: string;
   apellidos: string;
   email: string;
+  documento: string | null;
   activo: boolean;
   roles: string[];
 }
@@ -18,6 +19,7 @@ export interface UsuarioNuevo {
   nombres: string;
   apellidos: string;
   email: string;
+  documento: string;
   password: string;
   id_rol_sistema: number;
 }

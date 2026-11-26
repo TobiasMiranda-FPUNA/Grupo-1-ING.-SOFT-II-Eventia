@@ -64,6 +64,7 @@ def _datos(db: Session):
         nombres="Ana",
         apellidos="Gómez",
         email="ana@example.com",
+        documento="4123456",
     )
     db.add_all([actividad, participante])
     db.flush()
@@ -90,6 +91,8 @@ def test_listar_y_guardar_asistencia(db):
     )
     assert len(roster) == 1
     assert roster[0].estado_asistencia is None
+    # La cédula viaja en la lista para poder buscar por documento en la puerta.
+    assert roster[0].documento == "4123456"
 
     response = registrar_asistencia_masiva(
         actividad.id_actividad,

@@ -49,6 +49,17 @@
         </div>
 
         <div class="field">
+          <label for="documento">Cédula de identidad *</label>
+          <input id="documento" type="text" formControlName="documento" placeholder="Ej.: 4123456"
+                 autocomplete="off" inputmode="text" [class.is-invalid]="invalido('documento')" />
+          @if (invalido('documento')) {
+            <small class="field-error">Ingresá una cédula válida (de 3 a 20 dígitos o letras).</small>
+          } @else {
+            <small class="hint">Podés escribirla con o sin puntos.</small>
+          }
+        </div>
+
+        <div class="field">
           <label for="password">Contraseña *</label>
           <input id="password" type="password" formControlName="password" autocomplete="new-password"
                  [class.is-invalid]="invalido('password')" />
@@ -80,7 +91,7 @@
     <section class="card table-card">
       <div class="table-head">
         <h3>Usuarios registrados <span class="count">{{ usuarios().length }}</span></h3>
-        <input type="search" class="search" placeholder="Buscar por nombre, correo o rol"
+        <input type="search" class="search" placeholder="Buscar por nombre, correo, cédula o rol"
                aria-label="Buscar usuarios" [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
       </div>
 
@@ -90,6 +101,7 @@
             <tr>
               <th>Usuario</th>
               <th>Correo</th>
+              <th>Cédula</th>
               <th>Rol</th>
               <th>Estado</th>
               <th><span class="sr-only">Acciones</span></th>
@@ -97,7 +109,7 @@
           </thead>
           <tbody>
             @if (cargando()) {
-              <tr><td colspan="5" class="empty-state">Cargando usuarios…</td></tr>
+              <tr><td colspan="6" class="empty-state">Cargando usuarios…</td></tr>
             } @else {
               @for (u of usuariosFiltrados(); track u.id_usuario) {
                 <tr>
@@ -106,6 +118,7 @@
                     @if (u.id_usuario === idUsuarioActual()) { <span class="you">(vos)</span> }
                   </td>
                   <td>{{ u.email }}</td>
+                  <td>{{ u.documento || '—' }}</td>
                   <td>{{ u.roles.join(', ') || 'Sin rol' }}</td>
                   <td>
                     <span class="badge" [class.ok]="u.activo" [class.wait]="!u.activo">
@@ -126,7 +139,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="empty-state">
+                  <td colspan="6" class="empty-state">
                     {{ busqueda() ? 'Ningún usuario coincide con la búsqueda.' : 'No hay usuarios registrados.' }}
                   </td>
                 </tr>

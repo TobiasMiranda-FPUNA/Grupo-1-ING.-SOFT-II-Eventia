@@ -55,6 +55,14 @@ describe('coincide', () => {
     expect(coincide(ana, '1')).toBe(false);
   });
 
+  it('busca por cédula exacta, con o sin puntos', () => {
+    const conCedula = { ...ana, documento: '4123456' };
+    expect(coincide(conCedula, '4123456')).toBe(true);
+    expect(coincide(conCedula, '4.123.456')).toBe(true);
+    expect(coincide(conCedula, '4123')).toBe(false);
+    expect(coincide(ana, '4123456')).toBe(false);
+  });
+
   it('acepta el código de barras de la tarjeta de inscripción', () => {
     expect(coincide(ana, 'INS-000012')).toBe(true);
     expect(coincide(ana, 'ins000012')).toBe(true);

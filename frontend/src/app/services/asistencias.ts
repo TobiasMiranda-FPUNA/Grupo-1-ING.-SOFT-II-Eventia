@@ -10,6 +10,7 @@ export interface AsistenciaParticipante {
   id_participante: number;
   participante: string;
   email: string;
+  documento?: string | null;
   estado_inscripcion: string;
   estado_asistencia: EstadoAsistencia | null;
 }

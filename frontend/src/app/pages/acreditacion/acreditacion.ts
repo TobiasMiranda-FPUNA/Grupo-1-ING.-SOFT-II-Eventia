@@ -55,13 +55,25 @@ export function numeroInscripcion(consulta: string): string {
   return consulta.replace(/^(#|ins-?)/, '').replace(/^0+(?=\d)/, '');
 }
 
+// Cédula sin puntos ni espacios: "4.123.456" → "4123456".
+export function cedula(texto: string): string {
+  return normalizar(texto).replace(/[\s.]/g, '');
+}
+
+// true si la búsqueda es exactamente la cédula del participante (con o sin
+// puntos). Es exacta, no parcial: "123" no encuentra al de cédula "4123456".
+export function coincideCedula(p: AsistenciaParticipante, busqueda: string): boolean {
+  return !!p.documento && cedula(busqueda) === cedula(p.documento);
+}
+
 // Coincide si cada palabra buscada aparece en el nombre o el correo, o si
-// la búsqueda es exactamente el número de inscripción: "123", "#123" o el
-// código de barras de la tarjeta de inscripción ("INS-000123").
+// la búsqueda es exactamente el número de inscripción ("123", "#123", el
+// código de barras "INS-000123") o la cédula del participante.
 export function coincide(p: AsistenciaParticipante, busqueda: string): boolean {
   const consulta = normalizar(busqueda);
   if (!consulta) return true;
   if (numeroInscripcion(consulta) === String(p.id_inscripcion)) return true;
+  if (coincideCedula(p, busqueda)) return true;
 
   const texto = normalizar(`${p.participante} ${p.email}`);
   return consulta.split(/\s+/).every(palabra => texto.includes(palabra));
@@ -264,8 +276,12 @@ export class Acreditacion implements OnInit {
     if (!normalizar(busqueda)) return;
 
     const numero = numeroInscripcion(normalizar(busqueda));
-    const porNumero = this.participantes().find(p => String(p.id_inscripcion) === numero);
-    const candidatos = porNumero ? [porNumero] : this.participantes().filter(p => coincide(p, busqueda));
+    // El número de inscripción y la cédula identifican a una sola persona:
+    // con cualquiera de los dos, Enter acredita directamente.
+    const exacto =
+      this.participantes().find(p => String(p.id_inscripcion) === numero) ??
+      this.participantes().find(p => coincideCedula(p, busqueda));
+    const candidatos = exacto ? [exacto] : this.participantes().filter(p => coincide(p, busqueda));
 
     if (candidatos.length === 0) {
       this.mostrarAviso('error', `No hay inscripciones confirmadas que coincidan con «${busqueda}».`);

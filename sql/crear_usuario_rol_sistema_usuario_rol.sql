@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     nombres             VARCHAR(100) NOT NULL,
     apellidos           VARCHAR(100) NOT NULL,
     correo              VARCHAR(150) NOT NULL,
+    documento           VARCHAR(20),
     contrasena_hash     VARCHAR(255) NOT NULL,
     activo              BOOLEAN      NOT NULL DEFAULT TRUE,
     ultimo_acceso       TIMESTAMPTZ,
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     actualizado_en      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_usuario_correo UNIQUE (correo),
+    CONSTRAINT uq_usuario_documento UNIQUE (documento),
     CONSTRAINT ck_usuario_nombres_no_vacio CHECK (BTRIM(nombres) <> ''),
     CONSTRAINT ck_usuario_apellidos_no_vacio CHECK (BTRIM(apellidos) <> ''),
     CONSTRAINT ck_usuario_correo_no_vacio CHECK (BTRIM(correo) <> ''),
@@ -45,6 +47,9 @@ CREATE TABLE IF NOT EXISTS usuario (
 
 COMMENT ON TABLE usuario IS
 'Usuarios autenticables del Sistema de Gestión de Eventos.';
+
+COMMENT ON COLUMN usuario.documento IS
+'Número de cédula de identidad (o pasaporte). Obligatorio al crear un usuario desde el sistema; NULL solo en cuentas anteriores a este campo.';
 
 COMMENT ON COLUMN usuario.contrasena_hash IS
 'Hash de contraseña generado por el backend. Nunca almacenar contraseñas en texto plano.';

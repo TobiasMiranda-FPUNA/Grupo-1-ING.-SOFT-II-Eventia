@@ -20,6 +20,8 @@
     nombres: { input: document.getElementById('nombres'), validar: v => !!v.trim() && v.length <= 100 },
     apellidos: { input: document.getElementById('apellidos'), validar: v => !!v.trim() && v.length <= 100 },
     email: { input: document.getElementById('email'), validar: v => EMAIL_RE.test(v.trim()) },
+    // Cédula: sin puntos ni espacios, 3 a 20 dígitos, letras o guiones.
+    documento: { input: document.getElementById('documento'), validar: v => /^[A-Z0-9-]{3,20}$/.test(v.replace(/[\s.]/g, '').toUpperCase()) },
     password: { input: document.getElementById('password'), validar: v => v.length >= 8 && v.length <= 128 },
     rol: { input: rolSelect, validar: v => Number(v) > 0 },
   };
@@ -53,15 +55,15 @@
   function render() {
     count.textContent = usuarios.length;
     if (cargando) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Cargando usuarios…</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Cargando usuarios…</td></tr>';
       return;
     }
     const q = busqueda.value.trim().toLowerCase();
     const filtrados = usuarios.filter(u =>
-      !q || `${u.nombres} ${u.apellidos} ${u.email} ${u.roles.join(' ')}`.toLowerCase().includes(q));
+      !q || `${u.nombres} ${u.apellidos} ${u.email} ${u.documento || ''} ${u.roles.join(' ')}`.toLowerCase().includes(q));
 
     if (filtrados.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty-state">${q ? 'Ningún usuario coincide con la búsqueda.' : 'No hay usuarios registrados.'}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">${q ? 'Ningún usuario coincide con la búsqueda.' : 'No hay usuarios registrados.'}</td></tr>`;
       return;
     }
     tbody.innerHTML = filtrados.map(u => {
@@ -73,6 +75,7 @@
       return `<tr>
         <td><strong>${escapar(u.nombres)} ${escapar(u.apellidos)}</strong>${soyYo ? '<span class="you">(vos)</span>' : ''}</td>
         <td>${escapar(u.email)}</td>
+        <td>${escapar(u.documento || '—')}</td>
         <td>${escapar(u.roles.join(', ') || 'Sin rol')}</td>
         <td><span class="badge ${u.activo ? 'badge-ok' : 'badge-off'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
         <td class="actions">${accion}</td>
@@ -126,6 +129,7 @@
       nombres: campos.nombres.input.value,
       apellidos: campos.apellidos.input.value,
       email: campos.email.input.value,
+      documento: campos.documento.input.value,
       password: campos.password.input.value,
       id_rol_sistema: Number(rolSelect.value),
     })

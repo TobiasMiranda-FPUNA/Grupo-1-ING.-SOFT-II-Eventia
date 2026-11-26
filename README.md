@@ -70,14 +70,17 @@ La documentación interactiva queda disponible en `/docs`. El endpoint de autent
 El script `sql/cargar_datos_ejemplo.sql` crea estas cuentas para desarrollo
 local (no usar en producción):
 
-| Nombre | Correo | Contraseña | Rol |
-|---|---|---|---|
-| Ana Duarte | admin@eventia.test | `Admin123!` | Administrador |
-| Carlos Benítez | organizador@eventia.test | `Organizador123!` | Organizador |
-| Lucía Giménez | participante@eventia.test | `Participante123!` | Participante |
-| Laura Méndez | conferencista@eventia.test | `Conferencista123!` | Conferencista |
-| Pedro Ayala | acreditacion@eventia.test | `Acreditacion123!` | Personal de acreditación |
-| Hugo Villagra | hasvbogarin92@fpuna.edu.py | `Hugo123!` | Participante |
+| Nombre | Correo | Contraseña | Cédula | Rol |
+|---|---|---|---|---|
+| Ana Duarte | admin@eventia.test | `Admin123!` | 1000001 | Administrador |
+| Carlos Benítez | organizador@eventia.test | `Organizador123!` | 1000002 | Organizador |
+| Lucía Giménez | participante@eventia.test | `Participante123!` | 1000003 | Participante |
+| Laura Méndez | conferencista@eventia.test | `Conferencista123!` | 1000004 | Conferencista |
+| Pedro Ayala | acreditacion@eventia.test | `Acreditacion123!` | 1000005 | Personal de acreditación |
+| Hugo Villagra | hasvbogarin92@fpuna.edu.py | `Hugo123!` | 1000006 | Participante |
+
+Las cédulas son números ficticios de prueba. Al crear usuarios desde la
+pantalla **Usuarios** la cédula es obligatoria y no puede repetirse.
 
 Hugo Villagra también está inscripto (confirmado) al *Congreso Nacional de
 Tecnología 2026* con asistencia a todas las actividades, por lo que sirve

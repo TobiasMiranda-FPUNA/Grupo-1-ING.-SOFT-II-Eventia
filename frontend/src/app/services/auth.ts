@@ -14,6 +14,9 @@ export interface UsuarioSesion {
     nombres: string;
     apellidos: string;
     email: string;
+    // Cédula de identidad; null en cuentas anteriores al campo (o sesiones
+    // iniciadas antes de este cambio, hasta volver a ingresar).
+    documento?: string | null;
     roles: string[];
 }
 
@@ -57,6 +60,18 @@ export class AuthService {
             localStorage.setItem(EXPIRES_KEY, String(Date.now() + response.expires_in * 1000));
             this.usuario.set(response.user);
             }
+        })
+        );
+    }
+
+    // Vuelve a pedir el perfil al backend (GET /users/me) y actualiza la
+    // sesión guardada. Así los datos nuevos de la cuenta (ej: la cédula)
+    // llegan sin tener que cerrar sesión y volver a ingresar.
+    refrescarPerfil(): Observable<UsuarioSesion> {
+        return this.http.get<UsuarioSesion>(`${environment.apiUrl}/users/me`).pipe(
+        tap(usuario => {
+            localStorage.setItem(USER_KEY, JSON.stringify(usuario));
+            this.usuario.set(usuario);
         })
         );
     }

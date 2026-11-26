@@ -4,6 +4,7 @@ from datetime import date, datetime, time
 
 # Literal: restringe un campo a un conjunto fijo de valores permitidos.
 # Annotated: permite adjuntar validadores personalizados.
+import re
 from typing import Annotated, Literal
 
 from email_validator import EmailNotValidError, validate_email
@@ -31,6 +32,22 @@ def _validate_email(value: str) -> str:
 
 
 Email = Annotated[str, BeforeValidator(_validate_email)]
+
+
+# Cédula de identidad: acepta cómo se suele escribir ("4.123.456",
+# "4 123 456") y guarda solo los caracteres significativos ("4123456").
+# Se permiten letras y guiones para pasaportes o documentos extranjeros.
+def _normalizar_documento(value):
+    if not isinstance(value, str):
+        return value
+    return re.sub(r"[\s.]", "", value).upper()
+
+
+Documento = Annotated[
+    str,
+    BeforeValidator(_normalizar_documento),
+    Field(min_length=3, max_length=20, pattern=r"^[A-Z0-9-]+$"),
+]
 
 
 # ============================================================
@@ -70,6 +87,7 @@ class UserResponse(BaseModel):
     nombres: str
     apellidos: str
     email: Email
+    documento: str | None = None
     roles: list[str]
 
 
@@ -83,6 +101,7 @@ class UsuarioCreate(BaseModel):
     nombres: str = Field(min_length=1, max_length=100)
     apellidos: str = Field(min_length=1, max_length=100)
     email: Email
+    documento: Documento
     password: str = Field(min_length=8, max_length=128)
     id_rol_sistema: int = Field(gt=0)
 
@@ -101,6 +120,7 @@ class UsuarioAdminResponse(BaseModel):
     nombres: str
     apellidos: str
     email: str
+    documento: str | None = None
     activo: bool
     roles: list[str]
 
@@ -515,6 +535,8 @@ class AsistenciaParticipanteResponse(BaseModel):
     id_participante: int
     participante: str
     email: Email
+    # Cédula del participante: permite buscarlo por documento en la acreditación.
+    documento: str | None = None
     estado_inscripcion: str
     estado_asistencia: EstadoAsistencia | None = None
 

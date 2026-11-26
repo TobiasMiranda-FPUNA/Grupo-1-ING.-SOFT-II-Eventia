@@ -1,10 +1,23 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AuthService } from '../../services/auth';
 import { RolSistema, UsuarioAdmin, UsuariosService } from '../../services/usuarios';
+
+// Normaliza la cédula como el backend: sin puntos ni espacios y en mayúsculas.
+export function normalizarDocumento(valor: string): string {
+  return (valor ?? '').replace(/[\s.]/g, '').toUpperCase();
+}
+
+// Cédula válida: 3 a 20 caracteres entre dígitos, letras (pasaportes) y guiones,
+// una vez quitados los puntos y espacios ("4.123.456" es válida).
+function cedulaValida(control: AbstractControl): ValidationErrors | null {
+  const valor = normalizarDocumento(control.value);
+  if (!valor) return null; // de eso se encarga Validators.required
+  return /^[A-Z0-9-]{3,20}$/.test(valor) ? null : { cedula: true };
+}
 
 // Pantalla de gestión de usuarios (solo administrador): lista las cuentas,
 // permite crear una nueva con su rol de sistema y eliminar cuentas.
@@ -35,7 +48,7 @@ export class Usuarios implements OnInit {
     const texto = this.busqueda().trim().toLowerCase();
     if (!texto) return this.usuarios();
     return this.usuarios().filter(u =>
-      `${u.nombres} ${u.apellidos} ${u.email} ${u.roles.join(' ')}`.toLowerCase().includes(texto),
+      `${u.nombres} ${u.apellidos} ${u.email} ${u.documento ?? ''} ${u.roles.join(' ')}`.toLowerCase().includes(texto),
     );
   });
 
@@ -43,6 +56,7 @@ export class Usuarios implements OnInit {
     nombres: ['', [Validators.required, Validators.maxLength(100)]],
     apellidos: ['', [Validators.required, Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
+    documento: ['', [Validators.required, cedulaValida]],
     password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
     id_rol_sistema: [0, [Validators.required, Validators.min(1)]],
   });
@@ -95,7 +109,7 @@ export class Usuarios implements OnInit {
     const datos = this.form.getRawValue();
 
     this.usuariosService
-      .crear({ ...datos, id_rol_sistema: Number(datos.id_rol_sistema) })
+      .crear({ ...datos, documento: normalizarDocumento(datos.documento), id_rol_sistema: Number(datos.id_rol_sistema) })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: usuario => {
@@ -152,7 +166,7 @@ export class Usuarios implements OnInit {
     } else if (detalle && [400, 404, 409].includes(err.status)) {
       this.error.set(detalle);
     } else if (err?.status === 422) {
-      this.error.set('Revisá los datos: correo válido y contraseña de al menos 8 caracteres.');
+      this.error.set('Revisá los datos: correo y cédula válidos, y contraseña de al menos 8 caracteres.');
     } else {
       this.error.set(porDefecto);
     }

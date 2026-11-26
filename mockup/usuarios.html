@@ -46,6 +46,13 @@
           </div>
 
           <div class="form-group">
+            <label for="documento">Cédula de identidad *</label>
+            <input id="documento" type="text" placeholder="Ej.: 4123456" autocomplete="off" />
+            <small class="field-error" data-campo="documento" hidden>Ingresá una cédula válida (de 3 a 20 dígitos o letras).</small>
+            <small class="hint" data-hint="documento">Podés escribirla con o sin puntos.</small>
+          </div>
+
+          <div class="form-group">
             <label for="password">Contraseña *</label>
             <input id="password" type="password" autocomplete="new-password" />
             <small class="field-error" data-campo="password" hidden>La contraseña debe tener al menos 8 caracteres.</small>
@@ -66,12 +73,12 @@
       <section class="card table-card">
         <div class="table-head">
           <h3>Usuarios registrados <span class="count" id="count">0</span></h3>
-          <input type="search" id="busqueda" class="search" placeholder="Buscar por nombre, correo o rol" aria-label="Buscar usuarios" />
+          <input type="search" id="busqueda" class="search" placeholder="Buscar por nombre, correo, cédula o rol" aria-label="Buscar usuarios" />
         </div>
         <div class="table-responsive">
           <table>
             <thead>
-              <tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th><span class="sr-only">Acciones</span></th></tr>
+              <tr><th>Usuario</th><th>Correo</th><th>Cédula</th><th>Rol</th><th>Estado</th><th><span class="sr-only">Acciones</span></th></tr>
             </thead>
             <tbody id="usuariosBody"></tbody>
           </table>

@@ -39,6 +39,7 @@ def admin_user(db, roles):
         nombres="Ana",
         apellidos="Duarte",
         email="admin@eventia.test",
+        documento="1000001",
         password_hash=hash_password("Admin123!"),
         roles=[roles["admin"]],
     )
@@ -52,6 +53,7 @@ def _payload(rol: RolSistema, **cambios) -> UsuarioCreate:
         "nombres": "María",
         "apellidos": "López",
         "email": "maria@eventia.test",
+        "documento": "4123456",
         "password": "Clave1234",
         "id_rol_sistema": rol.id_rol,
     }
@@ -70,6 +72,22 @@ def test_crear_usuario_participante_puede_iniciar_sesion(db, roles, admin_user):
 
     sesion = login(LoginRequest(email="maria@eventia.test", password="Clave1234"), db)
     assert sesion.user.roles == ["participante"]
+
+
+def test_crear_usuario_guarda_cedula_normalizada(db, roles, admin_user):
+    creado = create_user(_payload(roles["participante"], documento=" 4.123.456 "), db, admin_user)
+
+    assert creado.documento == "4123456"
+    assert db.get(Usuario, creado.id_usuario).documento == "4123456"
+    assert login(LoginRequest(email="maria@eventia.test", password="Clave1234"), db).user.documento == "4123456"
+
+
+def test_crear_usuario_rechaza_cedula_duplicada(db, roles, admin_user):
+    with pytest.raises(HTTPException) as error:
+        create_user(_payload(roles["participante"], documento="1.000.001"), db, admin_user)
+
+    assert error.value.status_code == 409
+    assert "cédula" in error.value.detail
 
 
 def test_crear_usuario_rechaza_correo_duplicado_sin_importar_mayusculas(db, roles, admin_user):
@@ -91,7 +109,10 @@ def test_crear_usuario_rechaza_rol_inexistente_o_inactivo(db, roles, admin_user,
 
 @pytest.mark.parametrize(
     "cambios",
-    [{"password": "corta"}, {"email": "no-es-un-correo"}, {"nombres": "   "}, {"id_rol_sistema": 0}],
+    [
+        {"password": "corta"}, {"email": "no-es-un-correo"}, {"nombres": "   "}, {"id_rol_sistema": 0},
+        {"documento": "12"}, {"documento": "12#45"}, {"documento": ""},
+    ],
 )
 def test_esquema_valida_datos_obligatorios(roles, cambios):
     with pytest.raises(ValidationError):
@@ -99,12 +120,13 @@ def test_esquema_valida_datos_obligatorios(roles, cambios):
 
 
 def test_listar_usuarios_ordenados_por_apellido(db, roles, admin_user):
-    create_user(_payload(roles["participante"], apellidos="Acosta", email="b@eventia.test"), db, admin_user)
+    create_user(_payload(roles["participante"], apellidos="Acosta", email="b@eventia.test", documento="555"), db, admin_user)
 
     listado = list_users(db, admin_user)
 
     assert [u.apellidos for u in listado] == ["Acosta", "Duarte"]
     assert listado[1].roles == ["administrador"]
+    assert [u.documento for u in listado] == ["555", "1000001"]
 
 
 def test_eliminar_usuario_borra_cuenta_y_roles(db, roles, admin_user):

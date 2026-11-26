@@ -120,20 +120,30 @@ def list_public_participant_roles(
 STAFF_ROLES = {"organizador", "administrador", "personal de acreditación"}
 
 
-# Si quien envía el pedido es un participante con sesión iniciada, se
-# inscribe a sí mismo: nombres, apellidos y correo se toman de su cuenta y
-# se descarta lo que venga en el cuerpo (aunque se haya manipulado el
-# formulario). Sin sesión, o si es personal del evento, se usan los datos
-# enviados.
-def _con_datos_de_cuenta(data: InscripcionCreate, usuario: Usuario | None) -> InscripcionCreate:
+# Devuelve el usuario si es un participante con sesión que se inscribe a sí
+# mismo (no personal del evento); si no, None.
+def _participante_en_sesion(usuario: Usuario | None) -> Usuario | None:
     if usuario is None:
-        return data
+        return None
     roles = {rol.nombre.lower() for rol in usuario.roles if rol.activo}
     if "participante" not in roles or roles & STAFF_ROLES:
+        return None
+    return usuario
+
+
+# Si quien envía el pedido es un participante con sesión iniciada, se
+# inscribe a sí mismo: nombres, apellidos, correo y cédula (si la cuenta la
+# tiene) se toman de su cuenta y se descarta lo que venga en el cuerpo
+# (aunque se haya manipulado el formulario). Sin sesión, o si es personal
+# del evento, se usan los datos enviados.
+def _con_datos_de_cuenta(data: InscripcionCreate, usuario: Usuario | None) -> InscripcionCreate:
+    titular = _participante_en_sesion(usuario)
+    if titular is None:
         return data
-    return data.model_copy(
-        update={"nombres": usuario.nombres, "apellidos": usuario.apellidos, "email": usuario.email}
-    )
+    cambios = {"nombres": titular.nombres, "apellidos": titular.apellidos, "email": titular.email}
+    if titular.documento:
+        cambios["documento"] = titular.documento
+    return data.model_copy(update=cambios)
 
 
 @router.post("", response_model=InscripcionResponse, status_code=status.HTTP_201_CREATED)
@@ -180,6 +190,12 @@ def create_inscripcion(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rol de participante no encontrado")
 
     participante = _get_or_create_participante(db, data)
+    # El registro de participante con el correo de la cuenta es del propio
+    # titular: su cédula se sincroniza con la de la cuenta (es la que sale
+    # en la tarjeta de inscripción y permite identificarlo en la puerta).
+    titular = _participante_en_sesion(usuario)
+    if titular is not None and titular.documento and participante.documento != titular.documento:
+        participante.documento = titular.documento
 
     existing = db.scalar(
         select(Inscripcion).where(

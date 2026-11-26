@@ -25,10 +25,10 @@
       { id: 5, nombre: 'personal de acreditación', activo: true },
     ],
     cuentas: [
-      { id_usuario: 1, nombres: 'Ana', apellidos: 'Duarte', email: 'admin@eventia.test', activo: true, roles: ['administrador'] },
-      { id_usuario: 2, nombres: 'Carlos', apellidos: 'Benítez', email: 'organizador@eventia.test', activo: true, roles: ['organizador'] },
-      { id_usuario: 3, nombres: 'Lucía', apellidos: 'Giménez', email: 'participante@eventia.test', activo: true, roles: ['participante'] },
-      { id_usuario: 4, nombres: 'Pedro', apellidos: 'Ayala', email: 'acreditacion@eventia.test', activo: true, roles: ['personal de acreditación'] },
+      { id_usuario: 1, nombres: 'Ana', apellidos: 'Duarte', email: 'admin@eventia.test', documento: '1000001', activo: true, roles: ['administrador'] },
+      { id_usuario: 2, nombres: 'Carlos', apellidos: 'Benítez', email: 'organizador@eventia.test', documento: '1000002', activo: true, roles: ['organizador'] },
+      { id_usuario: 3, nombres: 'Lucía', apellidos: 'Giménez', email: 'participante@eventia.test', documento: '1000003', activo: true, roles: ['participante'] },
+      { id_usuario: 4, nombres: 'Pedro', apellidos: 'Ayala', email: 'acreditacion@eventia.test', documento: '1000005', activo: true, roles: ['personal de acreditación'] },
     ],
     // Mis certificados (/mis-certificados) de la participante Lucía Giménez.
     misCertificados: [
@@ -217,12 +217,16 @@
       if (datos.cuentas.some(c => c.email.toLowerCase() === email)) {
         return new Promise((_, reject) => setTimeout(() => reject({ status: 409, detail: 'Ya existe un usuario con ese correo' }), 400));
       }
+      const documento = String(payload.documento || '').replace(/[\s.]/g, '').toUpperCase();
+      if (datos.cuentas.some(c => c.documento === documento)) {
+        return new Promise((_, reject) => setTimeout(() => reject({ status: 409, detail: 'Ya existe un usuario con esa cédula' }), 400));
+      }
       const rol = datos.rolesSistema.find(r => r.id === Number(payload.id_rol_sistema) && r.activo);
       if (!rol) return Promise.reject({ status: 400, detail: 'El rol seleccionado no existe o está inactivo' });
       const nuevo = {
         id_usuario: siguienteId(datos.cuentas, 'id_usuario'),
         nombres: payload.nombres.trim(), apellidos: payload.apellidos.trim(),
-        email, activo: true, roles: [rol.nombre],
+        email, documento, activo: true, roles: [rol.nombre],
       };
       datos.cuentas.push(nuevo);
       // La cuenta nueva también puede usarse en el login del mockup.

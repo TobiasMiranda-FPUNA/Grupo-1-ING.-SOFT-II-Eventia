@@ -59,6 +59,22 @@ VALUES
      '$argon2id$v=19$m=65536,t=3,p=4$322uzZz8kDwNsLgBwMPIfA$uB6eA0fnvJI0gTLN5LUIKpxChCSXAIPO6eur9vvBN18')
 ON CONFLICT (correo) DO NOTHING;
 
+-- Cédulas de prueba de las cuentas de ejemplo (números ficticios). Se
+-- cargan con UPDATE para completar también bases creadas antes de que
+-- existiera la columna usuario.documento.
+UPDATE usuario u
+SET documento = v.documento
+FROM (VALUES
+    ('admin@eventia.test',         '1000001'),
+    ('organizador@eventia.test',   '1000002'),
+    ('participante@eventia.test',  '1000003'),
+    ('conferencista@eventia.test', '1000004'),
+    ('acreditacion@eventia.test',  '1000005'),
+    ('hasvbogarin92@fpuna.edu.py', '1000006')
+) AS v(correo, documento)
+WHERE u.correo = v.correo
+  AND u.documento IS NULL;
+
 -- USUARIO_ROL: asigna el rol de sistema correspondiente a cada
 -- cuenta de ejemplo.
 INSERT INTO usuario_rol (id_usuario, id_rol_sistema)
@@ -177,11 +193,17 @@ FROM (VALUES
     ('4345678', 'Valeria', 'Gómez', 'valeria.gomez@example.com', NULL),
     ('4456789', 'Diego', 'Cáceres', 'diego.caceres@example.com', 'Instituto Superior de Informática'),
     -- Participante real para probar el envío de certificados por correo.
-    (NULL, 'Hugo', 'Villagra', 'hasvbogarin92@fpuna.edu.py', 'Facultad Politécnica')
+    ('1000006', 'Hugo', 'Villagra', 'hasvbogarin92@fpuna.edu.py', 'Facultad Politécnica')
 ) AS v(documento, nombres, apellidos, email, institucion)
 WHERE NOT EXISTS (
     SELECT 1 FROM participante p WHERE p.email = v.email
 );
+
+-- Bases cargadas antes: el participante de Hugo no tenía documento.
+UPDATE participante
+SET documento = '1000006'
+WHERE email = 'hasvbogarin92@fpuna.edu.py'
+  AND documento IS NULL;
 
 -- ------------------------------------------------------------
 -- INSCRIPCION: inscripciones de ejemplo, cubriendo distintos

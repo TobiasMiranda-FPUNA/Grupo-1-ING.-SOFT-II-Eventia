@@ -63,11 +63,12 @@ describe('Usuarios', () => {
   it('crea un usuario con correo, contraseña y rol', () => {
     const fixture = crear();
     const c = fixture.componentInstance;
-    c.form.setValue({ nombres: 'María', apellidos: 'López', email: 'maria@eventia.test', password: 'Clave1234', id_rol_sistema: 3 });
+    c.form.setValue({ nombres: 'María', apellidos: 'López', email: 'maria@eventia.test', documento: '4.123.456', password: 'Clave1234', id_rol_sistema: 3 });
 
     c.crear();
     const req = http.expectOne(r => r.method === 'POST' && r.url === `${API}/users`);
-    expect(req.request.body).toEqual({ nombres: 'María', apellidos: 'López', email: 'maria@eventia.test', password: 'Clave1234', id_rol_sistema: 3 });
+    // La cédula se envía normalizada, sin puntos.
+    expect(req.request.body).toEqual({ nombres: 'María', apellidos: 'López', email: 'maria@eventia.test', documento: '4123456', password: 'Clave1234', id_rol_sistema: 3 });
     req.flush({ id_usuario: 5, nombres: 'María', apellidos: 'López', email: 'maria@eventia.test', activo: true, roles: ['participante'] });
 
     http.expectOne(`${API}/users`).flush([]);
@@ -77,12 +78,24 @@ describe('Usuarios', () => {
   it('muestra el detalle del backend cuando el correo ya existe', () => {
     const fixture = crear();
     const c = fixture.componentInstance;
-    c.form.setValue({ nombres: 'Ana', apellidos: 'D', email: 'admin@eventia.test', password: 'Clave1234', id_rol_sistema: 1 });
+    c.form.setValue({ nombres: 'Ana', apellidos: 'D', email: 'admin@eventia.test', documento: '1000009', password: 'Clave1234', id_rol_sistema: 1 });
 
     c.crear();
     http.expectOne(r => r.method === 'POST').flush({ detail: 'Ya existe un usuario con ese correo' }, { status: 409, statusText: 'Conflict' });
 
     expect(c.error()).toBe('Ya existe un usuario con ese correo');
+  });
+
+  it('exige una cédula válida', () => {
+    const fixture = crear();
+    const doc = fixture.componentInstance.form.controls.documento;
+
+    doc.setValue('');
+    expect(doc.hasError('required')).toBe(true);
+    doc.setValue('12');
+    expect(doc.hasError('cedula')).toBe(true);
+    doc.setValue('4.123.456');
+    expect(doc.valid).toBe(true);
   });
 
   it('elimina un usuario después de confirmar', () => {

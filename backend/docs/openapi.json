@@ -2616,6 +2616,17 @@
             "type": "string",
             "title": "Email"
           },
+          "documento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documento"
+          },
           "estado_inscripcion": {
             "type": "string",
             "title": "Estado Inscripcion"
@@ -4225,6 +4236,17 @@
             "type": "string",
             "title": "Email"
           },
+          "documento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documento"
+          },
           "roles": {
             "items": {
               "type": "string"
@@ -4260,6 +4282,17 @@
           "email": {
             "type": "string",
             "title": "Email"
+          },
+          "documento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documento"
           },
           "activo": {
             "type": "boolean",
@@ -4302,6 +4335,12 @@
             "type": "string",
             "title": "Email"
           },
+          "documento": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 3,
+            "title": "Documento"
+          },
           "password": {
             "type": "string",
             "maxLength": 128,
@@ -4319,6 +4358,7 @@
           "nombres",
           "apellidos",
           "email",
+          "documento",
           "password",
           "id_rol_sistema"
         ],

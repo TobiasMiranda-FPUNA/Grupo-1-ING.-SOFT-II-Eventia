@@ -147,6 +147,7 @@ def listar_participantes_actividad(
             id_participante=participante.id_participante,
             participante=f"{participante.nombres} {participante.apellidos}".strip(),
             email=participante.email,
+            documento=participante.documento,
             estado_inscripcion=inscripcion.estado,
             estado_asistencia=asistencias.get(inscripcion.id_inscripcion),
         )

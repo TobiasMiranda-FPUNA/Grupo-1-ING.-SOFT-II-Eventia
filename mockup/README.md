@@ -52,7 +52,7 @@ Con Ctrl+C se detiene. Si no hay Python, abre el archivo directamente.
   error de duplicado (409).
 - Usuarios: la sesión simulada es la del administrador (Ana Duarte), que no
   puede eliminarse a sí misma. Con `organizador@eventia.test` se muestra el
-  error de correo duplicado. Las cuentas creadas también sirven para el login
+  error de correo duplicado y con la cédula `1000002`, el de cédula duplicada. Las cuentas creadas también sirven para el login
   del mockup.
 - Mis certificados: la sesión simulada es la de la participante Lucía
   Giménez, con un ejemplo de cada estado (emitido, pendiente de emisión, en
