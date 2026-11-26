@@ -1343,9 +1343,6 @@
               ]
             },
             "description": "",
-            "auth": {
-              "type": "noauth"
-            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_evento\": 1,\n  \"id_rol_participante\": 1,\n  \"documento\": \"texto de ejemplo (documento)\",\n  \"nombres\": \"texto de ejemplo (nombres)\",\n  \"apellidos\": \"texto de ejemplo (apellidos)\",\n  \"email\": \"usuario@eventia.test\",\n  \"institucion\": \"texto de ejemplo (institucion)\"\n}",

@@ -53,6 +53,21 @@ def get_current_user(
     return user
 
 
+# Variante para endpoints públicos que se comportan distinto si hay sesión
+# (ej: la inscripción). Sin header Authorization devuelve None; con un
+# token inválido o vencido responde 401, igual que get_current_user.
+optional_bearer_scheme = HTTPBearer(auto_error=False)
+
+
+def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Usuario | None:
+    if credentials is None:
+        return None
+    return get_current_user(credentials, db)
+
+
 # Fábrica de dependencias: dado el nombre de un rol, devuelve una
 # dependencia de FastAPI que exige que el usuario autenticado tenga ese rol
 # activo (usada en app/api/roles.py como "admin_required"). Si no lo tiene,

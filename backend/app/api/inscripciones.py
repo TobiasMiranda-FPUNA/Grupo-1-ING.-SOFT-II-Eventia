@@ -2,6 +2,9 @@ import logging
 # UTC/datetime: para registrar el momento exacto en que se crea la
 # inscripción (fecha_inscripcion).
 from datetime import UTC, date, datetime
+# Annotated: permite declarar una dependencia opcional con valor por
+# defecto None (así la función también se puede llamar directo en tests).
+from typing import Annotated
 
 # APIRouter/Depends/HTTPException/status: ver detalle en app/api/auth.py.
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -14,7 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.users import require_any_system_role
+from app.api.users import get_optional_user, require_any_system_role
 from app.db import get_db
 from app.models import Actividad, Evento, Inscripcion, Participante, RolParticipante, Usuario
 from app.schemas import (
@@ -112,8 +115,34 @@ def list_public_participant_roles(
 # según el cupo disponible: "confirmada" si hay cupo, "lista_de_espera" si
 # no hay cupo pero la política del evento lo permite, o rechaza la
 # operación (409) si no hay cupo ni lista de espera habilitada.
+# Roles de sistema del personal que inscribe a otras personas desde el
+# mismo formulario (sus datos personales no se fuerzan).
+STAFF_ROLES = {"organizador", "administrador", "personal de acreditación"}
+
+
+# Si quien envía el pedido es un participante con sesión iniciada, se
+# inscribe a sí mismo: nombres, apellidos y correo se toman de su cuenta y
+# se descarta lo que venga en el cuerpo (aunque se haya manipulado el
+# formulario). Sin sesión, o si es personal del evento, se usan los datos
+# enviados.
+def _con_datos_de_cuenta(data: InscripcionCreate, usuario: Usuario | None) -> InscripcionCreate:
+    if usuario is None:
+        return data
+    roles = {rol.nombre.lower() for rol in usuario.roles if rol.activo}
+    if "participante" not in roles or roles & STAFF_ROLES:
+        return data
+    return data.model_copy(
+        update={"nombres": usuario.nombres, "apellidos": usuario.apellidos, "email": usuario.email}
+    )
+
+
 @router.post("", response_model=InscripcionResponse, status_code=status.HTTP_201_CREATED)
-def create_inscripcion(data: InscripcionCreate, db: Session = Depends(get_db)) -> InscripcionResponse:
+def create_inscripcion(
+    data: InscripcionCreate,
+    db: Session = Depends(get_db),
+    usuario: Annotated[Usuario | None, Depends(get_optional_user)] = None,
+) -> InscripcionResponse:
+    data = _con_datos_de_cuenta(data, usuario)
     # with_for_update() bloquea la fila del evento hasta el commit, para que
     # dos inscripciones concurrentes no lean el mismo conteo de cupo antes
     # de que ninguna haya confirmado la suya (en SQLite, usado en los tests,

@@ -1030,7 +1030,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/inscripciones/{id_inscripcion}/tarjeta": {

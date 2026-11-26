@@ -177,3 +177,101 @@ def test_create_inscripcion_rechaza_fuera_de_fecha_limite(db, rol_asistente):
 
     assert error.value.status_code == 409
     assert "plazo" in error.value.detail
+
+
+# ------------------------------------------------------------
+# Inscripción con sesión iniciada: los datos personales del
+# participante salen de su cuenta, no del cuerpo del pedido.
+# ------------------------------------------------------------
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
+
+from app.core.security import create_access_token, hash_password  # noqa: E402
+from app.db import get_db  # noqa: E402
+from app.main import app  # noqa: E402
+from app.models import Inscripcion, Participante, RolSistema, Usuario  # noqa: E402
+
+
+def _usuario(db, rol_nombre, email="hugo@fpuna.edu.py"):
+    rol = db.query(RolSistema).filter_by(nombre=rol_nombre).first() or RolSistema(nombre=rol_nombre, activo=True)
+    usuario = Usuario(
+        nombres="Hugo", apellidos="Villagra", email=email,
+        password_hash=hash_password("Clave1234"), roles=[rol],
+    )
+    db.add(usuario)
+    db.commit()
+    return usuario
+
+
+def _participante_de(db, id_inscripcion):
+    inscripcion = db.get(Inscripcion, id_inscripcion)
+    return db.get(Participante, inscripcion.id_participante)
+
+
+def test_participante_con_sesion_se_inscribe_con_datos_de_su_cuenta(db, rol_asistente):
+    evento = _crear_evento(db, cupo_maximo=5)
+    usuario = _usuario(db, "participante")
+    manipulado = _inscripcion(
+        evento.id_evento, rol_asistente.id_rol_participante,
+        "otra.persona@example.com", nombres="Nombre", apellidos="Falso",
+    )
+
+    response = create_inscripcion(manipulado, db, usuario)
+
+    participante = _participante_de(db, response.id_inscripcion)
+    assert participante.email == "hugo@fpuna.edu.py"
+    assert (participante.nombres, participante.apellidos) == ("Hugo", "Villagra")
+    assert db.query(Participante).filter_by(email="otra.persona@example.com").first() is None
+
+
+@pytest.mark.parametrize("rol_staff", ["organizador", "administrador", "Personal de acreditación"])
+def test_personal_del_evento_puede_inscribir_a_otra_persona(db, rol_asistente, rol_staff):
+    evento = _crear_evento(db, cupo_maximo=5)
+    usuario = _usuario(db, rol_staff)
+
+    response = create_inscripcion(
+        _inscripcion(evento.id_evento, rol_asistente.id_rol_participante, "invitada@example.com", nombres="Laura"),
+        db,
+        usuario,
+    )
+
+    participante = _participante_de(db, response.id_inscripcion)
+    assert (participante.email, participante.nombres) == ("invitada@example.com", "Laura")
+
+
+def test_endpoint_http_ignora_correo_manipulado_y_rechaza_token_invalido():
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        rol = RolParticipante(nombre="Asistente", activo=True)
+        session.add(rol)
+        session.commit()
+        evento = _crear_evento(session, cupo_maximo=5)
+        usuario = _usuario(session, "participante")
+        token, _ = create_access_token(usuario.id_usuario, ["participante"])
+        cuerpo = {
+            "id_evento": evento.id_evento, "id_rol_participante": rol.id_rol_participante,
+            "nombres": "Nombre", "apellidos": "Falso", "email": "victima@example.com",
+        }
+
+    def override_db():
+        with Session(engine) as s:
+            yield s
+
+    app.dependency_overrides[get_db] = override_db
+    try:
+        client = TestClient(app)
+        ok = client.post("/api/v1/inscripciones", json=cuerpo, headers={"Authorization": f"Bearer {token}"})
+        assert ok.status_code == 201
+        with Session(engine) as s:
+            assert _participante_de(s, ok.json()["id_inscripcion"]).email == "hugo@fpuna.edu.py"
+            assert s.query(Participante).filter_by(email="victima@example.com").first() is None
+
+        invalido = client.post("/api/v1/inscripciones", json=cuerpo, headers={"Authorization": "Bearer basura"})
+        assert invalido.status_code == 401
+
+        # Sin sesión, la inscripción pública sigue funcionando con los datos enviados.
+        anonimo = client.post("/api/v1/inscripciones", json=cuerpo)
+        assert anonimo.status_code == 201
+    finally:
+        app.dependency_overrides.clear()
