@@ -2252,6 +2252,79 @@
         }
       }
     },
+    "/api/v1/certificados/mios": {
+      "get": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Listar Mis Certificados",
+        "operationId": "listar_mis_certificados_api_v1_certificados_mios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MiCertificadoResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Mis Certificados Api V1 Certificados Mios Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/certificados/mios/{id_inscripcion}/documento": {
+      "get": {
+        "tags": [
+          "Certificados"
+        ],
+        "summary": "Descargar Mi Certificado",
+        "operationId": "descargar_mi_certificado_api_v1_certificados_mios__id_inscripcion__documento_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_inscripcion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id Inscripcion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/metricas/eventos": {
       "get": {
         "tags": [
@@ -3776,6 +3849,130 @@
           "rechazadas"
         ],
         "title": "MetricasInscripciones"
+      },
+      "MiCertificadoResponse": {
+        "properties": {
+          "id_inscripcion": {
+            "type": "integer",
+            "title": "Id Inscripcion"
+          },
+          "id_participante": {
+            "type": "integer",
+            "title": "Id Participante"
+          },
+          "participante": {
+            "type": "string",
+            "title": "Participante"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "estado_inscripcion": {
+            "type": "string",
+            "title": "Estado Inscripcion"
+          },
+          "actividades_evento": {
+            "type": "integer",
+            "title": "Actividades Evento"
+          },
+          "asistencias_presentes": {
+            "type": "integer",
+            "title": "Asistencias Presentes"
+          },
+          "porcentaje_asistencia": {
+            "type": "number",
+            "title": "Porcentaje Asistencia"
+          },
+          "minimo_requerido": {
+            "type": "integer",
+            "title": "Minimo Requerido"
+          },
+          "elegible": {
+            "type": "boolean",
+            "title": "Elegible"
+          },
+          "certificado_emitido": {
+            "type": "boolean",
+            "title": "Certificado Emitido"
+          },
+          "codigo_validacion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codigo Validacion"
+          },
+          "fecha_emision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Emision"
+          },
+          "envio_correo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "enviado",
+                  "error",
+                  "no_configurado"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Envio Correo"
+          },
+          "id_evento": {
+            "type": "integer",
+            "title": "Id Evento"
+          },
+          "evento": {
+            "type": "string",
+            "title": "Evento"
+          },
+          "fecha_inicio_evento": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Inicio Evento"
+          },
+          "fecha_fin_evento": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha Fin Evento"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_inscripcion",
+          "id_participante",
+          "participante",
+          "email",
+          "estado_inscripcion",
+          "actividades_evento",
+          "asistencias_presentes",
+          "porcentaje_asistencia",
+          "minimo_requerido",
+          "elegible",
+          "certificado_emitido",
+          "id_evento",
+          "evento",
+          "fecha_inicio_evento",
+          "fecha_fin_evento"
+        ],
+        "title": "MiCertificadoResponse"
       },
       "PoliticaInscripcionData": {
         "properties": {

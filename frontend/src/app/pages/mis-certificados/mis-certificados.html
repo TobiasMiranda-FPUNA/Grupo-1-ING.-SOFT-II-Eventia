@@ -1,0 +1,77 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">HU08 · CERTIFICACIÓN</span>
+      <h1>Mis certificados</h1>
+      <p>Tu asistencia en cada evento y los certificados que ya podés descargar.</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="card empty">Cargando tus certificados…</div>
+  } @else if (certificados().length === 0 && !error()) {
+    <div class="card empty">
+      <p>Todavía no tenés inscripciones.</p>
+      <a routerLink="/inscripciones" class="btn-primary">Inscribirme a un evento</a>
+    </div>
+  } @else {
+    @if (certificados().length > 0) {
+      <p class="resumen">
+        <strong>{{ emitidos() }}</strong> de {{ certificados().length }}
+        {{ certificados().length === 1 ? 'inscripción tiene' : 'inscripciones tienen' }} certificado emitido.
+      </p>
+    }
+
+    <div class="lista">
+      @for (c of certificados(); track c.id_inscripcion) {
+        <article class="card cert" [class.emitido]="estado(c) === 'emitido'">
+          <div class="cert-head">
+            <div>
+              <h2>{{ c.evento }}</h2>
+              <p class="fechas">
+                {{ c.fecha_inicio_evento | date:'dd/MM/yyyy' }}
+                @if (c.fecha_fin_evento !== c.fecha_inicio_evento) { – {{ c.fecha_fin_evento | date:'dd/MM/yyyy' }} }
+              </p>
+            </div>
+            <span class="estado" [attr.data-estado]="estado(c)">{{ textoEstado(c) }}</span>
+          </div>
+
+          @if (c.estado_inscripcion === 'confirmada') {
+            <div class="asistencia">
+              <div class="barra" role="img"
+                   [attr.aria-label]="'Asistencia ' + (c.porcentaje_asistencia | number:'1.0-0') + '% de un mínimo de ' + c.minimo_requerido + '%'">
+                <div class="relleno" [style.width.%]="c.porcentaje_asistencia"
+                     [class.ok]="c.porcentaje_asistencia >= c.minimo_requerido"></div>
+                <div class="minimo" [style.left.%]="c.minimo_requerido"></div>
+              </div>
+              <p class="cifras">
+                Asistencia <strong>{{ c.porcentaje_asistencia | number:'1.0-0' }}%</strong>
+                ({{ c.asistencias_presentes }} de {{ c.actividades_evento }} actividades)
+                · Mínimo {{ c.minimo_requerido }}%
+              </p>
+            </div>
+          }
+
+          <p class="detalle">{{ detalleEstado(c) }}</p>
+
+          @if (c.certificado_emitido && c.codigo_validacion) {
+            <div class="acciones">
+              <p class="codigo">Código <code>{{ c.codigo_validacion }}</code></p>
+              <div class="botones">
+                <a class="btn-secondary" [routerLink]="['/certificados/verificar', c.codigo_validacion]">Verificar</a>
+                <button type="button" class="btn-primary" (click)="descargar(c)"
+                        [disabled]="descargandoId() === c.id_inscripcion">
+                  {{ descargandoId() === c.id_inscripcion ? 'Descargando…' : 'Descargar PDF' }}
+                </button>
+              </div>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

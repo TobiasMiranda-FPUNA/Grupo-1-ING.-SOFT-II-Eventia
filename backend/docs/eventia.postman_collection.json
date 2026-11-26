@@ -1738,6 +1738,55 @@
               "type": "noauth"
             }
           }
+        },
+        {
+          "name": "GET /api/v1/certificados/mios — Listar Mis Certificados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/mios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "mios"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "GET /api/v1/certificados/mios/{id_inscripcion}/documento — Descargar Mi Certificado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certificados/mios/:id_inscripcion/documento",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "certificados",
+                "mios",
+                ":id_inscripcion",
+                "documento"
+              ],
+              "variable": [
+                {
+                  "key": "id_inscripcion",
+                  "value": "1",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     },

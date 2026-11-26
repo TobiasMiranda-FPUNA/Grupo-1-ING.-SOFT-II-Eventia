@@ -108,6 +108,15 @@ export const OPERACIONES: Operacion[] = [
     historia: 'HU08',
   },
   {
+    titulo: 'Mis certificados',
+    descripcion: 'Mirá tu asistencia en cada evento y descargá los certificados que ya obtuviste.',
+    icono: '🎓',
+    ruta: '/mis-certificados',
+    roles: [PARTICIPANTE],
+    enMenu: true,
+    historia: 'HU08',
+  },
+  {
     titulo: 'Panel de control',
     descripcion: 'Indicadores de inscriptos, cupos y asistencia en tiempo real.',
     icono: '📊',

@@ -35,6 +35,14 @@ export interface CertificadoGestion {
 
 export type EnvioCorreo = 'enviado' | 'error' | 'no_configurado';
 
+// Certificado de una inscripción propia (GET /certificados/mios).
+export interface MiCertificado extends CertificadoGestion {
+  id_evento: number;
+  evento: string;
+  fecha_inicio_evento: string;
+  fecha_fin_evento: string;
+}
+
 export interface EnvioCertificadosEvento {
   emitidos: number;
   enviados: number;
@@ -74,6 +82,16 @@ export class CertificadosService {
       `${this.apiUrl}/evento/${eventoId}/emitir-y-enviar`,
       {}
     );
+  }
+
+  // Inscripciones del participante en sesión con el estado de su certificado.
+  listarMios(): Observable<MiCertificado[]> {
+    return this.http.get<MiCertificado[]>(`${this.apiUrl}/mios`);
+  }
+
+  // PDF de un certificado propio ya emitido.
+  descargarMio(idInscripcion: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/mios/${idInscripcion}/documento`, { responseType: 'blob' });
   }
 
   verificar(codigo: string): Observable<CertificadoVerificado> {

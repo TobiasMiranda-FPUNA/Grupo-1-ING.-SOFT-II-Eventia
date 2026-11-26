@@ -18,6 +18,7 @@ from app.schemas import (
     CertificadoGestionResponse,
     CertificadoVerificacionResponse,
     EnvioCertificadosEventoResponse,
+    MiCertificadoResponse,
 )
 from app.services.asistencia import (
     ResumenAsistencia,
@@ -39,6 +40,8 @@ router = APIRouter(
 certificate_manager_required = Depends(
     require_any_system_role("organizador", "administrador")
 )
+
+participant_required = Depends(require_any_system_role("participante"))
 
 
 def _calcular_estado_certificado(
@@ -429,3 +432,66 @@ def verificar_certificado(
         fecha_inicio_evento=evento.fecha_inicio,
         fecha_fin_evento=evento.fecha_fin,
     )
+
+
+# ============================================================
+# MIS CERTIFICADOS (participante con sesión)
+# ============================================================
+
+# El participante se identifica por el correo de su cuenta, el mismo con
+# el que se inscribe (ver _con_datos_de_cuenta en inscripciones.py).
+def _del_participante(usuario: Usuario):
+    return func.lower(Participante.email) == usuario.email.strip().lower()
+
+
+# Lista todas las inscripciones del participante en sesión con el estado
+# de su certificado: asistencia frente al mínimo, si ya fue emitido y su
+# código. Solo devuelve inscripciones propias.
+@router.get("/mios", response_model=list[MiCertificadoResponse])
+def listar_mis_certificados(
+    db: Session = Depends(get_db),
+    usuario: Usuario = participant_required,
+) -> list[MiCertificadoResponse]:
+    rows = db.execute(
+        select(Inscripcion, Participante, Evento)
+        .join(Participante, Participante.id_participante == Inscripcion.id_participante)
+        .join(Evento, Evento.id_evento == Inscripcion.id_evento)
+        .where(_del_participante(usuario))
+        .order_by(Evento.fecha_inicio.desc(), Evento.nombre)
+    ).all()
+
+    return [
+        MiCertificadoResponse(
+            **_calcular_estado_certificado(db, inscripcion, participante, evento).model_dump(),
+            id_evento=evento.id_evento,
+            evento=evento.nombre,
+            fecha_inicio_evento=evento.fecha_inicio,
+            fecha_fin_evento=evento.fecha_fin,
+        )
+        for inscripcion, participante, evento in rows
+    ]
+
+
+# Descarga el PDF de un certificado propio. Si la inscripción es de otra
+# persona responde 404, igual que si no existiera, para no revelar nada.
+@router.get(
+    "/mios/{id_inscripcion}/documento",
+    response_class=Response,
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+def descargar_mi_certificado(
+    id_inscripcion: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = participant_required,
+) -> Response:
+    row = _get_certificado_emitido(
+        db,
+        Certificado.id_inscripcion == id_inscripcion,
+        _del_participante(usuario),
+    )
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No tenés un certificado emitido para esta inscripción",
+        )
+    return _respuesta_pdf(db, row)

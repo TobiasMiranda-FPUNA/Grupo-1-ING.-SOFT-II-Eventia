@@ -564,6 +564,15 @@ class CertificadoGestionResponse(BaseModel):
     envio_correo: Literal["enviado", "error", "no_configurado"] | None = None
 
 
+# Estado del certificado de una inscripción del propio participante
+# (pantalla "Mis certificados"), con los datos del evento.
+class MiCertificadoResponse(CertificadoGestionResponse):
+    id_evento: int
+    evento: str
+    fecha_inicio_evento: date
+    fecha_fin_evento: date
+
+
 class EnvioCertificadosEventoResponse(BaseModel):
     emitidos: int
     enviados: int
